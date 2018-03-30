@@ -65,4 +65,9 @@ subroutine quasisymmetry_read_input
   print *,"N_N_phis:",N_N_phis
   print *,"N_phis:",N_phis(1:N_N_phis)
 
+  print *,"R0c:", R0c
+  print *,"R0s:", R0s
+  print *,"Z0c:", Z0c
+  print *,"Z0s:", Z0s
+
 end subroutine quasisymmetry_read_input

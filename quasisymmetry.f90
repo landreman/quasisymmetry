@@ -8,6 +8,7 @@ program quasisymmetry
 
   integer :: tic, toc, countrate
 
+  print "(a)"," -------------------------------------------------------------"
   print *,"Quasisymmetry solver"
   call system_clock(tic,countrate)
 
@@ -28,7 +29,8 @@ program quasisymmetry
   total_time = real(toc-tic)/countrate
 
   !call write_output()
- 
-  print *,"quasisymmetry solver is complete. Total time=",total_time,"sec."
+
+  print "(a)"," -------------------------------------------------------------"
+  print "(a,es10.3,a)","Quasisymmetry solver is complete. Total time=",total_time,"sec."
 
 end program quasisymmetry

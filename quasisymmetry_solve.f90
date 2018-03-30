@@ -25,7 +25,7 @@ subroutine quasisymmetry_solve
 
   call quasisymmetry_residual()
   residual_norm = sum(residual * residual)
-  print *,"Initial residual norm: ",residual_norm
+  print "(a,es10.3)","                Initial residual norm: ",residual_norm
 
   ! Here is the main Newton iteration:
   Newton: do iteration = 1, N_iterations
@@ -35,7 +35,7 @@ subroutine quasisymmetry_solve
      call quasisymmetry_Jacobian()
 
      state0 = state
-     print *,"Newton iteration ",iteration
+     print "(a,i3)","  Newton iteration ",iteration
      ! We will use the LAPACK subroutine DGESV to solve a general (asymmetric) linear system
      ! step_direction = - matrix \ residual
      step_direction = -residual ! Note that LAPACK will over-write step_direction and with the solution, and over-write Jacobian with the LU factorization.
@@ -53,7 +53,7 @@ subroutine quasisymmetry_solve
         iota = state(matrix_size)
         call quasisymmetry_residual()
         residual_norm = sum(residual * residual)
-        print *,"  Line search step",j_line_search,"  Residual norm:",residual_norm,"  iota:",iota
+        print "(a,i3,a,es10.3,a,es23.15)","    Line search step",j_line_search,"  Residual norm:",residual_norm,"  iota:",iota
         if (residual_norm < last_residual_norm) exit line_search
 
         step_scale = step_scale / 2
