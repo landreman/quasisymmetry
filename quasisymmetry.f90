@@ -7,10 +7,12 @@ program quasisymmetry
   implicit none
 
   integer :: tic, toc, countrate
+  real :: start_time, end_time
 
   print "(a)"," -------------------------------------------------------------"
   print *,"Quasisymmetry solver"
-  call system_clock(tic,countrate)
+  !call system_clock(tic,countrate)
+  call cpu_time(start_time)
 
   call quasisymmetry_read_input()
   call quasisymmetry_validate_input()
@@ -25,12 +27,14 @@ program quasisymmetry
      stop
   end select
 
-  call system_clock(toc)
-  total_time = real(toc-tic)/countrate
+  !call system_clock(toc)
+  !total_time = real(toc-tic)/countrate
+  call cpu_time(end_time)
+  total_time = end_time - start_time
 
   !call write_output()
 
   print "(a)"," -------------------------------------------------------------"
-  print "(a,es10.3,a)","Quasisymmetry solver is complete. Total time=",total_time,"sec."
+  print "(a,es10.3,a)","Quasisymmetry solver is complete. Total time=",total_time," sec."
 
 end program quasisymmetry

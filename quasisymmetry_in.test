@@ -1,6 +1,6 @@
 &quasisymmetry
  general_option = 1
- N_phis = 15 31
+ N_phis = 31
 
  ! QA example:
  nfp = 3
@@ -9,8 +9,8 @@
  B1c_over_B0 = -1.0
 
  ! QH example:
- nfp = 4
- R0c = 1  0.17
- Z0s = 0 -0.14
- B1c_over_B0 = -3.0
+! nfp = 4
+! R0c = 1  0.17
+! Z0s = 0 -0.14
+! B1c_over_B0 = -3.0
 /

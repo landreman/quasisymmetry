@@ -18,4 +18,6 @@ subroutine quasisymmetry_elongation
 
   deallocate(p,q)
 
+  max_elongation = maxval(elongation)
+
 end subroutine quasisymmetry_elongation

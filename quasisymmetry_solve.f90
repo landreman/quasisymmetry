@@ -25,7 +25,7 @@ subroutine quasisymmetry_solve
 
   call quasisymmetry_residual()
   residual_norm = sum(residual * residual)
-  print "(a,es10.3)","                Initial residual norm: ",residual_norm
+  print "(a,es10.3)","                 Initial residual norm:",residual_norm
 
   ! Here is the main Newton iteration:
   Newton: do iteration = 1, N_iterations
@@ -82,6 +82,10 @@ subroutine quasisymmetry_solve
        / (RZ_to_XY_a * RZ_to_XY_d - RZ_to_XY_b * RZ_to_XY_b)
 
   call quasisymmetry_elongation()
+
+  print *,"elongation:"
+  print *,elongation
+  print "(a,es23.15,a,es23.15)", " Final iota:",iota,"  max elongation:",max_elongation
 
   deallocate(state, state0, IPIV)
 
