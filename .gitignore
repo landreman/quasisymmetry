@@ -1,9 +1,9 @@
 *.o
 *.mod
 *.a
-regcoil
+quasisymmetry
 *.nc
-regcoil_out*
+quasisymmetry_out*
 job.out.*
 job.err.*
 make_test.o*

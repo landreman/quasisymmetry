@@ -6,7 +6,7 @@ subroutine quasisymmetry_single_solve
 
   integer :: j_N_phi
 
-  do j_N_phi = 1:N_N_phi
+  do j_N_phi = 1, N_N_phis
 
      N_phi = N_phis(j_N_phi)
      print *,"Handling N_phi=",N_phi

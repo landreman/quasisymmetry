@@ -12,7 +12,7 @@ program quasisymmetry
   call system_clock(tic,countrate)
 
   call quasisymmetry_read_input()
-  call validate_input()
+  call quasisymmetry_validate_input()
 
   select case (general_option)
   case (1)
@@ -27,7 +27,7 @@ program quasisymmetry
   call system_clock(toc)
   total_time = real(toc-tic)/countrate
 
-  call write_output()
+  !call write_output()
  
   print *,"quasisymmetry solver is complete. Total time=",total_time,"sec."
 

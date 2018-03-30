@@ -1,0 +1,8 @@
+&quasisymmetry
+ general_option = 1
+ N_phis = 4 8
+ nfp = 3
+ R0c = 0.03
+ Z0s = 0.06
+ B1c_over_B0 = -1.0
+/

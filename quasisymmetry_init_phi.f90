@@ -4,9 +4,9 @@ subroutine quasisymmetry_init_phi
 
   implicit none
 
-  real(prec), dimension(:,:), allocatable :: temp_matrix
-  real(prec), dimension(:,:), allocatable :: temp_vector
-  integer :: option, quadrature_option
+  real(dp), dimension(:,:), allocatable :: temp_matrix
+  real(dp), dimension(:), allocatable :: temp_vector
+  integer :: option, quadrature_option, i
 
   if (allocated(phi)) deallocate(phi)
   if (allocated(phi_extended)) deallocate(phi_extended)
@@ -16,8 +16,16 @@ subroutine quasisymmetry_init_phi
   if (allocated(X1c)) deallocate(X1c)
   if (allocated(Y1s)) deallocate(Y1s)
   if (allocated(Y1c)) deallocate(Y1c)
+  if (allocated(R1s)) deallocate(R1s)
+  if (allocated(R1c)) deallocate(R1c)
+  if (allocated(Z1s)) deallocate(Z1s)
+  if (allocated(Z1c)) deallocate(Z1c)
   if (allocated(sigma)) deallocate(sigma)
   if (allocated(elongation)) deallocate(elongation)
+
+  if (allocated(Jacobian)) deallocate(Jacobian)
+  if (allocated(residual)) deallocate(residual)
+  if (allocated(step_direction)) deallocate(step_direction)
   
   allocate(phi(N_phi))
   allocate(d_d_phi(N_phi,N_phi))
@@ -28,12 +36,21 @@ subroutine quasisymmetry_init_phi
   allocate(X1c(N_phi))
   allocate(Y1s(N_phi))
   allocate(Y1c(N_phi))
+  allocate(R1s(N_phi))
+  allocate(R1c(N_phi))
+  allocate(Z1s(N_phi))
+  allocate(Z1c(N_phi))
   allocate(sigma(N_phi))
   allocate(elongation(N_phi))
 
+  matrix_size = N_phi + 1
+  allocate(Jacobian(matrix_size, matrix_size))
+  allocate(residual(matrix_size))
+  allocate(step_direction(matrix_size))
+
   option = 20
   quadrature_option = 0
-  call uniformDiffMatrices(N_phi,0_prec, 2*pi/nfp, option, quadrature_option, phi, temp_vector, d_d_phi, temp_matrix)
+  call quasisymmetry_differentiation_matrix(N_phi,0_dp, 2*pi/nfp, option, quadrature_option, phi, temp_vector, d_d_phi, temp_matrix)
 
   phi_extended = [( 2*pi*i/(N_phi*nfp), i=0,N_phi*nfp-1 )]
 

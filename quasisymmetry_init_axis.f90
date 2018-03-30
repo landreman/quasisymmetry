@@ -5,10 +5,10 @@ subroutine quasisymmetry_init_axis
   implicit none
 
   integer :: n, j
-  real(prec), dimension(:), allocatable :: sinangle, cosangle
-  real(prec), dimension(:), allocatable :: d2_l_d_phi2, torsion_numerator, torsion_denominator
-  real(prec), dimension(:,:), allocatable :: d_r_d_phi_cylindrical, d2_r_d_phi2_cylindrical, d3_r_d_phi3_cylindrical
-  real(prec), dimension(:,:), allocatable :: d_tangent_d_l_cylindrical
+  real(dp), dimension(:), allocatable :: sinangle, cosangle
+  real(dp), dimension(:), allocatable :: d2_l_d_phi2, torsion_numerator, torsion_denominator
+  real(dp), dimension(:,:), allocatable :: d_r_d_phi_cylindrical, d2_r_d_phi2_cylindrical, d3_r_d_phi3_cylindrical
+  real(dp), dimension(:,:), allocatable :: d_tangent_d_l_cylindrical
 
   if (allocated(R0)) deallocate(R0)
   if (allocated(Z0)) deallocate(Z0)
@@ -33,8 +33,6 @@ subroutine quasisymmetry_init_axis
   if (allocated(RZ_to_XY_a)) deallocate(RZ_to_XY_a)
   if (allocated(RZ_to_XY_b)) deallocate(RZ_to_XY_b)
   if (allocated(RZ_to_XY_d)) deallocate(RZ_to_XY_d)
-  if (allocated()) deallocate()
-  if (allocated()) deallocate()
 
   allocate(sinangle(N_phi))
   allocate(cosangle(N_phi))
@@ -70,8 +68,6 @@ subroutine quasisymmetry_init_axis
   allocate(normal_Cartesian(N_phi,3))
   allocate(binormal_Cartesian(N_phi,3))
 
-  allocate((N_phi))
-
   R0 = R0c(1)
   Z0 = Z0c(1)
   R0_extended = R0c(1)
@@ -83,7 +79,7 @@ subroutine quasisymmetry_init_axis
   R0ppp = 0
   Z0ppp = 0
 
-  do n = 1:(axis_nmax)
+  do n = 1, axis_nmax
      sinangle = sin(n*nfp*phi)
      cosangle = cos(n*nfp*phi)
 
@@ -161,12 +157,12 @@ subroutine quasisymmetry_init_axis
   tangent_Cartesian(:,2) = tangent_cylindrical(:,1) * sinangle + tangent_cylindrical(:,2) * cosangle
   tangent_Cartesian(:,3) = tangent_cylindrical(:,3)
     
-  normal_Cartesian(:,1) = normal_cylindrical(:,1) * cosphi - normal_cylindrical(:,2) * sinangle
-  normal_Cartesian(:,2) = normal_cylindrical(:,1) * sinphi + normal_cylindrical(:,2) * cosangle
+  normal_Cartesian(:,1) = normal_cylindrical(:,1) * cosangle - normal_cylindrical(:,2) * sinangle
+  normal_Cartesian(:,2) = normal_cylindrical(:,1) * sinangle + normal_cylindrical(:,2) * cosangle
   normal_Cartesian(:,3) = normal_cylindrical(:,3)
     
-  binormal_Cartesian(:,1) = binormal_cylindrical(:,1) * cosphi - binormal_cylindrical(:,2) * sinangle
-  binormal_Cartesian(:,2) = binormal_cylindrical(:,1) * sinphi + binormal_cylindrical(:,2) * cosangle
+  binormal_Cartesian(:,1) = binormal_cylindrical(:,1) * cosangle - binormal_cylindrical(:,2) * sinangle
+  binormal_Cartesian(:,2) = binormal_cylindrical(:,1) * sinangle + binormal_cylindrical(:,2) * cosangle
   binormal_Cartesian(:,3) = binormal_cylindrical(:,3)
 
   B1Squared_over_curvatureSquared = (B1s_over_B0*B1s_over_B0 + B1c_over_B0*B1c_over_B0) / (curvature * curvature)
@@ -179,7 +175,7 @@ subroutine quasisymmetry_init_axis
   if (allocated(d_d_zeta)) deallocate(d_d_zeta)
   allocate(d_d_zeta(N_phi, N_phi))
   do j=1,N_phi
-     d_d_zeta(j,:) = d_d_phi(j,:) / (B0_over_abs_G0(j) * d_l_d_phi(j))
+     d_d_zeta(j,:) = d_d_phi(j,:) / (B0_over_abs_G0 * d_l_d_phi(j))
   end do
 
   X1s = B1s_over_B0 / curvature

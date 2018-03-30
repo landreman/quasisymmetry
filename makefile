@@ -57,7 +57,7 @@ endif
 
 # End of system-dependent variable assignments
 
-TARGET = regcoil
+TARGET = quasisymmetry
 
 export
 

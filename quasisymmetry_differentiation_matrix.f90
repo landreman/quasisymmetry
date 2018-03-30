@@ -1,4 +1,4 @@
-subroutine uniformDiffMatrices(N, xMin, xMax, option, quadrature_option, x, weights, ddx, d2dx2)
+subroutine quasisymmetry_differentiation_matrix(N, xMin, xMax, option, quadrature_option, x, weights, ddx, d2dx2)
   ! Finite difference and spectral differentiation matrices and integration
   ! weights for a uniform grid.
   !
@@ -133,20 +133,20 @@ subroutine uniformDiffMatrices(N, xMin, xMax, option, quadrature_option, x, weig
   !   ddx = matrix for differentiation.
   !   d2dx2 = matrix for the 2nd derivative.
 
-  use kinds
+  use stel_kinds
 
   implicit none
 
   integer, intent(in) :: N, option, quadrature_option
-  real(prec), intent(in) :: xMin, xMax
-  real(prec), intent(out), dimension(N) :: x, weights
-  real(prec), intent(out), dimension(N,N) :: ddx, d2dx2
+  real(dp), intent(in) :: xMin, xMax
+  real(dp), intent(out), dimension(N) :: x, weights
+  real(dp), intent(out), dimension(N,N) :: ddx, d2dx2
   integer :: i
-  real(prec) :: dx, dx2
-  real(prec) :: h
+  real(dp) :: dx, dx2
+  real(dp) :: h
   integer :: n1, n2
-  real(prec), allocatable :: topc(:), col1(:)
-  real(prec), parameter :: pi = 3.1415926535897932384626433d+0
+  real(dp), allocatable :: topc(:), col1(:)
+  real(dp), parameter :: pi = 3.1415926535897932384626433d+0
 
   ! ***************************************************************
   ! Validate input
@@ -1303,5 +1303,5 @@ subroutine uniformDiffMatrices(N, xMin, xMax, option, quadrature_option, x, weig
      stop
   end select
 
-end subroutine uniformDiffMatrices
+end subroutine quasisymmetry_differentiation_matrix
 
