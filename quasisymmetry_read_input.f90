@@ -9,11 +9,10 @@ subroutine quasisymmetry_read_input
   integer :: fileUnit, didFileAccessWork, i
   integer, parameter :: uninitialized = -9999
 
-  namelist / quasisymmetry / general_option, nfp, sign_G, I2_over_B0, &
-       N_iterations, N_line_search, Newton_tolerance, N_phis, &
+  namelist / quasisymmetry / resolution_option, general_option, nfp, sign_G, I2_over_B0, &
+       N_iterations, N_line_search, Newton_tolerance, N_phi, &
        R0s, R0c, Z0s, Z0c, B1s_over_B0, B1c_over_B0
 
-  N_phis = 0
   R0s = 0
   R0c = 0
   Z0s = 0
@@ -53,17 +52,14 @@ subroutine quasisymmetry_read_input
   end if
   close(unit = fileUnit)
 
-  ! Count the number of nonzero entries at the beginning of N_phis:
-  N_N_phis = 0
-  do i=1,max_N_N_phis
-     if (N_phis(i) == 0) then
-        N_N_phis = i-1
-        exit
-     end if
-  end do
-
-  print *,"N_N_phis:",N_N_phis
-  print *,"N_phis:",N_phis(1:N_N_phis)
+!!$  ! Count the number of nonzero entries at the beginning of N_phis:
+!!$  N_N_phis = 0
+!!$  do i=1,max_N_N_phis
+!!$     if (N_phis(i) == 0) then
+!!$        N_N_phis = i-1
+!!$        exit
+!!$     end if
+!!$  end do
 
   print *,"R0c:", R0c
   print *,"R0s:", R0s

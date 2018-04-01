@@ -4,19 +4,42 @@ subroutine quasisymmetry_single_solve
 
   implicit none
 
-  integer :: j_N_phi
+  integer :: iteration, new_N_phi
+  logical :: iota_tolerance_achieved
 
-  do j_N_phi = 1, N_N_phis
-
-     N_phi = N_phis(j_N_phi)
+  iota_tolerance_achieved = .false.
+  iteration = 0
+  do 
+     iteration = iteration + 1
      print "(a)"," -------------------------------------------------------"
-     print "(a,i4)"," Handling N_phi=",N_phi
+     print "(a,i4)"," Solving system using N_phi=",N_phi
      
      call quasisymmetry_init_phi()
 
      call quasisymmetry_init_axis()
 
      call quasisymmetry_solve()
+
+     if (resolution_option == 1) exit
+
+     if (iteration > 1) then
+        print "(a,es10.3)"," abs(iota - last_iota) =",abs(iota - last_iota)
+        if (abs(iota - last_iota) <= iota_tolerance) then
+           print *,"iota_tolerance achieved."
+           iota_tolerance_achieved = .true.
+           exit
+        end if
+     end if
+
+     last_iota = iota
+     last_max_elongation = max_elongation
+
+     new_N_phi = N_phi * 2 + 1
+     if (new_N_phi > max_N_phi) then
+        print *,"Stopping N_phi refinement since max_N_phi exceeded."
+        exit
+     end if
+     N_phi = new_N_phi
 
   end do
 

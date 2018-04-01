@@ -6,6 +6,10 @@ module quasisymmetry_variables
 
   real(dp), parameter :: pi = 3.14159265358979d+0
 
+  integer :: resolution_option=1
+  ! 1 = Run using the specified N_phi.
+  ! 2 = Keep doubling N_phi (approximately, so N_phi remains odd) until iota_tolerance is achieved, or N_phi > max_N_phi.
+
   integer :: general_option=1
 
   integer :: nfp = 3
@@ -16,11 +20,10 @@ module quasisymmetry_variables
   integer :: N_iterations = 20
   integer :: N_line_search = 10
   real(dp) :: Newton_tolerance = 1.0d-12
+  real(dp) :: iota_tolerance = 1.0d-6
 
-  integer :: N_N_phis = 2
-  integer, parameter :: max_N_N_phis = 10
-  integer, dimension(max_N_N_phis) :: N_phis = (/ 15, 31, 0, 0, 0, 0, 0, 0, 0, 0 /)
-  integer :: N_phi = 0
+  integer :: N_phi = 15
+  integer :: max_N_phi = 100
 
   integer, parameter :: max_axis_nmax = 1
   integer :: axis_nmax = 1
@@ -28,7 +31,7 @@ module quasisymmetry_variables
   real(dp) :: B1s_over_B0, B1c_over_B0
 
   integer :: matrix_size
-  real(dp), dimension(max_N_N_phis) :: iotas, max_elongations
+  real(dp) :: last_iota, last_max_elongation
   real(dp), dimension(:,:), allocatable :: d_d_phi, d_d_zeta
   real(dp), dimension(:), allocatable :: phi_extended, R0_extended, Z0_extended
   real(dp), dimension(:), allocatable :: phi, R0, Z0, R0p, Z0p, R0pp, Z0pp, R0ppp, Z0ppp
