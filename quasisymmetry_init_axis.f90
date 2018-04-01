@@ -30,9 +30,6 @@ subroutine quasisymmetry_init_axis
   if (allocated(normal_Cartesian)) deallocate(normal_Cartesian)
   if (allocated(binormal_Cartesian)) deallocate(binormal_Cartesian)
   if (allocated(B1Squared_over_curvatureSquared)) deallocate(B1Squared_over_curvatureSquared)
-  if (allocated(RZ_to_XY_a)) deallocate(RZ_to_XY_a)
-  if (allocated(RZ_to_XY_b)) deallocate(RZ_to_XY_b)
-  if (allocated(RZ_to_XY_d)) deallocate(RZ_to_XY_d)
 
   allocate(sinangle(N_phi))
   allocate(cosangle(N_phi))
@@ -53,9 +50,6 @@ subroutine quasisymmetry_init_axis
   allocate(torsion(N_phi))
   allocate(torsion_numerator(N_phi))
   allocate(torsion_denominator(N_phi))
-  allocate(RZ_to_XY_a(N_phi))
-  allocate(RZ_to_XY_b(N_phi))
-  allocate(RZ_to_XY_d(N_phi))
 
   allocate(d_r_d_phi_cylindrical(N_phi,3))
   allocate(d2_r_d_phi2_cylindrical(N_phi,3))
@@ -166,11 +160,6 @@ subroutine quasisymmetry_init_axis
   binormal_Cartesian(:,3) = binormal_cylindrical(:,3)
 
   B1Squared_over_curvatureSquared = (B1s_over_B0*B1s_over_B0 + B1c_over_B0*B1c_over_B0) / (curvature * curvature)
-
-  ! Matrix elements for converting X,Y to R,Z:
-  RZ_to_XY_a = 1 - R0p * R0p / (d_l_d_phi * d_l_d_phi)
-  RZ_to_XY_b =   - R0p * Z0p / (d_l_d_phi * d_l_d_phi)
-  RZ_to_XY_d = 1 - Z0p * Z0p / (d_l_d_phi * d_l_d_phi)
 
   if (allocated(d_d_zeta)) deallocate(d_d_zeta)
   allocate(d_d_zeta(N_phi, N_phi))
