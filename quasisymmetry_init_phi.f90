@@ -54,6 +54,20 @@ subroutine quasisymmetry_init_phi
 
   phi_extended = [( 2*pi*i/(N_phi*nfp), i=0,N_phi*nfp-1 )]
 
+  dimension_Fourier = max(max_axis_nmax+1, (N_phi+1) / 2)
+  if (allocated(sin_n_phi)) deallocate(sin_n_phi)
+  if (allocated(cos_n_phi)) deallocate(cos_n_phi)
+  allocate(sin_n_phi(N_phi,dimension_Fourier))
+  allocate(cos_n_phi(N_phi,dimension_Fourier))
+  sin_n_phi(:,1) = 0
+  cos_n_phi(:,1) = 1
+  do i = 2, dimension_Fourier
+     sin_n_phi(:,i) = sin((i-1) * nfp * phi)
+     cos_n_phi(:,i) = cos((i-1) * nfp * phi)
+  end do
+
+  d_phi = phi(2) - phi(1)
+
   deallocate(temp_matrix, temp_vector)
 
 end subroutine quasisymmetry_init_phi

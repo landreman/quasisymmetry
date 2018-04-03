@@ -5,9 +5,10 @@ subroutine quasisymmetry_single_solve
   implicit none
 
   integer :: iteration, new_N_phi
-  logical :: iota_tolerance_achieved
+  logical :: iota_tolerance_achieved, elongation_tolerance_achieved
 
   iota_tolerance_achieved = .false.
+  elongation_tolerance_achieved = .false.
   iteration = 0
   do 
      iteration = iteration + 1
@@ -23,12 +24,17 @@ subroutine quasisymmetry_single_solve
      if (resolution_option == 1) exit
 
      if (iteration > 1) then
-        print "(a,es10.3)"," abs(iota - last_iota) =",abs(iota - last_iota)
+        print "(a,es10.3)"," abs(iota - last_iota)                     =",abs(iota - last_iota)
+        print "(a,es10.3)"," abs(max_elongation - last_max_elongation) =",abs(max_elongation - last_max_elongation)
         if (abs(iota - last_iota) <= iota_tolerance) then
            print *,"iota_tolerance achieved."
            iota_tolerance_achieved = .true.
-           exit
         end if
+        if (abs(max_elongation - last_max_elongation) <= elongation_tolerance) then
+           print *,"elongation_tolerance achieved."
+           elongation_tolerance_achieved = .true.
+        end if
+        if (iota_tolerance_achieved .and. elongation_tolerance_achieved) exit
      end if
 
      last_iota = iota

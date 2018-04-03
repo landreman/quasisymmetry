@@ -5,6 +5,9 @@ subroutine quasisymmetry_elongation
   implicit none
 
   real(dp), dimension(:), allocatable :: p, q
+  real(dp), dimension(:), allocatable :: elongation_sin, elongation_cos, elongation_reconstructed
+  integer :: n, index_of_max
+  real(dp) :: phi_of_max_elongation, fmin_tolerance, quasisymmetry_fmin, maxval_elongation
 
   allocate(q(N_phi))
   allocate(p(N_phi))
@@ -14,10 +17,68 @@ subroutine quasisymmetry_elongation
   q = R1s*Z1c - R1c*Z1s
   elongation = 2*abs(q) / (p - sqrt(p*p-4*q*q))
 
+  ! In preparation for searching for max elongation, Fourier transform the elongation.
+  allocate(elongation_sin((N_phi+1)/2))
+  allocate(elongation_cos((N_phi+1)/2))
+  allocate(elongation_reconstructed(N_phi))
+  elongation_sin(1) = 0
+  elongation_cos(1) = sum(elongation) / N_phi
+  do n=1,((N_phi-1)/2)
+     elongation_sin(n+1) = sum(elongation * sin_n_phi(:,n+1)) * 2 / (N_phi)
+     elongation_cos(n+1) = sum(elongation * cos_n_phi(:,n+1)) * 2 / (N_phi)
+  end do
+
+!!$  elongation_reconstructed = elongation_cos(1)
+!!$  do n = 1,((N_phi-1)/2)
+!!$     elongation_reconstructed = elongation_reconstructed + elongation_sin(n+1) * sin_n_phi(:,n+1) + elongation_cos(n+1) * cos_n_phi(:,n+1)
+!!$  end do
+!!$
+!!$  print *,"elongation:"
+!!$  print *,elongation
+!!$  print *,"elongation_reconstructed:"
+!!$  print *,elongation_reconstructed
+
+  !print *,"elongation_sin:",elongation_sin
+  !print *,"elongation_cos:",elongation_cos
+
   ! Search for maximum using Fourier interpolation...
+  index_of_max = maxloc(elongation,1)
+  maxval_elongation = elongation(index_of_max)
+!!$  print *,"index_of_max:",index_of_max
+!!$  print *,"d_phi:",d_phi,"(index_of_max-1)*d_phi:",(index_of_max-1)*d_phi
+!!$  print *,"Interpolated elongation at index_of_max:",-minus_elongation((index_of_max-1)*d_phi)
+
+  fmin_tolerance = 0
+  phi_of_max_elongation =  quasisymmetry_fmin((index_of_max-2)*d_phi, (index_of_max)*d_phi, &
+       minus_elongation, fmin_tolerance)
+
+  max_elongation = -minus_elongation(phi_of_max_elongation)
+  print *,"maxval(elongation):      ",maxval_elongation
+  print *,"max elongation from fmin:",max_elongation
+  if (maxval_elongation > max_elongation) stop "Error! Something went wrong with the max_elongation search."
 
   deallocate(p,q)
+  deallocate(elongation_sin, elongation_cos, elongation_reconstructed)
 
-  max_elongation = maxval(elongation)
+contains
+
+  real(dp) function minus_elongation(this_phi)
+    
+    implicit none
+    
+    real(dp) :: f, this_phi
+    integer :: nn
+    
+    f = elongation_cos(1)
+
+    do nn = 1,((N_phi-1)/2)
+       f = f + elongation_sin(nn+1) * sin(nn*nfp*this_phi) + elongation_cos(nn+1) * cos(nn*nfp*this_phi)
+    end do
+    minus_elongation = -f
+    return
+    
+  end function minus_elongation
 
 end subroutine quasisymmetry_elongation
+
+

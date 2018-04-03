@@ -11,7 +11,8 @@ OBJ_FILES = quasisymmetry.o \
 	quasisymmetry_Jacobian.o \
 	quasisymmetry_residual.o \
 	quasisymmetry_elongation.o \
-	quasisymmetry_differentiation_matrix.o
+	quasisymmetry_differentiation_matrix.o \
+	quasisymmetry_fmin.o
 
 # Dependencies:
 quasisymmetry.o: quasisymmetry_variables.o
@@ -26,3 +27,4 @@ quasisymmetry_Jacobian.o: quasisymmetry_variables.o
 quasisymmetry_residual.o: quasisymmetry_variables.o
 quasisymmetry_variables.o:
 quasisymmetry_differentiation_matrix.o: 
+quasisymmetry_fmin.o:

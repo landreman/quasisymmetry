@@ -74,8 +74,10 @@ subroutine quasisymmetry_init_axis
   Z0ppp = 0
 
   do n = 1, axis_nmax
-     sinangle = sin(n*nfp*phi)
-     cosangle = cos(n*nfp*phi)
+     !sinangle = sin(n*nfp*phi)
+     !cosangle = cos(n*nfp*phi)
+     sinangle = sin_n_phi(:,n+1)
+     cosangle = cos_n_phi(:,n+1)
 
      R0 = R0 + R0c(n+1) * cosangle + R0s(n+1) * sinangle
      Z0 = Z0 + Z0c(n+1) * cosangle + Z0s(n+1) * sinangle

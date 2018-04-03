@@ -21,6 +21,7 @@ module quasisymmetry_variables
   integer :: N_line_search = 10
   real(dp) :: Newton_tolerance = 1.0d-12
   real(dp) :: iota_tolerance = 1.0d-6
+  real(dp) :: elongation_tolerance = 1.0d-2
 
   integer :: N_phi = 15
   integer :: max_N_phi = 100
@@ -31,7 +32,7 @@ module quasisymmetry_variables
   real(dp) :: B1s_over_B0, B1c_over_B0
 
   integer :: matrix_size
-  real(dp) :: last_iota, last_max_elongation
+  real(dp) :: last_iota, last_max_elongation, d_phi
   real(dp), dimension(:,:), allocatable :: d_d_phi, d_d_zeta
   real(dp), dimension(:), allocatable :: phi_extended, R0_extended, Z0_extended
   real(dp), dimension(:), allocatable :: phi, R0, Z0, R0p, Z0p, R0pp, Z0pp, R0ppp, Z0ppp
@@ -42,6 +43,9 @@ module quasisymmetry_variables
   real(dp) :: B0_over_abs_G0, iota, max_elongation
   real(dp), dimension(:,:), allocatable :: Jacobian
   real(dp), dimension(:), allocatable :: residual, step_direction
+
+  integer :: dimension_Fourier = 0
+  real(dp), dimension(:,:), allocatable :: sin_n_phi, cos_n_phi
 
   character(len=200) :: output_filename
 

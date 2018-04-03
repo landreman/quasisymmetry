@@ -1,7 +1,7 @@
 &quasisymmetry
- resolution_option = 2
+ resolution_option = 1
  general_option = 1
- !N_phi = 7
+ N_phi = 15
 
  ! QA example:
  nfp = 3
