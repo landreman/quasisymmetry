@@ -28,25 +28,25 @@ subroutine quasisymmetry_elongation
      elongation_cos(n+1) = sum(elongation * cos_n_phi(:,n+1)) * 2 / (N_phi)
   end do
 
-!!$  elongation_reconstructed = elongation_cos(1)
-!!$  do n = 1,((N_phi-1)/2)
-!!$     elongation_reconstructed = elongation_reconstructed + elongation_sin(n+1) * sin_n_phi(:,n+1) + elongation_cos(n+1) * cos_n_phi(:,n+1)
-!!$  end do
-!!$
-!!$  print *,"elongation:"
-!!$  print *,elongation
-!!$  print *,"elongation_reconstructed:"
-!!$  print *,elongation_reconstructed
+  elongation_reconstructed = elongation_cos(1)
+  do n = 1,((N_phi-1)/2)
+     elongation_reconstructed = elongation_reconstructed + elongation_sin(n+1) * sin_n_phi(:,n+1) + elongation_cos(n+1) * cos_n_phi(:,n+1)
+  end do
 
-  !print *,"elongation_sin:",elongation_sin
-  !print *,"elongation_cos:",elongation_cos
+  print *,"elongation:"
+  print *,elongation
+  print *,"elongation_reconstructed:"
+  print *,elongation_reconstructed
+
+  print *,"elongation_sin:",elongation_sin
+  print *,"elongation_cos:",elongation_cos
 
   ! Search for maximum using Fourier interpolation...
   index_of_max = maxloc(elongation,1)
   maxval_elongation = elongation(index_of_max)
-!!$  print *,"index_of_max:",index_of_max
-!!$  print *,"d_phi:",d_phi,"(index_of_max-1)*d_phi:",(index_of_max-1)*d_phi
-!!$  print *,"Interpolated elongation at index_of_max:",-minus_elongation((index_of_max-1)*d_phi)
+  print *,"index_of_max:",index_of_max
+  print *,"d_phi:",d_phi,"(index_of_max-1)*d_phi:",(index_of_max-1)*d_phi
+  print *,"Interpolated elongation at index_of_max:",-minus_elongation((index_of_max-1)*d_phi)
 
   fmin_tolerance = 0
   phi_of_max_elongation =  quasisymmetry_fmin((index_of_max-2)*d_phi, (index_of_max)*d_phi, &
@@ -55,7 +55,7 @@ subroutine quasisymmetry_elongation
   max_elongation = -minus_elongation(phi_of_max_elongation)
   print *,"maxval(elongation):      ",maxval_elongation
   print *,"max elongation from fmin:",max_elongation
-  if (maxval_elongation > max_elongation) stop "Error! Something went wrong with the max_elongation search."
+  if (maxval_elongation > max_elongation + 1.0d-10) stop "Error! Something went wrong with the max_elongation search."
 
   deallocate(p,q)
   deallocate(elongation_sin, elongation_cos, elongation_reconstructed)

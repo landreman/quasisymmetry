@@ -20,8 +20,8 @@ program quasisymmetry
   select case (general_option)
   case (1)
      call quasisymmetry_single_solve()
-  !case (2)
-  !   call quasisymmetry_scan()
+  case (2)
+     call quasisymmetry_scan()
   case default
      print *,"Invalid general_option:",general_option
      stop

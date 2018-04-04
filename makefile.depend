@@ -12,7 +12,9 @@ OBJ_FILES = quasisymmetry.o \
 	quasisymmetry_residual.o \
 	quasisymmetry_elongation.o \
 	quasisymmetry_differentiation_matrix.o \
-	quasisymmetry_fmin.o
+	quasisymmetry_fmin.o \
+	quasisymmetry_scan.o \
+	quasisymmetry_determine_helicity.o
 
 # Dependencies:
 quasisymmetry.o: quasisymmetry_variables.o
@@ -28,3 +30,5 @@ quasisymmetry_residual.o: quasisymmetry_variables.o
 quasisymmetry_variables.o:
 quasisymmetry_differentiation_matrix.o: 
 quasisymmetry_fmin.o:
+quasisymmetry_scan.o: quasisymmetry_variables.o
+quasisymmetry_determine_helicity.o: quasisymmetry_variables.o

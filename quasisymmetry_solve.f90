@@ -88,16 +88,19 @@ subroutine quasisymmetry_solve
 
   call quasisymmetry_elongation()
 
+  call quasisymmetry_determine_helicity()
+
   print *,"elongation:"
   print *,elongation
   print "(a,es23.15,a,es23.15)", " Final iota:",iota,"  max elongation:",max_elongation
 
   deallocate(state, state0, IPIV)
 
-  print *,"R1c_fortran=[",R1c(1),";"
-  do iteration = 2,N_phi-1
-     print *,R1c(iteration),";"
-  end do
-  print *,R1c(N_phi),"];"
+  ! Print R1c in MATLAB format, for comparing with the matlab version:
+!!$  print *,"R1c_fortran=[",R1c(1),";"
+!!$  do iteration = 2,N_phi-1
+!!$     print *,R1c(iteration),";"
+!!$  end do
+!!$  print *,R1c(N_phi),"];"
 
 end subroutine quasisymmetry_solve
