@@ -24,6 +24,7 @@ module quasisymmetry_variables
   real(dp) :: elongation_tolerance = 1.0d-2
 
   integer :: N_phi = 15
+  integer :: N_phi_original
   integer :: max_N_phi = 100
 
   integer, parameter :: max_axis_nmax = 1
@@ -58,6 +59,9 @@ module quasisymmetry_variables
   integer :: N_scan
   real(dp), dimension(:), allocatable :: iotas, max_elongations
   integer, dimension(:), allocatable :: helicities
+  logical, dimension(:), allocatable :: iota_tolerance_achieveds, elongation_tolerance_achieveds, Newton_tolerance_achieveds
+  logical :: iota_tolerance_achieved, elongation_tolerance_achieved, Newton_tolerance_achieved
+  integer, dimension(max_axis_nmax+1, 4) :: N_scan_array
 
 end module quasisymmetry_variables
 

@@ -22,6 +22,7 @@ program quasisymmetry
      call quasisymmetry_single_solve()
   case (2)
      call quasisymmetry_scan()
+     call quasisymmetry_write_output()
   case default
      print *,"Invalid general_option:",general_option
      stop

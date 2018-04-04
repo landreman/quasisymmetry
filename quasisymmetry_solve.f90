@@ -28,10 +28,14 @@ subroutine quasisymmetry_solve
   print "(a,es10.3)","                 Initial residual norm:",residual_norm
 
   ! Here is the main Newton iteration:
+  Newton_tolerance_achieved = .false.
   Newton: do iteration = 1, N_iterations
      last_residual_norm = residual_norm
-     if (residual_norm < Newton_tolerance) exit Newton
-     
+     if (residual_norm < Newton_tolerance) then
+        Newton_tolerance_achieved = .true.
+        exit Newton
+     end if
+
      call quasisymmetry_Jacobian()
 
      state0 = state
@@ -90,8 +94,8 @@ subroutine quasisymmetry_solve
 
   call quasisymmetry_determine_helicity()
 
-  print *,"elongation:"
-  print *,elongation
+  !print *,"elongation:"
+  !print *,elongation
   print "(a,es23.15,a,es23.15)", " Final iota:",iota,"  max elongation:",max_elongation
 
   deallocate(state, state0, IPIV)

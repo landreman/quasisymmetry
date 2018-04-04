@@ -1,22 +1,28 @@
 &quasisymmetry
  resolution_option = 2
  general_option = 1
- N_phi = 5
+ N_phi = 15
 
  iota_tolerance = 0.01
  elongation_tolerance = 0.01
 
  ! QA example:
+ !nfp = 3
+ !R0c = 1 0.03
+ !Z0s = 0 0.06
+ !B1c_over_B0 = -1.0
+
+ ! QA example:
  nfp = 3
- R0c = 1 0.03
- Z0s = 0 0.06
- B1c_over_B0 = -1.0
+ R0c = 1 0.05
+ Z0s = 0 0.05
+ B1c_over_B0 = -0.85
 
  ! QH example:
- nfp = 4
- R0c = 1  0.17
- Z0s = 0  0.14
- B1c_over_B0 = 3.0
+ !nfp = 4
+ !R0c = 1  0.17
+ !Z0s = 0  0.14
+ !B1c_over_B0 = 3.0
 
  !! Testing
  !nfp = 3
@@ -30,21 +36,21 @@
  R0s_max    = 0 0
  R0s_N_scan = 0 0
 
- R0c_min    = 1 0.02
- R0c_max    = 1 0.04
- R0c_N_scan = 0 3
+ R0c_min    = 1 -0.08
+ R0c_max    = 1  0.08
+ R0c_N_scan = 0 17
 
- Z0s_min    = 0 0.05
- Z0s_max    = 0 0.07
- Z0s_N_scan = 0 2
+ Z0s_min    = 0 -0.07
+ Z0s_max    = 0  0.07
+ Z0s_N_scan = 0 15
 
  Z0c_min    = 0 0
  Z0c_max    = 0 0
  Z0c_N_scan = 0 0
 
- B1c_min    = -1
+ B1c_min    = -0.2
  B1c_max    = -2
- B1c_N_scan = 3
+ B1c_N_scan = 20
 
  B1s_min    = 0
  B1s_max    = 0

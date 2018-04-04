@@ -5,11 +5,11 @@ subroutine quasisymmetry_single_solve
   implicit none
 
   integer :: iteration, new_N_phi
-  logical :: iota_tolerance_achieved, elongation_tolerance_achieved
 
   iota_tolerance_achieved = .false.
   elongation_tolerance_achieved = .false.
   iteration = 0
+  N_phi = N_phi_original
   do 
      iteration = iteration + 1
      print "(a)"," -------------------------------------------------------"

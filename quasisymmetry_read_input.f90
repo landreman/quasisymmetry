@@ -68,4 +68,6 @@ subroutine quasisymmetry_read_input
   print *,"Z0c:", Z0c
   print *,"Z0s:", Z0s
 
+  N_phi_original = N_phi
+
 end subroutine quasisymmetry_read_input
