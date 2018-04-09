@@ -176,4 +176,13 @@ subroutine quasisymmetry_init_axis
   deallocate(d2_l_d_phi2, torsion_numerator, torsion_denominator)
   deallocate(d_r_d_phi_cylindrical, d2_r_d_phi2_cylindrical, d3_r_d_phi3_cylindrical)
 
+  print *,"R0:",R0
+  print *,""
+  print *,"Z0:",Z0
+  print *,""
+  print *,"curvature:",curvature
+  print *,""
+  print *,"torsion:",torsion
+
+
 end subroutine quasisymmetry_init_axis

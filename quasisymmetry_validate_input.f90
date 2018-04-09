@@ -15,4 +15,6 @@ subroutine quasisymmetry_validate_input
   ! Ensure N_phi is always odd.
   if (mod(N_phi,2) ==0) N_phi = N_phi + 1
 
+  N_phi_original = N_phi
+
 end subroutine quasisymmetry_validate_input

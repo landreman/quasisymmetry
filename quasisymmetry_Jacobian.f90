@@ -25,6 +25,8 @@ subroutine quasisymmetry_Jacobian
   ! X1c = B1c_over_B0 ./ curvature
   ! and 
   ! Y1c = sign_G * curvature .* (-B1s_over_B0 + B1c_over_B0 * sigma) / (B1c_over_B0*B1c_over_B0 + B1s_over_B0*B1s_over_B0);
-  Jacobian(matrix_size, 1) = (- normal_cylindrical(1,1) * sign_G * curvature(1) * B1c_over_B0) / (B1c_over_B0*B1c_over_B0 + B1s_over_B0*B1s_over_B0) * d_l_d_phi(1) / R0(1)
+  !Jacobian(matrix_size, 1) = (- normal_cylindrical(1,1) * sign_G * curvature(1) * B1c_over_B0) / (B1c_over_B0*B1c_over_B0 + B1s_over_B0*B1s_over_B0) * d_l_d_phi(1) / R0(1)
+  
+  Jacobian(matrix_size, 1) = 1 ! Alternative, for comparing to theory
 
 end subroutine quasisymmetry_Jacobian

@@ -34,6 +34,13 @@ subroutine quasisymmetry_scan
   allocate(elongation_tolerance_achieveds(N_scan))
   allocate(Newton_tolerance_achieveds(N_scan))
 
+  allocate(scan_B1c(N_scan))
+  allocate(scan_B1s(N_scan))
+  allocate(scan_R0c(N_scan,max_axis_nmax+1))
+  allocate(scan_R0s(N_scan,max_axis_nmax+1))
+  allocate(scan_Z0c(N_scan,max_axis_nmax+1))
+  allocate(scan_Z0s(N_scan,max_axis_nmax+1))
+
   scan_state = 1
   j_scan = 0
   do j_Fourier_scan = 1, N_Fourier_scan
@@ -62,6 +69,13 @@ subroutine quasisymmetry_scan
            print *,"R0c:",R0c
            print *,"Z0s:",Z0s
            print *,"Z0c:",Z0c
+
+           scan_B1c(j_scan) = B1c_over_B0
+           scan_B1s(j_scan) = B1s_over_B0
+           scan_R0c(j_scan,:) = R0c
+           scan_R0s(j_scan,:) = R0s
+           scan_Z0c(j_scan,:) = Z0c
+           scan_Z0s(j_scan,:) = Z0s
 
            call quasisymmetry_single_solve()
 

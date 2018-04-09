@@ -8,6 +8,7 @@ subroutine quasisymmetry_read_input
   character(len=200) :: input_filename
   integer :: fileUnit, didFileAccessWork, i
   integer, parameter :: uninitialized = -9999
+  real(dp) :: threshold
 
   namelist / quasisymmetry / resolution_option, general_option, nfp, sign_G, I2_over_B0, &
        N_iterations, N_line_search, Newton_tolerance, iota_tolerance, elongation_tolerance, N_phi, &
@@ -63,11 +64,25 @@ subroutine quasisymmetry_read_input
 !!$     end if
 !!$  end do
 
-  print *,"R0c:", R0c
-  print *,"R0s:", R0s
-  print *,"Z0c:", Z0c
-  print *,"Z0s:", Z0s
+  ! Find how many Fourier modes we are keeping in the axis shape:
+  threshold = 1.0d-14
+  do i = max_axis_nmax+1,1,-1
+     !print *,'********* i=',i
+     !if (R0c(i) .ne. 0 .or. R0s(i) .ne. 0 .or. Z0s(i) .ne. 0 .or. Z0c(i) .ne. 0) then
+     if (abs(R0c(i)) > threshold .or. abs(R0s(i)) > threshold .or. abs(Z0s(i)) > threshold .or. abs(Z0c(i)) > threshold) then
+        !print *,"R0c(i):",R0c(i)
+        !print *,"R0s(i):",R0s(i)
+        !print *,"Z0c(i):",Z0c(i)
+        !print *,"Z0s(i):",Z0s(i)
+        axis_nmax = i-1
+        exit
+     end if
+  end do
 
-  N_phi_original = N_phi
+  print *,"axis_nmax:",axis_nmax
+  print *,"R0c:", R0c(1:axis_nmax+1)
+  print *,"R0s:", R0s(1:axis_nmax+1)
+  print *,"Z0c:", Z0c(1:axis_nmax+1)
+  print *,"Z0s:", Z0s(1:axis_nmax+1)
 
 end subroutine quasisymmetry_read_input

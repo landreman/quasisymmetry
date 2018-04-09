@@ -40,11 +40,17 @@ subroutine quasisymmetry_write_output
        vn_Z0s_N_scan = "Z0s_N_scan", &
        vn_Z0c_min = "Z0c_min", &
        vn_Z0c_max = "Z0c_max", &
-       vn_Z0c_N_scan = "Z0c_N_scan"
+       vn_Z0c_N_scan = "Z0c_N_scan", &
+       vn_scan_B1s = "scan_B1s", &
+       vn_scan_B1c = "scan_B1c"
 
   ! Arrays with dimension 2
   character(len=*), parameter :: &
-       vn_N_scan_array  = "N_scan_array"
+       vn_N_scan_array  = "N_scan_array", &
+       vn_scan_R0c  = "scan_R0c", &
+       vn_scan_R0s  = "scan_R0s", &
+       vn_scan_Z0c  = "scan_Z0c", &
+       vn_scan_Z0s  = "scan_Z0s"
 
 !!$  ! Arrays with dimension 3
 !!$  character(len=*), parameter :: &
@@ -63,7 +69,8 @@ subroutine quasisymmetry_write_output
   ! The form of the array declarations here is inspired by
   ! http://stackoverflow.com/questions/21552430/gfortran-does-not-allow-character-arrays-with-varying-component-lengths
   character(len=*), parameter, dimension(2) :: &
-       max_axis_nmax_plus_1_4_dim = (/ character(len=50) :: 'max_axis_nmax_plus_1','4'/)
+       max_axis_nmax_plus_1_4_dim = (/ character(len=50) :: 'max_axis_nmax_plus_1','4'/), &
+       N_scan_max_axis_nmax_plus_1_dim = (/ character(len=50) :: 'N_scan','max_axis_nmax_plus_1'/)
 
 !!$  ! Arrays with dimension 3:
 !!$  character(len=*), parameter, dimension(3) :: &
@@ -114,11 +121,17 @@ subroutine quasisymmetry_write_output
   call cdf_define(ncid, vn_Z0c_min, Z0c_min, dimname=max_axis_nmax_plus_1_dim)
   call cdf_define(ncid, vn_Z0c_max, Z0c_max, dimname=max_axis_nmax_plus_1_dim)
   call cdf_define(ncid, vn_Z0c_N_scan, Z0c_N_scan, dimname=max_axis_nmax_plus_1_dim)
+  call cdf_define(ncid, vn_scan_B1c, scan_B1c, dimname=N_scan_dim)
+  call cdf_define(ncid, vn_scan_B1s, scan_B1s, dimname=N_scan_dim)
 
 
   ! Arrays with dimension 2
 
   call cdf_define(ncid, vn_N_scan_array,  N_scan_array, dimname=max_axis_nmax_plus_1_4_dim)
+  call cdf_define(ncid, vn_scan_R0c,  scan_R0c, dimname=N_scan_max_axis_nmax_plus_1_dim)
+  call cdf_define(ncid, vn_scan_R0s,  scan_R0s, dimname=N_scan_max_axis_nmax_plus_1_dim)
+  call cdf_define(ncid, vn_scan_Z0c,  scan_Z0c, dimname=N_scan_max_axis_nmax_plus_1_dim)
+  call cdf_define(ncid, vn_scan_Z0s,  scan_Z0s, dimname=N_scan_max_axis_nmax_plus_1_dim)
 
   ! Arrays with dimension 3
 
@@ -159,10 +172,16 @@ subroutine quasisymmetry_write_output
   call cdf_write(ncid, vn_Z0c_min, Z0c_min)
   call cdf_write(ncid, vn_Z0c_max, Z0c_max)
   call cdf_write(ncid, vn_Z0c_N_scan, Z0c_N_scan)
+  call cdf_write(ncid, vn_scan_B1c, scan_B1c)
+  call cdf_write(ncid, vn_scan_B1s, scan_B1s)
 
   ! Arrays with dimension 2
 
   call cdf_write(ncid, vn_N_scan_array,  N_scan_array)
+  call cdf_write(ncid, vn_scan_R0c,  scan_R0c)
+  call cdf_write(ncid, vn_scan_R0s,  scan_R0s)
+  call cdf_write(ncid, vn_scan_Z0c,  scan_Z0c)
+  call cdf_write(ncid, vn_scan_Z0s,  scan_Z0s)
 
   ! Arrays with dimension 3
 

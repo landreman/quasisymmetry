@@ -62,9 +62,15 @@ subroutine quasisymmetry_solve
 
         step_scale = step_scale / 2
      end do line_search
+
+     if (residual_norm > last_residual_norm) then
+        print *,"Line search failed to reduce residual."
+        exit Newton
+     end if
   end do Newton
   ! End of Newton solve.
   ! Now compute quantities that are derived from the solution:
+
 
   Y1s = sign_G * curvature * ( B1c_over_B0 + B1s_over_B0 * sigma) / (B1c_over_B0*B1c_over_B0 + B1s_over_B0*B1s_over_B0);
   Y1c = sign_G * curvature * (-B1s_over_B0 + B1c_over_B0 * sigma) / (B1c_over_B0*B1c_over_B0 + B1s_over_B0*B1s_over_B0);

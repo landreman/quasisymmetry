@@ -1,0 +1,122 @@
+#!/usr/bin/env python
+
+import numpy as np
+from scipy.io import netcdf
+import sys, os
+
+print "Usage: "+__file__+" quasisymmetry_out.*.nc"
+
+if len(sys.argv) != 2:
+    print "Error! You must specify 1 argument: the quasisymmetry_out.*.nc file"
+    exit(1)
+
+filename = sys.argv[1]
+print "Reading filename "+filename
+f = netcdf.netcdf_file(filename,mode='r',mmap=False)
+iotas = f.variables['iotas'][()]
+max_elongations = f.variables['max_elongations'][()]
+scan_B1c = f.variables['scan_B1c'][()]
+scan_B1s = f.variables['scan_B1s'][()]
+scan_R0c = f.variables['scan_R0c'][()]
+scan_R0s = f.variables['scan_R0s'][()]
+scan_Z0c = f.variables['scan_Z0c'][()]
+scan_Z0s = f.variables['scan_Z0s'][()]
+
+print "scan_R0c.shape:",scan_R0c.shape
+
+f.close()
+
+import matplotlib.pyplot as plt
+
+fig = plt.figure(figsize=(16,7))
+fig.patch.set_facecolor('white')
+
+numRows = 2
+numCols = 2
+plotNum = 1
+
+ax = plt.subplot(numRows,numCols,plotNum)
+plotNum += 1
+scatterplot_handle = plt.scatter(np.abs(iotas), max_elongations,c=scan_B1c,s=4)
+plt.ylim([1,6])
+plt.xlabel('|iota|')
+plt.ylabel('max elongation')
+plt.colorbar()
+plt.title('Color = B1c')
+
+plt.subplot(numRows,numCols,plotNum)
+plotNum += 1
+plt.scatter(np.abs(iotas), max_elongations,c=scan_R0c[1,:],s=4)
+plt.ylim([1,6])
+plt.xlabel('|iota|')
+plt.ylabel('max elongation')
+plt.colorbar()
+plt.title('Color = R0c(1)')
+
+plt.subplot(numRows,numCols,plotNum)
+plotNum += 1
+plt.scatter(np.abs(iotas), max_elongations,c=scan_Z0s[1,:],s=4)
+plt.ylim([1,6])
+plt.xlabel('|iota|')
+plt.ylabel('max elongation')
+plt.colorbar()
+plt.title('Color = Z0s(1)')
+
+if False:
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.scatter(np.abs(iotas), max_elongations,c=scan_B1s,s=4)
+    plt.ylim([1,6])
+    plt.xlabel('|iota|')
+    plt.ylabel('max elongation')
+    plt.colorbar()
+    plt.title('Color = B1s')
+
+plt.figtext(0.5,0.99,os.path.abspath(filename),va='top',ha='center',fontsize=7)
+plt.figtext(0.5,0.01,'Plotted by '+os.path.abspath(__file__),va='bottom',ha='center',fontsize=7)
+
+plt.tight_layout()
+
+# For code below, see
+# https://stackoverflow.com/questions/7908636/possible-to-make-labels-appear-when-hovering-over-a-point-in-matplotlib
+annot = ax.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
+                    bbox=dict(boxstyle="round", fc="w"),
+                    arrowprops=dict(arrowstyle="->"),fontsize=6)
+annot.set_visible(False)
+
+def update_annot(ind):
+    index = ind["ind"][0]
+    pos = scatterplot_handle.get_offsets()[index]
+    annot.xy = pos
+    text = "index={}, B1c={:.4g}, B1s={:.4g}\nR0c={}\nZ0s={}\nR0s={}\nZ0c={}".format( \
+        str(index),scan_B1c[index],scan_B1s[index], \
+            ", ".join('{:.4g}'.format(k) for k in scan_R0c[:,index]), \
+            ", ".join('{:.4g}'.format(k) for k in scan_Z0s[:,index]), \
+            ", ".join('{:.4g}'.format(k) for k in scan_R0s[:,index]), \
+            ", ".join('{:.4g}'.format(k) for k in scan_Z0c[:,index]))
+    #list(map(str,scan_R0c[:,index]))))
+    #text = "{}".format(" ".join(list(map(str,ind["ind"]))))
+    #text = "{}, {}".format(" ".join(list(map(str,ind["ind"]))), 
+    #                       " ".join([names[n] for n in ind["ind"]]))
+    annot.set_text(text)
+    #annot.get_bbox_patch().set_facecolor(cmap(norm(c[ind["ind"][0]])))
+    annot.get_bbox_patch().set_facecolor('w')
+    #annot.get_bbox_patch().set_alpha(0.4)
+
+
+def hover(event):
+    vis = annot.get_visible()
+    if event.inaxes == ax:
+        cont, ind = scatterplot_handle.contains(event)
+        if cont:
+            update_annot(ind)
+            annot.set_visible(True)
+            fig.canvas.draw_idle()
+        else:
+            if vis:
+                annot.set_visible(False)
+                fig.canvas.draw_idle()
+
+fig.canvas.mpl_connect("motion_notify_event", hover)
+
+plt.show()
