@@ -20,9 +20,9 @@ subroutine quasisymmetry_residual
   ! X1c = B1c_over_B0 ./ curvature
   ! and 
   ! Y1c = sign_G * curvature .* (-B1s_over_B0 + B1c_over_B0 * sigma) / (B1c_over_B0*B1c_over_B0 + B1s_over_B0*B1s_over_B0);
-  !residual(matrix_size) = ( binormal_cylindrical(1,1) * B1c_over_B0 / curvature(1) &
-  !     - normal_cylindrical(1,1) * sign_G * curvature(1) * (-B1s_over_B0 + B1c_over_B0 * sigma(1)) / (B1c_over_B0*B1c_over_B0 + B1s_over_B0*B1s_over_B0)) * d_l_d_phi(1) / R0(1)
+  residual(matrix_size) = ( binormal_cylindrical(1,1) * B1c_over_B0 / curvature(1) &
+       - normal_cylindrical(1,1) * sign_G * curvature(1) * (-B1s_over_B0 + B1c_over_B0 * sigma(1)) / (B1c_over_B0*B1c_over_B0 + B1s_over_B0*B1s_over_B0)) * d_l_d_phi(1) / R0(1)
 
-  residual(matrix_size) = sigma(1) ! Alternative, for comparing to theory
+  !residual(matrix_size) = sigma(1) ! Alternative, for comparing to theory
 
 end subroutine quasisymmetry_residual
