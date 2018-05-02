@@ -12,6 +12,12 @@ module quasisymmetry_variables
 
   integer :: general_option=1
 
+  integer :: constraint_option = 1
+  ! 1 = Force the theta=0 line to have no Z component at phi=0.
+  ! 2 = Force sigma=sigma_initial at phi=0.
+
+  real(dp) :: sigma_initial = 0
+
   integer :: nfp = 3
 
   integer :: sign_G = 1
@@ -53,9 +59,9 @@ module quasisymmetry_variables
   real(dp) :: total_time
 
   real(dp), dimension(max_axis_nmax+1) :: R0s_min, R0s_max, R0c_min, R0c_max, Z0s_min, Z0s_max, Z0c_min, Z0c_max
-  real(dp) :: B1s_min, B1s_max, B1c_min, B1c_max
+  real(dp) :: B1s_min, B1s_max, B1c_min, B1c_max, sigma_initial_min, sigma_initial_max
   integer, dimension(max_axis_nmax+1) :: R0s_N_scan=0, R0c_N_scan=0, Z0s_N_scan=0, Z0c_N_scan=0
-  integer :: B1s_N_scan=0, B1c_N_scan=0
+  integer :: B1s_N_scan=0, B1c_N_scan=0, sigma_initial_N_scan=0
   integer :: N_scan
   real(dp), dimension(:), allocatable :: iotas, max_elongations
   integer, dimension(:), allocatable :: helicities
@@ -63,7 +69,7 @@ module quasisymmetry_variables
   logical :: iota_tolerance_achieved, elongation_tolerance_achieved, Newton_tolerance_achieved
   integer, dimension(max_axis_nmax+1, 4) :: N_scan_array
 
-  real(dp), dimension(:), allocatable :: scan_B1c, scan_B1s
+  real(dp), dimension(:), allocatable :: scan_B1c, scan_B1s, scan_sigma_initial
   real(dp), dimension(:,:), allocatable :: scan_R0c, scan_R0s, scan_Z0c, scan_Z0s
 
 end module quasisymmetry_variables

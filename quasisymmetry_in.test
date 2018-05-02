@@ -1,10 +1,12 @@
 &quasisymmetry
  resolution_option = 2
  general_option = 1
- N_phi = 15
+ N_phi = 31
 
  iota_tolerance = 0.01
  elongation_tolerance = 0.01
+
+ constraint_option = 1
 
  ! QA example:
  !nfp = 3
@@ -12,23 +14,42 @@
  !Z0s = 0 0.06
  !B1c_over_B0 = -1.0
 
- ! QA example:
+ ! QA example for paper
  !nfp = 3
  !R0c = 1 0.045
  !Z0s = 0 -0.045
  !B1c_over_B0 = -0.90
 
  ! QH example:
- nfp = 4
- R0c = 1  0.17
- Z0s = 0  0.14
- B1c_over_B0 = 3.0
+ !nfp = 4
+ !R0c = 1  0.17
+ !Z0s = 0  0.14
+ !B1c_over_B0 = 3.0
+
+ ! QH example for paper
+ !nfp = 4
+ !R0c = 1  0.265
+ !Z0s = 0  -0.21
+ !B1c_over_B0 = -2.25
+
+ ! QA without stellarator symmetry example for paper
+ nfp = 3
+ R0c = 1  0.042
+ Z0s = 0  -0.042
+ R0s = 0 0
+ Z0c = 0 -0.025
+ B1c_over_B0 = -0.95
+ B1s_over_B0 = 0.5
+ sigma_initial = 0
 
  !! Testing
- nfp = 4
- R0c = 1  0.265
- Z0s = 0  0.21
- B1c_over_B0 = -2.2
+ !nfp = 3
+ !R0c = 1 0.042
+ !Z0s = 0 0.042
+ !!B1c_over_B0 = 1.4142135623731
+ !B1c_over_B0 = 1
+ !B1s_over_B0 = 1
+ !sigma_initial = 10
 
  ! Scan parameters:
 
@@ -36,23 +57,27 @@
  R0s_max    = 0 0
  R0s_N_scan = 0 0
 
- R0c_min    = 1 -0.08
- R0c_max    = 1  0.08
- R0c_N_scan = 0 17
+ R0c_min    = 1 0.042
+ R0c_max    = 1 0.042
+ R0c_N_scan = 0 0
 
- Z0s_min    = 0 -0.07
- Z0s_max    = 0  0.07
- Z0s_N_scan = 0 15
+ Z0s_min    = 0 0.042
+ Z0s_max    = 0 0.042
+ Z0s_N_scan = 0 0
 
  Z0c_min    = 0 0
  Z0c_max    = 0 0
  Z0c_N_scan = 0 0
 
- B1c_min    = -0.2
- B1c_max    = -2
- B1c_N_scan = 20
+ B1c_min    = 0.5
+ B1c_max    = 2
+ B1c_N_scan = 10
 
  B1s_min    = 0
  B1s_max    = 0
  B1s_N_scan = 0
+
+ sigma_initial_min = -10
+ sigma_initial_max = 10
+ sigma_initial_N_scan = 5
 /

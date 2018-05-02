@@ -10,11 +10,14 @@ if len(sys.argv) != 2:
     print "Error! You must specify 1 argument: the quasisymmetry_out.*.nc file"
     exit(1)
 
+max_max_elongation = 6
+
 filename = sys.argv[1]
 print "Reading filename "+filename
 f = netcdf.netcdf_file(filename,mode='r',mmap=False)
 iotas = f.variables['iotas'][()]
 max_elongations = f.variables['max_elongations'][()]
+helicities = f.variables['helicities'][()]
 scan_B1c = f.variables['scan_B1c'][()]
 scan_B1s = f.variables['scan_B1s'][()]
 scan_R0c = f.variables['scan_R0c'][()]
@@ -22,7 +25,27 @@ scan_R0s = f.variables['scan_R0s'][()]
 scan_Z0c = f.variables['scan_Z0c'][()]
 scan_Z0s = f.variables['scan_Z0s'][()]
 
+print "Original number of scan entries:",len(iotas)
+mask = max_elongations < max_max_elongation
+iotas = iotas[mask]
+print "Number of filtered scan entries:",len(iotas)
+max_elongations = max_elongations[mask]
+helicities = helicities[mask]
+scan_B1s = scan_B1s[mask]
+scan_B1c = scan_B1c[mask]
+scan_R0s = scan_R0s[:,mask]
+scan_R0c = scan_R0c[:,mask]
+scan_Z0s = scan_Z0s[:,mask]
+scan_Z0c = scan_Z0c[:,mask]
+
+
 print "scan_R0c.shape:",scan_R0c.shape
+
+axis_nmax = len(scan_R0c[:,0])-1
+N_plots = axis_nmax*2 + 2
+
+numCols = np.ceil(np.sqrt(N_plots))
+numRows = np.ceil(N_plots / numCols)
 
 f.close()
 
@@ -31,36 +54,52 @@ import matplotlib.pyplot as plt
 fig = plt.figure(figsize=(16,7))
 fig.patch.set_facecolor('white')
 
-numRows = 2
-numCols = 2
+#numRows = 2
+#numCols = 2
 plotNum = 1
+
+iota_range = [0,0.7]
+
+ax = plt.subplot(numRows,numCols,plotNum)
+plotNum += 1
+plt.scatter(np.abs(iotas), max_elongations, c=helicities, s=4)
+plt.ylim([1,max_max_elongation])
+plt.xlabel('|iota|')
+plt.ylabel('max elongation')
+plt.colorbar()
+plt.title('Color = helicity')
+#plt.xlim(iota_range)
 
 ax = plt.subplot(numRows,numCols,plotNum)
 plotNum += 1
 scatterplot_handle = plt.scatter(np.abs(iotas), max_elongations,c=scan_B1c,s=4)
-plt.ylim([1,6])
+plt.ylim([1,max_max_elongation])
 plt.xlabel('|iota|')
 plt.ylabel('max elongation')
 plt.colorbar()
 plt.title('Color = B1c')
+#plt.xlim(iota_range)
 
-plt.subplot(numRows,numCols,plotNum)
-plotNum += 1
-plt.scatter(np.abs(iotas), max_elongations,c=scan_R0c[1,:],s=4)
-plt.ylim([1,6])
-plt.xlabel('|iota|')
-plt.ylabel('max elongation')
-plt.colorbar()
-plt.title('Color = R0c(1)')
+for n in range(1,axis_nmax+1):
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.scatter(np.abs(iotas), max_elongations,c=scan_R0c[n,:],s=4)
+    plt.ylim([1,max_max_elongation])
+    plt.xlabel('|iota|')
+    plt.ylabel('max elongation')
+    plt.colorbar()
+    plt.title('Color = R0c('+str(n)+')')
+    #plt.xlim(iota_range)
 
-plt.subplot(numRows,numCols,plotNum)
-plotNum += 1
-plt.scatter(np.abs(iotas), max_elongations,c=scan_Z0s[1,:],s=4)
-plt.ylim([1,6])
-plt.xlabel('|iota|')
-plt.ylabel('max elongation')
-plt.colorbar()
-plt.title('Color = Z0s(1)')
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.scatter(np.abs(iotas), max_elongations,c=scan_Z0s[n,:],s=4)
+    plt.ylim([1,max_max_elongation])
+    plt.xlabel('|iota|')
+    plt.ylabel('max elongation')
+    plt.colorbar()
+    plt.title('Color = Z0s('+str(n)+')')
+    #plt.xlim(iota_range)
 
 if False:
     plt.subplot(numRows,numCols,plotNum)
@@ -88,8 +127,8 @@ def update_annot(ind):
     index = ind["ind"][0]
     pos = scatterplot_handle.get_offsets()[index]
     annot.xy = pos
-    text = "index={}, B1c={:.4g}, B1s={:.4g}\nR0c={}\nZ0s={}\nR0s={}\nZ0c={}".format( \
-        str(index),scan_B1c[index],scan_B1s[index], \
+    text = "iota={:.2g}, elong={:.2g}\nindex={}, B1c={:.4g}, B1s={:.4g}\nR0c={}\nZ0s={}\nR0s={}\nZ0c={}".format( \
+        iotas[index], max_elongations[index], str(index),scan_B1c[index],scan_B1s[index], \
             ", ".join('{:.4g}'.format(k) for k in scan_R0c[:,index]), \
             ", ".join('{:.4g}'.format(k) for k in scan_Z0s[:,index]), \
             ", ".join('{:.4g}'.format(k) for k in scan_R0s[:,index]), \

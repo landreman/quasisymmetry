@@ -4,7 +4,7 @@ subroutine quasisymmetry_scan
 
   implicit none
 
-  integer :: j_scan, j_Fourier_scan, j, k, N_Fourier_scan, j_B1s, j_B1c
+  integer :: j_scan, j_Fourier_scan, j, k, N_Fourier_scan, j_B1s, j_B1c, j_sigma_initial
   integer, dimension(max_axis_nmax+1, 4) :: scan_state
 
   ! Clean up scan arrays
@@ -21,10 +21,11 @@ subroutine quasisymmetry_scan
   end do
   if (B1s_N_scan<1) B1s_N_scan = 1
   if (B1c_N_scan<1) B1c_N_scan = 1
+  if (sigma_initial_N_scan<1) sigma_initial_N_scan = 1
 
   !N_scan = product(R0s_N_scan)*product(R0c_N_scan)*product(Z0s_N_scan)*product(Z0c_N_scan)*product(B1s_N_scan)*product(B1c_N_scan)
   N_Fourier_scan = product(N_scan_array)
-  N_scan = N_Fourier_scan * B1s_N_scan * B1c_N_scan
+  N_scan = N_Fourier_scan * B1s_N_scan * B1c_N_scan * sigma_initial_N_scan
   print *,"N_Fourier_scan:",N_Fourier_scan,"N_scan:",N_scan
 
   allocate(iotas(N_scan))
@@ -36,6 +37,7 @@ subroutine quasisymmetry_scan
 
   allocate(scan_B1c(N_scan))
   allocate(scan_B1s(N_scan))
+  allocate(scan_sigma_initial(N_scan))
   allocate(scan_R0c(N_scan,max_axis_nmax+1))
   allocate(scan_R0s(N_scan,max_axis_nmax+1))
   allocate(scan_Z0c(N_scan,max_axis_nmax+1))
@@ -57,34 +59,39 @@ subroutine quasisymmetry_scan
         Z0c(j) = Z0c_min(j) + (Z0c_max(j) - Z0c_min(j)) * (scan_state(j,4) - 1) / max(N_scan_array(j,4) - 1, 1)
      end do
 
-     do j_B1s = 1, B1s_N_scan
-        B1s_over_B0 = B1s_min + (B1s_max - B1s_min) * (j_B1s - 1) / max(B1s_N_scan - 1, 1)
-        do j_B1c = 1, B1c_N_scan
-           B1c_over_B0 = B1c_min + (B1c_max - B1c_min) * (j_B1c - 1) / max(B1c_N_scan - 1, 1)
-           j_scan = j_scan + 1
-           print "(a)"," ###################################################################################"
-           print "(a,i5,a,i5)"," Scan case",j_scan," of",N_scan
-           print *,"B1s =", B1s_over_B0, "   B1c =",B1c_over_B0
-           print *,"R0s:",R0s
-           print *,"R0c:",R0c
-           print *,"Z0s:",Z0s
-           print *,"Z0c:",Z0c
-
-           scan_B1c(j_scan) = B1c_over_B0
-           scan_B1s(j_scan) = B1s_over_B0
-           scan_R0c(j_scan,:) = R0c
-           scan_R0s(j_scan,:) = R0s
-           scan_Z0c(j_scan,:) = Z0c
-           scan_Z0s(j_scan,:) = Z0s
-
-           call quasisymmetry_single_solve()
-
-           iotas(j_scan) = iota
-           max_elongations(j_scan) = max_elongation
-           helicities(j_scan) = helicity
-           iota_tolerance_achieveds(j_scan) = iota_tolerance_achieved
-           elongation_tolerance_achieveds(j_scan) = elongation_tolerance_achieved
-           Newton_tolerance_achieveds(j_scan) = Newton_tolerance_achieved
+     do j_sigma_initial = 1, sigma_initial_N_scan
+        sigma_initial = sigma_initial_min + (sigma_initial_max - sigma_initial_min) * (j_sigma_initial - 1) / max(sigma_initial_N_scan - 1, 1)
+        do j_B1s = 1, B1s_N_scan
+           B1s_over_B0 = B1s_min + (B1s_max - B1s_min) * (j_B1s - 1) / max(B1s_N_scan - 1, 1)
+           do j_B1c = 1, B1c_N_scan
+              B1c_over_B0 = B1c_min + (B1c_max - B1c_min) * (j_B1c - 1) / max(B1c_N_scan - 1, 1)
+              j_scan = j_scan + 1
+              print "(a)"," ###################################################################################"
+              print "(a,i7,a,i7)"," Scan case",j_scan," of",N_scan
+              print *,"B1s =", B1s_over_B0, "   B1c =",B1c_over_B0
+              print *,"sigma_initial = ",sigma_initial
+              print *,"R0s:",R0s(1:axis_nmax+1)
+              print *,"R0c:",R0c(1:axis_nmax+1)
+              print *,"Z0s:",Z0s(1:axis_nmax+1)
+              print *,"Z0c:",Z0c(1:axis_nmax+1)
+              
+              scan_B1c(j_scan) = B1c_over_B0
+              scan_B1s(j_scan) = B1s_over_B0
+              scan_sigma_initial(j_scan) = sigma_initial
+              scan_R0c(j_scan,:) = R0c
+              scan_R0s(j_scan,:) = R0s
+              scan_Z0c(j_scan,:) = Z0c
+              scan_Z0s(j_scan,:) = Z0s
+              
+              call quasisymmetry_single_solve()
+              
+              iotas(j_scan) = iota
+              max_elongations(j_scan) = max_elongation
+              helicities(j_scan) = helicity
+              iota_tolerance_achieveds(j_scan) = iota_tolerance_achieved
+              elongation_tolerance_achieveds(j_scan) = elongation_tolerance_achieved
+              Newton_tolerance_achieveds(j_scan) = Newton_tolerance_achieved
+           end do
         end do
      end do
 
