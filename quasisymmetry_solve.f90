@@ -103,6 +103,7 @@ subroutine quasisymmetry_solve
   !print *,"elongation:"
   !print *,elongation
   print "(a,es23.15,a,es23.15)", " Final iota:",iota,"  max elongation:",max_elongation
+  print "(a,es23.15)", " Final sigma(0): ",sigma(1)
 
   deallocate(state, state0, IPIV)
 
