@@ -17,11 +17,11 @@ subroutine quasisymmetry_solve
   allocate(IPIV(matrix_size))
 
   ! Initialize state
-  sigma = 1
+  sigma = sigma_initial ! sigma_initial only needs to fix the first element of sigma, but let's set all the other elements of sigma to this same value as an initial guess.
   iota = 0
 
-  state(1:N_phi) = sigma
-  state(matrix_size) = iota
+  state(1) = iota
+  state(2:N_phi) = sigma(2:N_phi)
 
   call quasisymmetry_residual()
   residual_norm = sum(residual * residual)
@@ -53,8 +53,9 @@ subroutine quasisymmetry_solve
      line_search: do j_line_search = 1, N_line_search
         state = state0 + step_scale * step_direction
 
-        sigma = state(1:N_phi)
-        iota = state(matrix_size)
+        sigma = state ! This over-writes sigma(1) with the wrong value. Now fix it:
+        sigma(1) = sigma_initial
+        iota = state(1)
         call quasisymmetry_residual()
         residual_norm = sum(residual * residual)
         print "(a,i3,a,es10.3,a,es23.15)","    Line search step",j_line_search,"  Residual norm:",residual_norm,"  iota:",iota

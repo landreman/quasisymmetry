@@ -43,7 +43,7 @@ subroutine quasisymmetry_init_phi
   allocate(sigma(N_phi))
   allocate(elongation(N_phi))
 
-  matrix_size = N_phi + 1
+  matrix_size = N_phi
   allocate(Jacobian(matrix_size, matrix_size))
   allocate(residual(matrix_size))
   allocate(step_direction(matrix_size))

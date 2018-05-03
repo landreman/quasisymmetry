@@ -1,7 +1,7 @@
 &quasisymmetry
  resolution_option = 2
  general_option = 1
- N_phi = 131
+ N_phi = 15
 
  iota_tolerance = 1e-10 !0.01
  elongation_tolerance = 0.01
@@ -27,10 +27,10 @@
  !B1c_over_B0 = 3.0
 
  ! QH example for paper
- !nfp = 4
- !R0c = 1  0.265
- !Z0s = 0  -0.21
- !B1c_over_B0 = -2.25
+ nfp = 4
+ R0c = 1  0.265
+ Z0s = 0  -0.21
+ B1c_over_B0 = -2.25
 
  ! QA without stellarator symmetry example for paper
  !nfp = 3
@@ -44,26 +44,26 @@
  !sigma_initial = 0
 
  ! Same QA without stellarator symmetry example for paper, but using constraint_option=2
- nfp = 3
- R0c = 1  0.042
- Z0s = 0  -0.042
- R0s = 0 0
- Z0c = 0 -0.025
- B1c_over_B0 = -1.07354552767919d+0
- B1s_over_B0 = 0
- constraint_option = 2
- sigma_initial = -6.327962586868797d-01
+ !nfp = 3
+ !R0c = 1  0.042
+ !Z0s = 0  -0.042
+ !R0s = 0 0
+ !Z0c = 0 -0.025
+ !B1c_over_B0 = -1.07354552767919d+0
+ !B1s_over_B0 = 0
+ !constraint_option = 2
+ !sigma_initial = -6.327962586868797d-01
 
  ! Same QA without stellarator symmetry example for paper, using rounded values for constraint_option=2
- nfp = 3
- R0c = 1  0.042
- Z0s = 0  -0.042
- R0s = 0 0
- Z0c = 0 -0.025
- B1c_over_B0 = -1.1d+0
- B1s_over_B0 = 0
- constraint_option = 2
- sigma_initial = -0.6d+0
+ !nfp = 3
+ !R0c = 1  0.042
+ !Z0s = 0  -0.042
+ !R0s = 0 0
+ !Z0c = 0 -0.025
+ !B1c_over_B0 = -1.1d+0
+ !B1s_over_B0 = 0
+ !constraint_option = 2
+ !sigma_initial = -0.6d+0
 
  !! Testing
  !nfp = 3
