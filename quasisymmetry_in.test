@@ -5,6 +5,10 @@
  !general_option = 'single'
  general_option = 'scan'
 
+ !verbose_option = 'all'
+ !verbose_option = 'proc0'
+ verbose_option = 'summary'
+
  N_phi = 15
 
  max_N_phi = 1000
@@ -99,7 +103,7 @@
 
  B1c_min    = 0.5
  B1c_max    = 2
- B1c_N_scan = 10
+ B1c_N_scan = 2
 
  B1s_min    = 0
  B1s_max    = 0
@@ -107,5 +111,5 @@
 
  sigma_initial_min = -10
  sigma_initial_max = 10
- sigma_initial_N_scan = 5
+ sigma_initial_N_scan = 3
 /

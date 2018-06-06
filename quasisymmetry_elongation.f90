@@ -54,8 +54,10 @@ subroutine quasisymmetry_elongation
        minus_elongation, fmin_tolerance)
 
   max_elongation = -minus_elongation(phi_of_max_elongation)
-  print *,"maxval(elongation):      ",maxval_elongation
-  print *,"max elongation from fmin:",max_elongation
+  if (verbose) then
+     print *,"maxval(elongation):      ",maxval_elongation
+     print *,"max elongation from fmin:",max_elongation
+  end if
   if (maxval_elongation > max_elongation + 1.0d-10) then
      print *,"Error! Something went wrong with the max_elongation search."
      if (maxval_elongation < 10) stop ! If the elongation is larger than this, we don't care about the solution much, so don't bother aborting.

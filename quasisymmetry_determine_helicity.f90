@@ -38,7 +38,7 @@ subroutine quasisymmetry_determine_helicity
   end do
 
   helicity = counter / 4
-  print *,"Helicity counter:",counter, "  helicity:",helicity
+  if (verbose) print *,"Helicity counter:",counter, "  helicity:",helicity
   if (modulo(counter,4) .ne. 0) stop "Helicity counter was not a multiple of 4"
 
   deallocate(quadrant)

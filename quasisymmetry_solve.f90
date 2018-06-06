@@ -40,7 +40,7 @@ subroutine quasisymmetry_solve
      call quasisymmetry_Jacobian()
 
      state0 = state
-     print "(a,i3)","  Newton iteration ",iteration
+     if (verbose) print "(a,i3)","  Newton iteration ",iteration
      ! We will use the LAPACK subroutine DGESV to solve a general (asymmetric) linear system
      ! step_direction = - matrix \ residual
      step_direction = -residual ! Note that LAPACK will over-write step_direction and with the solution, and over-write Jacobian with the LU factorization.
@@ -59,7 +59,7 @@ subroutine quasisymmetry_solve
         iota = state(1)
         call quasisymmetry_residual()
         residual_norm = sqrt(sum(residual * residual))
-        print "(a,i3,a,es10.3,a,es23.15)","    Line search step",j_line_search,"  Relative residual L2 norm:",residual_norm / initial_residual_norm,"  iota:",iota
+        if (verbose) print "(a,i3,a,es10.3,a,es23.15)","    Line search step",j_line_search,"  Relative residual L2 norm:",residual_norm / initial_residual_norm,"  iota:",iota
         if (residual_norm < last_residual_norm) exit line_search
 
         step_scale = step_scale / 2
@@ -104,8 +104,10 @@ subroutine quasisymmetry_solve
 
   !print *,"elongation:"
   !print *,elongation
-  print "(a,es23.15,a,es23.15)", " Final iota:",iota,"  max elongation:",max_elongation
-  print "(a,es23.15)", " Final sigma(0): ",sigma(1)
+  if (verbose) then
+     print "(a,es23.15,a,es23.15)", " Final iota:",iota,"  max elongation:",max_elongation
+     print "(a,es23.15)", " Final sigma(0): ",sigma(1)
+  end if
 
   deallocate(state, state0, IPIV)
 

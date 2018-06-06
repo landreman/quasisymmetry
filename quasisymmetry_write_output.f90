@@ -79,6 +79,9 @@ subroutine quasisymmetry_write_output
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+  ! Only proc 0 writes.
+  if (.not. proc0) return
+
   call cdf_open(ncid,output_filename,'w',ierr)
   IF (ierr .ne. 0) then
      print *,"Error opening output file ",output_filename

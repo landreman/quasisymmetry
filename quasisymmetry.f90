@@ -2,15 +2,26 @@
 
 program quasisymmetry
 
-  use quasisymmetry_variables, only: total_time, general_option, general_option_single, general_option_scan
+  use quasisymmetry_variables, only: total_time, general_option, general_option_single, general_option_scan, &
+       N_procs, mpi_rank, proc0
 
   implicit none
 
-  integer :: tic, toc, countrate
+  include 'mpif.h'
+
+  integer :: tic, toc, countrate, ierr
   real :: start_time, end_time
 
-  print "(a)"," -------------------------------------------------------------"
-  print *,"Quasisymmetry solver"
+
+  call mpi_init(ierr)
+  call mpi_comm_rank(MPI_COMM_WORLD, mpi_rank, ierr)
+  call mpi_comm_size(MPI_COMM_WORLD, N_procs, ierr)
+  proc0 = (mpi_rank==0)
+
+  if (proc0) then
+     print "(a)"," -------------------------------------------------------------"
+     print *,"Quasisymmetry solver"
+  end if
   !call system_clock(tic,countrate)
   call cpu_time(start_time)
 
@@ -35,7 +46,11 @@ program quasisymmetry
 
   !call write_output()
 
-  print "(a)"," -------------------------------------------------------------"
-  print "(a,es10.3,a)","Quasisymmetry solver is complete. Total time=",total_time," sec."
+  if (proc0) then
+     print "(a)"," -------------------------------------------------------------"
+     print "(a,es10.3,a)","Quasisymmetry solver is complete. Total time=",total_time," sec."
+  end if
+
+  call mpi_finalize(ierr)
 
 end program quasisymmetry

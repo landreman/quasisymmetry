@@ -45,9 +45,12 @@ subroutine quasisymmetry_read_input
         end if
         stop
      end if
-     print *,"Successfully read parameters from quasisymmetry namelist in ", trim(input_filename), "."
+     if (proc0) print *,"Successfully read parameters from quasisymmetry namelist in ", trim(input_filename), "."
   end if
   close(unit = fileUnit)
+
+  verbose = (trim(verbose_option)==verbose_option_all .or. (proc0 .and. trim(verbose_option)==verbose_option_proc0))
+
 
 !!$  ! Count the number of nonzero entries at the beginning of N_phis:
 !!$  N_N_phis = 0
@@ -75,10 +78,12 @@ subroutine quasisymmetry_read_input
         end if
      end do
 
-     print *,"R0c:", R0c(1:axis_nmax+1)
-     print *,"R0s:", R0s(1:axis_nmax+1)
-     print *,"Z0c:", Z0c(1:axis_nmax+1)
-     print *,"Z0s:", Z0s(1:axis_nmax+1)
+     if (proc0) then
+        print *,"R0c:", R0c(1:axis_nmax+1)
+        print *,"R0s:", R0s(1:axis_nmax+1)
+        print *,"Z0c:", Z0c(1:axis_nmax+1)
+        print *,"Z0s:", Z0s(1:axis_nmax+1)
+     end if
   else
      ! Set axis_nmax using the scan options
      do i = max_axis_nmax+1,1,-1
@@ -90,6 +95,6 @@ subroutine quasisymmetry_read_input
      end do
   end if
 
-  print *,"axis_nmax:",axis_nmax
+  if (proc0) print *,"axis_nmax:",axis_nmax
 
 end subroutine quasisymmetry_read_input

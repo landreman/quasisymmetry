@@ -38,4 +38,12 @@ subroutine quasisymmetry_validate_input
      print *,"Error! Invalid constraint_option:",constraint_option
   end select
 
+  select case (trim(verbose_option))
+  case (verbose_option_all)
+  case (verbose_option_proc0)
+  case (verbose_option_summary)
+  case default
+     print *,"Error! Invalid verbose_option:",verbose_option
+  end select
+
 end subroutine quasisymmetry_validate_input

@@ -25,6 +25,12 @@ module quasisymmetry_variables
   ! "no_Z_component" = Force the theta = 0 line to have no Z component at phi = 0.
   ! "sigma_initial"  = Force sigma = sigma_initial at phi = 0.
 
+  character(len=*), parameter :: &
+       verbose_option_all = "all", &
+       verbose_option_proc0 = "proc0", &
+       verbose_option_summary = "summary"
+  character(len=50) :: verbose_option = verbose_option_all
+
   real(dp) :: sigma_initial = 0
 
   integer :: nfp = 3
@@ -81,7 +87,10 @@ module quasisymmetry_variables
   real(dp), dimension(:), allocatable :: scan_B1c, scan_B1s, scan_sigma_initial
   real(dp), dimension(:,:), allocatable :: scan_R0c, scan_R0s, scan_Z0c, scan_Z0s
 
-  namelist / quasisymmetry / resolution_option, general_option, constraint_option, nfp, sign_G, I2_over_B0, &
+  integer :: N_procs, mpi_rank
+  logical :: proc0, verbose = .true.
+
+  namelist / quasisymmetry / resolution_option, general_option, constraint_option, verbose_option, nfp, sign_G, I2_over_B0, &
        N_iterations, N_line_search, Newton_tolerance, iota_tolerance, elongation_tolerance, N_phi, max_N_phi, &
        R0s, R0c, Z0s, Z0c, B1s_over_B0, B1c_over_B0, sigma_initial, &
        R0s_min, R0s_max, R0s_N_scan, R0c_min, R0c_max, R0c_N_scan, Z0s_min, Z0s_max, Z0s_N_scan, Z0c_min, Z0c_max, Z0c_N_scan, &
