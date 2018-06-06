@@ -5,7 +5,7 @@ subroutine quasisymmetry_solve
   implicit none
 
   integer :: iteration, j_line_search
-  real(dp) :: residual_norm, last_residual_norm, step_scale
+  real(dp) :: residual_norm, last_residual_norm, initial_residual_norm, step_scale
   real(dp), dimension(:), allocatable :: state, state0
 
   ! Variables needed by LAPACK:                                                                                            
@@ -24,14 +24,15 @@ subroutine quasisymmetry_solve
   state(2:N_phi) = sigma(2:N_phi)
 
   call quasisymmetry_residual()
-  residual_norm = sum(residual * residual)
-  print "(a,es10.3)","                 Initial residual norm:",residual_norm
+  initial_residual_norm = sqrt(sum(residual * residual))
+  residual_norm = initial_residual_norm
+  !print "(a,es10.3)","                 Initial relatiresidual norm:"
 
   ! Here is the main Newton iteration:
   Newton_tolerance_achieved = .false.
   Newton: do iteration = 1, N_iterations
      last_residual_norm = residual_norm
-     if (residual_norm < Newton_tolerance) then
+     if (residual_norm / initial_residual_norm < Newton_tolerance) then
         Newton_tolerance_achieved = .true.
         exit Newton
      end if
@@ -57,8 +58,8 @@ subroutine quasisymmetry_solve
         sigma(1) = sigma_initial
         iota = state(1)
         call quasisymmetry_residual()
-        residual_norm = sum(residual * residual)
-        print "(a,i3,a,es10.3,a,es23.15)","    Line search step",j_line_search,"  Residual norm:",residual_norm,"  iota:",iota
+        residual_norm = sqrt(sum(residual * residual))
+        print "(a,i3,a,es10.3,a,es23.15)","    Line search step",j_line_search,"  Relative residual L2 norm:",residual_norm / initial_residual_norm,"  iota:",iota
         if (residual_norm < last_residual_norm) exit line_search
 
         step_scale = step_scale / 2

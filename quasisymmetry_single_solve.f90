@@ -21,7 +21,7 @@ subroutine quasisymmetry_single_solve
 
      call quasisymmetry_solve()
 
-     if (resolution_option == 1) exit
+     if (trim(resolution_option) == resolution_option_fixed) exit
 
      if (iteration > 1) then
         print "(a,es10.3)"," abs(iota - last_iota)                     =",abs(iota - last_iota)

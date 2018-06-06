@@ -2,7 +2,7 @@
 
 program quasisymmetry
 
-  use quasisymmetry_variables, only: total_time, general_option
+  use quasisymmetry_variables, only: total_time, general_option, general_option_single, general_option_scan
 
   implicit none
 
@@ -17,10 +17,10 @@ program quasisymmetry
   call quasisymmetry_read_input()
   call quasisymmetry_validate_input()
 
-  select case (general_option)
-  case (1)
+  select case (trim(general_option))
+  case (general_option_single)
      call quasisymmetry_single_solve()
-  case (2)
+  case (general_option_scan)
      call quasisymmetry_scan()
      call quasisymmetry_write_output()
   case default

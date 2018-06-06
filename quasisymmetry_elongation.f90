@@ -15,7 +15,8 @@ subroutine quasisymmetry_elongation
   ! See my note 20180329-03 for derivation of the formula below for elongation:
   p = R1s*R1s + R1c*R1c + Z1s*Z1s + Z1c*Z1c
   q = R1s*Z1c - R1c*Z1s
-  elongation = 2*abs(q) / (p - sqrt(p*p-4*q*q))
+  !elongation = 2*abs(q) / (p - sqrt(p*p-4*q*q)) ! This version suffers precision loss for large elongation.
+  elongation = (p + sqrt(p*p-4*q*q))/(2*abs(q)) ! This version is more stable numerically.
 
   ! In preparation for searching for max elongation, Fourier transform the elongation.
   allocate(elongation_sin((N_phi+1)/2))
