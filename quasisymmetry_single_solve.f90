@@ -26,14 +26,19 @@ subroutine quasisymmetry_single_solve
      if (trim(resolution_option) == resolution_option_fixed) exit
 
      if (iteration > 1) then
-        if (verbose) print "(a,es10.3)"," abs(iota - last_iota)                     =",abs(iota - last_iota)
-        if (verbose) print "(a,es10.3)"," abs(max_elongation - last_max_elongation) =",abs(max_elongation - last_max_elongation)
+        if (verbose) print "(a,es10.3)","                                      abs(iota - last_iota) =",abs(iota - last_iota)
+        if (verbose) print "(a,es10.3)"," abs(max_elongation - last_max_elongation) / max_elongation =",abs(max_elongation - last_max_elongation) / max_elongation
         if (abs(iota - last_iota) <= iota_tolerance) then
-           if (verbose) print *,"iota_tolerance achieved."
+           if (verbose) print *,"iota_tolerance (absolute) achieved."
            iota_tolerance_achieved = .true.
         end if
-        if (abs(max_elongation - last_max_elongation) <= elongation_tolerance) then
-           if (verbose) print *,"elongation_tolerance achieved."
+        !if (abs(max_elongation - last_max_elongation) <= elongation_tolerance) then  ! Absolute tolerance
+        if (abs(max_elongation - last_max_elongation) / max_elongation <= elongation_tolerance) then  ! Relative tolerance
+           if (verbose) print *,"elongation_tolerance (relative) achieved."
+           elongation_tolerance_achieved = .true.
+        end if
+        if (max_elongation > max_precise_elongation) then
+           if (verbose) print "(a)"," Ignoring elongation_tolerance since max_elongation > max_precise_elongation."
            elongation_tolerance_achieved = .true.
         end if
         if (iota_tolerance_achieved .and. elongation_tolerance_achieved) exit

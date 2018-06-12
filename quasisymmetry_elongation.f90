@@ -18,6 +18,19 @@ subroutine quasisymmetry_elongation
   !elongation = 2*abs(q) / (p - sqrt(p*p-4*q*q)) ! This version suffers precision loss for large elongation.
   elongation = (p + sqrt(p*p-4*q*q))/(2*abs(q)) ! This version is more stable numerically.
 
+  ! Search for maximum using Fourier interpolation...
+  index_of_max = maxloc(elongation,1)
+  maxval_elongation = elongation(index_of_max)
+  if (maxval_elongation > max_precise_elongation) then
+     max_elongation = maxval_elongation
+     if (verbose) then
+        print *,"maxval(elongation):      ",maxval_elongation
+        print "(a)"," elongation > max_precise_elongation so skipping precise solve."
+     end if
+     return
+  end if
+
+
   ! In preparation for searching for max elongation, Fourier transform the elongation.
   allocate(elongation_sin((N_phi+1)/2))
   allocate(elongation_cos((N_phi+1)/2))
@@ -42,9 +55,6 @@ subroutine quasisymmetry_elongation
 !!$  print *,"elongation_sin:",elongation_sin
 !!$  print *,"elongation_cos:",elongation_cos
 
-  ! Search for maximum using Fourier interpolation...
-  index_of_max = maxloc(elongation,1)
-  maxval_elongation = elongation(index_of_max)
 !!$  print *,"index_of_max:",index_of_max
 !!$  print *,"d_phi:",d_phi,"(index_of_max-1)*d_phi:",(index_of_max-1)*d_phi
 !!$  print *,"Interpolated elongation at index_of_max:",-minus_elongation((index_of_max-1)*d_phi)
