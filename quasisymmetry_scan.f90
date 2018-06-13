@@ -6,7 +6,7 @@ subroutine quasisymmetry_scan
 
   include 'mpif.h'
 
-  integer :: j_scan, j_scan_local, j_Fourier_scan, j, k, N_Fourier_scan, j_B1s, j_B1c, j_sigma_initial
+  integer :: j_scan, j_scan_local, j_Fourier_scan, j, k, N_Fourier_scan, j_B1s, j_B1c, j_sigma_initial, index
   integer, dimension(max_axis_nmax+1, 4) :: scan_state
   integer :: ierr, tag, dummy(1), scan_index_min, scan_index_max, N_scan_local
   integer :: mpi_status(MPI_STATUS_SIZE)
@@ -15,6 +15,10 @@ subroutine quasisymmetry_scan
   real(dp), dimension(:), allocatable :: iotas_local, max_elongations_local
   integer, dimension(:), allocatable :: helicities_local
   logical, dimension(:), allocatable :: iota_tolerance_achieveds_local, elongation_tolerance_achieveds_local, Newton_tolerance_achieveds_local
+  integer, dimension(:), allocatable :: N_solves_kept
+  real(dp), dimension(:), allocatable :: scan_B1c_local, scan_B1s_local, scan_sigma_initial_local
+  real(dp), dimension(:,:), allocatable :: scan_R0c_local, scan_R0s_local, scan_Z0c_local, scan_Z0s_local
+
 
   ! Clean up scan arrays
   do j = 1,max_axis_nmax+1
@@ -84,25 +88,17 @@ subroutine quasisymmetry_scan
   allocate(elongation_tolerance_achieveds_local(N_scan_local))
   allocate(Newton_tolerance_achieveds_local(N_scan_local))
 
-  if (proc0) then
-     allocate(iotas(N_scan))
-     allocate(max_elongations(N_scan))
-     allocate(helicities(N_scan))
-     allocate(iota_tolerance_achieveds(N_scan))
-     allocate(elongation_tolerance_achieveds(N_scan))
-     allocate(Newton_tolerance_achieveds(N_scan))
-
-     allocate(scan_B1c(N_scan))
-     allocate(scan_B1s(N_scan))
-     allocate(scan_sigma_initial(N_scan))
-     allocate(scan_R0c(N_scan,max_axis_nmax+1))
-     allocate(scan_R0s(N_scan,max_axis_nmax+1))
-     allocate(scan_Z0c(N_scan,max_axis_nmax+1))
-     allocate(scan_Z0s(N_scan,max_axis_nmax+1))
-  end if
+  allocate(scan_B1c_local(N_scan_local))
+  allocate(scan_B1s_local(N_scan_local))
+  allocate(scan_sigma_initial_local(N_scan_local))
+  allocate(scan_R0c_local(N_scan_local,max_axis_nmax+1))
+  allocate(scan_R0s_local(N_scan_local,max_axis_nmax+1))
+  allocate(scan_Z0c_local(N_scan_local,max_axis_nmax+1))
+  allocate(scan_Z0s_local(N_scan_local,max_axis_nmax+1))
 
   scan_state = 1
   j_scan = 0
+  j_scan_local = 0
   do j_Fourier_scan = 1, N_Fourier_scan
 !!$     print *,"scan_state:"
 !!$     do k = 1,4
@@ -125,16 +121,6 @@ subroutine quasisymmetry_scan
               B1c_over_B0 = B1c_min + (B1c_max - B1c_min) * (j_B1c - 1) / max(B1c_N_scan - 1, 1)
               j_scan = j_scan + 1
 
-              if (proc0) then
-                 scan_B1c(j_scan) = B1c_over_B0
-                 scan_B1s(j_scan) = B1s_over_B0
-                 scan_sigma_initial(j_scan) = sigma_initial
-                 scan_R0c(j_scan,:) = R0c
-                 scan_R0s(j_scan,:) = R0s
-                 scan_Z0c(j_scan,:) = Z0c
-                 scan_Z0s(j_scan,:) = Z0s
-              end if
-
               ! Only proceed on the appropriate proc
               if (j_scan < scan_index_min) cycle
               if (j_scan > scan_index_max) cycle  ! Could replace with goto?
@@ -150,16 +136,24 @@ subroutine quasisymmetry_scan
                  print *,"Z0c:",Z0c(1:axis_nmax+1)
               end if
               
-              j_scan_local = j_scan - scan_index_min + 1
-              ! Sanity test
-              if (j_scan_local < 1) stop "Error! j_scan_local<1"
-              if (j_scan_local > N_scan_local) stop "Error! j_scan_local > N_scan_local"
               if (trim(verbose_option)==verbose_option_summary .and. mod(j_scan_local,1000)==1) then
-                 print "(a,i4,a,i9,a,i9)", " Proc",mpi_rank,": solve",j_scan_local," of",N_scan_local
+                 print "(a,i4,a,i9,a,i9)", " Proc",mpi_rank,": solve",j_scan - scan_index_min + 1," of",N_scan_local
               end if
               
               call quasisymmetry_single_solve()
-              
+              if (max_elongation > max_elongation_to_keep) cycle
+
+              ! If we made it this far, then record the results
+              j_scan_local = j_scan_local + 1
+
+              scan_B1c_local(j_scan_local) = B1c_over_B0
+              scan_B1s_local(j_scan_local) = B1s_over_B0
+              scan_sigma_initial_local(j_scan_local) = sigma_initial
+              scan_R0c_local(j_scan_local,:) = R0c
+              scan_R0s_local(j_scan_local,:) = R0s
+              scan_Z0c_local(j_scan_local,:) = Z0c
+              scan_Z0s_local(j_scan_local,:) = Z0s
+
               iotas_local(j_scan_local) = iota
               max_elongations_local(j_scan_local) = max_elongation
               helicities_local(j_scan_local) = helicity
@@ -195,42 +189,103 @@ subroutine quasisymmetry_scan
 
   ! Finally, send all results to proc 0.
   if (proc0) then
-     iotas(scan_index_min:scan_index_max) = iotas_local
-     max_elongations(scan_index_min:scan_index_max) = max_elongations_local
-     helicities(scan_index_min:scan_index_max) = helicities_local
-     iota_tolerance_achieveds(scan_index_min:scan_index_max) = iota_tolerance_achieveds_local
-     elongation_tolerance_achieveds(scan_index_min:scan_index_max) = elongation_tolerance_achieveds_local
-     Newton_tolerance_achieveds(scan_index_min:scan_index_max) = Newton_tolerance_achieveds_local
      if (N_procs > 1) then
         print "(a)"," ###################################################################################"
         print *,"Transferring results to proc 0"
      end if
+
+     allocate(N_solves_kept(N_procs))
+     N_solves_kept(1) = j_scan_local
      do j = 1, N_procs-1
         ! Use mpi_rank as the tag
         call mpi_recv(dummy,1,MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
-        scan_index_min = dummy(1)
-        call mpi_recv(dummy,1,MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
-        N_scan_local = dummy(1)
-        print "(a,i8,a,i4)"," Proc 0 is receiving results from ",N_scan_local," solves from proc",j
-        call mpi_recv(iotas(scan_index_min:scan_index_min + N_scan_local-1),N_scan_local,MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
-        call mpi_recv(max_elongations(scan_index_min:scan_index_min + N_scan_local-1),N_scan_local,MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
-        call mpi_recv(helicities(scan_index_min:scan_index_min + N_scan_local-1),N_scan_local,MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
-        call mpi_recv(Newton_tolerance_achieveds(scan_index_min:scan_index_min + N_scan_local-1),N_scan_local,MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
-        call mpi_recv(iota_tolerance_achieveds(scan_index_min:scan_index_min + N_scan_local-1),N_scan_local,MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
-        call mpi_recv(elongation_tolerance_achieveds(scan_index_min:scan_index_min + N_scan_local-1),N_scan_local,MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        N_solves_kept(j+1) = dummy(1)
      end do
+     print *,"# solves kept on each proc:",N_solves_kept
+     N_scan = sum(N_solves_kept)
+     print *,"Total # of solves kept:",N_scan
+
+     ! Now that we know the total number of runs that were kept, we can allocate the arrays for the final results:
+     allocate(iotas(N_scan))
+     allocate(max_elongations(N_scan))
+     allocate(helicities(N_scan))
+     allocate(iota_tolerance_achieveds(N_scan))
+     allocate(elongation_tolerance_achieveds(N_scan))
+     allocate(Newton_tolerance_achieveds(N_scan))
+
+     allocate(scan_B1c(N_scan))
+     allocate(scan_B1s(N_scan))
+     allocate(scan_sigma_initial(N_scan))
+     allocate(scan_R0c(N_scan,max_axis_nmax+1))
+     allocate(scan_R0s(N_scan,max_axis_nmax+1))
+     allocate(scan_Z0c(N_scan,max_axis_nmax+1))
+     allocate(scan_Z0s(N_scan,max_axis_nmax+1))
+
+     ! Store results from proc0 in the final arrays:
+     iotas(1:N_solves_kept(1)) = iotas_local(1:N_solves_kept(1))
+     max_elongations(1:N_solves_kept(1)) = max_elongations_local(1:N_solves_kept(1))
+     helicities(1:N_solves_kept(1)) = helicities_local(1:N_solves_kept(1))
+     iota_tolerance_achieveds(1:N_solves_kept(1)) = iota_tolerance_achieveds_local(1:N_solves_kept(1))
+     elongation_tolerance_achieveds(1:N_solves_kept(1)) = elongation_tolerance_achieveds_local(1:N_solves_kept(1))
+     Newton_tolerance_achieveds(1:N_solves_kept(1)) = Newton_tolerance_achieveds_local(1:N_solves_kept(1))
+
+     scan_B1c(1:N_solves_kept(1)) = scan_B1c_local(1:N_solves_kept(1))
+     scan_B1s(1:N_solves_kept(1)) = scan_B1s_local(1:N_solves_kept(1))
+     scan_sigma_initial(1:N_solves_kept(1)) = scan_sigma_initial_local(1:N_solves_kept(1))
+     scan_R0c(1:N_solves_kept(1),:) = scan_R0c_local(1:N_solves_kept(1),:)
+     scan_R0s(1:N_solves_kept(1),:) = scan_R0s_local(1:N_solves_kept(1),:)
+     scan_Z0c(1:N_solves_kept(1),:) = scan_Z0c_local(1:N_solves_kept(1),:)
+     scan_Z0s(1:N_solves_kept(1),:) = scan_Z0s_local(1:N_solves_kept(1),:)
+
+     index = N_solves_kept(1) + 1
+     do j = 1, N_procs-1
+        print "(a,i8,a,i4)"," Proc 0 is receiving results from ",N_solves_kept(j+1)," solves from proc",j
+        call mpi_recv(iotas(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(max_elongations(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(helicities(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(Newton_tolerance_achieveds(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(iota_tolerance_achieveds(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(elongation_tolerance_achieveds(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+
+        call mpi_recv(scan_B1c(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(scan_B1s(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(scan_sigma_initial(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(scan_R0c(index:index+N_solves_kept(j+1)-1,:),N_solves_kept(j+1)*(max_axis_nmax+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(scan_R0s(index:index+N_solves_kept(j+1)-1,:),N_solves_kept(j+1)*(max_axis_nmax+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(scan_Z0c(index:index+N_solves_kept(j+1)-1,:),N_solves_kept(j+1)*(max_axis_nmax+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(scan_Z0s(index:index+N_solves_kept(j+1)-1,:),N_solves_kept(j+1)*(max_axis_nmax+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        !do k = 1,max_axis_nmax+1
+        !   call mpi_recv(scan_R0c(index:index+N_solves_kept(j+1)-1,k),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        !end do
+
+        index = index + N_solves_kept(j+1)
+     end do
+
+
   else
-     dummy(1) = scan_index_min
+     ! Send the number of runs this proc kept:
+     dummy(1) = j_scan_local
      ! Use mpi_rank as the tag
      call mpi_send(dummy,1,MPI_INT,0,mpi_rank,MPI_COMM_WORLD,ierr)
-     dummy(1) = N_scan_local
-     call mpi_send(dummy,1,MPI_INT,0,mpi_rank,MPI_COMM_WORLD,ierr)
-     call mpi_send(iotas_local,N_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
-     call mpi_send(max_elongations_local,N_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
-     call mpi_send(helicities_local,N_scan_local,MPI_INT,0,mpi_rank,MPI_COMM_WORLD,ierr)
-     call mpi_send(Newton_tolerance_achieveds_local,N_scan_local,MPI_LOGICAL,0,mpi_rank,MPI_COMM_WORLD,ierr)
-     call mpi_send(iota_tolerance_achieveds_local,N_scan_local,MPI_LOGICAL,0,mpi_rank,MPI_COMM_WORLD,ierr)
-     call mpi_send(elongation_tolerance_achieveds_local,N_scan_local,MPI_LOGICAL,0,mpi_rank,MPI_COMM_WORLD,ierr)
+
+     ! Send the other results:
+     call mpi_send(iotas_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(max_elongations_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(helicities_local(1:j_scan_local),j_scan_local,MPI_INT,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(Newton_tolerance_achieveds_local(1:j_scan_local),j_scan_local,MPI_LOGICAL,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(iota_tolerance_achieveds_local(1:j_scan_local),j_scan_local,MPI_LOGICAL,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(elongation_tolerance_achieveds_local(1:j_scan_local),j_scan_local,MPI_LOGICAL,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     
+     call mpi_send(scan_B1c_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(scan_B1s_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(scan_sigma_initial_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(scan_R0c_local(1:j_scan_local,:),j_scan_local*(max_axis_nmax+1),MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(scan_R0s_local(1:j_scan_local,:),j_scan_local*(max_axis_nmax+1),MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(scan_Z0c_local(1:j_scan_local,:),j_scan_local*(max_axis_nmax+1),MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(scan_Z0s_local(1:j_scan_local,:),j_scan_local*(max_axis_nmax+1),MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     !do k = 1,max_axis_nmax+1
+     !   call mpi_send(scan_R0c_local(1:j_scan_local,k),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     !end do
   end if
 
   if (proc0) then

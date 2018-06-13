@@ -19,7 +19,10 @@ subroutine quasisymmetry_write_output
        vn_B1s_N_scan = "B1s_N_scan", &
        vn_B1c_min = "B1c_min", &
        vn_B1c_max = "B1c_max", &
-       vn_B1c_N_scan = "B1c_N_scan"
+       vn_B1c_N_scan = "B1c_N_scan", &
+       vn_N_scan = "N_scan", &
+       vn_max_precise_elongation = "max_precise_elongation", &
+       vn_max_elongation_to_keep = "max_elongation_to_keep"
 
   ! Arrays with dimension 1
   character(len=*), parameter :: &
@@ -103,6 +106,9 @@ subroutine quasisymmetry_write_output
   call cdf_define(ncid, vn_B1c_min, B1c_min)
   call cdf_define(ncid, vn_B1c_max, B1c_max)
   call cdf_define(ncid, vn_B1c_N_scan, B1c_N_scan)
+  call cdf_define(ncid, vn_N_scan, N_scan)
+  call cdf_define(ncid, vn_max_precise_elongation, max_precise_elongation)
+  call cdf_define(ncid, vn_max_elongation_to_keep, max_elongation_to_keep)
 
   ! Arrays with dimension 1
 
@@ -154,6 +160,9 @@ subroutine quasisymmetry_write_output
   call cdf_write(ncid, vn_B1c_min, B1c_min)
   call cdf_write(ncid, vn_B1c_max, B1c_max)
   call cdf_write(ncid, vn_B1c_N_scan, B1c_N_scan)
+  call cdf_write(ncid, vn_N_scan, N_scan)
+  call cdf_write(ncid, vn_max_precise_elongation, max_precise_elongation)
+  call cdf_write(ncid, vn_max_elongation_to_keep, max_elongation_to_keep)
 
   ! Arrays with dimension 1
 
