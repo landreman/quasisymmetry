@@ -16,9 +16,8 @@ subroutine quasisymmetry_scan
   integer, dimension(:), allocatable :: helicities_local
   logical, dimension(:), allocatable :: iota_tolerance_achieveds_local, elongation_tolerance_achieveds_local, Newton_tolerance_achieveds_local
   integer, dimension(:), allocatable :: N_solves_kept
-  real(dp), dimension(:), allocatable :: scan_B1c_local, scan_B1s_local, scan_sigma_initial_local
+  real(dp), dimension(:), allocatable :: scan_B1c_local, scan_B1s_local, scan_sigma_initial_local, B1c_values
   real(dp), dimension(:,:), allocatable :: scan_R0c_local, scan_R0s_local, scan_Z0c_local, scan_Z0s_local
-
 
   ! Clean up scan arrays
   do j = 1,max_axis_nmax+1
@@ -35,6 +34,20 @@ subroutine quasisymmetry_scan
   if (B1s_N_scan<1) B1s_N_scan = 1
   if (B1c_N_scan<1) B1c_N_scan = 1
   if (sigma_initial_N_scan<1) sigma_initial_N_scan = 1
+
+  allocate(B1c_values(B1c_N_scan))
+  do j_B1c = 1, B1c_N_scan
+     select case (trim(B1c_scan_option))
+     case (B1c_scan_option_linear)
+        B1c_values(j_B1c) = B1c_min + (B1c_max - B1c_min) * (j_B1c - 1) / max(B1c_N_scan - 1, 1)
+     case (B1c_scan_option_log)
+        B1c_values(j_B1c) = exp(log(B1c_min) + (log(B1c_max) - log(B1c_min)) * (j_B1c - 1) / max(B1c_N_scan - 1, 1))
+     case default
+        print *,"Error! Invalid B1c_scan_option:", B1c_scan_option
+        stop
+     end select
+  end do
+  if (proc0) print *,"B1c_values:",B1c_values
 
   !N_scan = product(R0s_N_scan)*product(R0c_N_scan)*product(Z0s_N_scan)*product(Z0c_N_scan)*product(B1s_N_scan)*product(B1c_N_scan)
   N_Fourier_scan = product(N_scan_array)
@@ -118,7 +131,8 @@ subroutine quasisymmetry_scan
         do j_B1s = 1, B1s_N_scan
            B1s_over_B0 = B1s_min + (B1s_max - B1s_min) * (j_B1s - 1) / max(B1s_N_scan - 1, 1)
            do j_B1c = 1, B1c_N_scan
-              B1c_over_B0 = B1c_min + (B1c_max - B1c_min) * (j_B1c - 1) / max(B1c_N_scan - 1, 1)
+              B1c_over_B0 = B1c_values(j_B1c)
+
               j_scan = j_scan + 1
 
               ! Only proceed on the appropriate proc
@@ -136,12 +150,13 @@ subroutine quasisymmetry_scan
                  print *,"Z0c:",Z0c(1:axis_nmax+1)
               end if
               
-              if (trim(verbose_option)==verbose_option_summary .and. mod(j_scan_local,1000)==1) then
+              if (trim(verbose_option)==verbose_option_summary .and. mod(j_scan - scan_index_min + 1,1000)==1) then
                  print "(a,i4,a,i9,a,i9)", " Proc",mpi_rank,": solve",j_scan - scan_index_min + 1," of",N_scan_local
               end if
               
               call quasisymmetry_single_solve()
               if (max_elongation > max_elongation_to_keep) cycle
+              if (abs(iota) < 1e-3) cycle
 
               ! If we made it this far, then record the results
               j_scan_local = j_scan_local + 1

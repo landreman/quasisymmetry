@@ -38,8 +38,9 @@ subroutine quasisymmetry_single_solve
            elongation_tolerance_achieved = .true.
         end if
         if (max_elongation > max_precise_elongation) then
-           if (verbose) print "(a)"," Ignoring elongation_tolerance since max_elongation > max_precise_elongation."
+           if (verbose) print "(a)"," Ignoring elongation_tolerance and iota_tolerance since max_elongation > max_precise_elongation."
            elongation_tolerance_achieved = .true.
+           iota_tolerance_achieved = .true.
         end if
         if (iota_tolerance_achieved .and. elongation_tolerance_achieved) exit
      end if
