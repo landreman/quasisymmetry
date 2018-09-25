@@ -32,7 +32,8 @@ subroutine quasisymmetry_solve
   Newton_tolerance_achieved = .false.
   Newton: do iteration = 1, N_iterations
      last_residual_norm = residual_norm
-     if (residual_norm / initial_residual_norm < Newton_tolerance) then
+     !if (residual_norm / initial_residual_norm < Newton_tolerance) then
+     if (residual_norm < Newton_tolerance) then
         Newton_tolerance_achieved = .true.
         exit Newton
      end if
@@ -59,7 +60,8 @@ subroutine quasisymmetry_solve
         iota = state(1)
         call quasisymmetry_residual()
         residual_norm = sqrt(sum(residual * residual))
-        if (verbose) print "(a,i3,a,es10.3,a,es23.15)","    Line search step",j_line_search,"  Relative residual L2 norm:",residual_norm / initial_residual_norm,"  iota:",iota
+        !if (verbose) print "(a,i3,a,es10.3,a,es23.15)","    Line search step",j_line_search,"  Relative residual L2 norm:",residual_norm / initial_residual_norm,"  iota:",iota
+        if (verbose) print "(a,i3,a,es10.3,a,es23.15)","    Line search step",j_line_search,"  Residual L2 norm:",residual_norm,"  iota:",iota
         if (residual_norm < last_residual_norm) exit line_search
 
         step_scale = step_scale / 2

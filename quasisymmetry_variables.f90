@@ -53,7 +53,7 @@ module quasisymmetry_variables
   integer :: N_phi_original
   integer :: max_N_phi = 100
 
-  integer, parameter :: max_axis_nmax = 2
+  integer, parameter :: max_axis_nmax = 1
   integer :: axis_nmax = 1
   real(dp), dimension(max_axis_nmax + 1) :: R0s, R0c, Z0s, Z0c ! Fourier coefficients for the magnetic axis
   real(dp) :: B1s_over_B0, B1c_over_B0
@@ -85,7 +85,7 @@ module quasisymmetry_variables
   integer, dimension(max_axis_nmax+1) :: R0s_N_scan=0, R0c_N_scan=0, Z0s_N_scan=0, Z0c_N_scan=0
   integer :: B1s_N_scan=0, B1c_N_scan=0, sigma_initial_N_scan=0
   integer :: N_scan
-  real(dp), dimension(:), allocatable :: iotas, max_elongations
+  real(dp), dimension(:), allocatable :: iotas, max_elongations, B1c_values
   integer, dimension(:), allocatable :: helicities
   logical, dimension(:), allocatable :: iota_tolerance_achieveds, elongation_tolerance_achieveds, Newton_tolerance_achieveds
   logical :: iota_tolerance_achieved, elongation_tolerance_achieved, Newton_tolerance_achieved

@@ -16,7 +16,7 @@ subroutine quasisymmetry_scan
   integer, dimension(:), allocatable :: helicities_local
   logical, dimension(:), allocatable :: iota_tolerance_achieveds_local, elongation_tolerance_achieveds_local, Newton_tolerance_achieveds_local
   integer, dimension(:), allocatable :: N_solves_kept
-  real(dp), dimension(:), allocatable :: scan_B1c_local, scan_B1s_local, scan_sigma_initial_local, B1c_values
+  real(dp), dimension(:), allocatable :: scan_B1c_local, scan_B1s_local, scan_sigma_initial_local
   real(dp), dimension(:,:), allocatable :: scan_R0c_local, scan_R0s_local, scan_Z0c_local, scan_Z0s_local
 
   ! Clean up scan arrays
@@ -156,7 +156,7 @@ subroutine quasisymmetry_scan
               
               call quasisymmetry_single_solve()
               if (max_elongation > max_elongation_to_keep) cycle
-              if (abs(iota) < 1e-3) cycle
+              !if (abs(iota) < 1e-3) cycle
 
               ! If we made it this far, then record the results
               j_scan_local = j_scan_local + 1
