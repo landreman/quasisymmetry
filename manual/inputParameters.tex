@@ -1,0 +1,242 @@
+\chapter{Input Parameters}
+\label{ch:input}
+
+\newcommand{\param}[5]{{\setlength{\parindent}{0cm} {\ttfamily \bfseries \hypertarget{#1}{#1}}\\{\it Type}: #2\\{\it Default}: #3\\{\it When it matters}: #4\\{\it Meaning}: #5}}
+\newcommand{\myhrule}{{\setlength{\parindent}{0cm} \hrulefill }}
+
+\newcommand{\true}{{\ttfamily .true.}}
+\newcommand{\false}{{\ttfamily .false.}}
+
+In this section we describe all the parameters which can be included in the input namelist. \\
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+
+\section{General parameters}
+
+\param{general\_option}
+{string}
+{{\ttfamily "single"}}
+{Always}
+{Determines the overall flow of program execution.\\
+
+{\ttfamily general\_option} = {\ttfamily "single"}: Solve the equations for first-order quasisymmetry for a single set of input parameters.\\
+
+{\ttfamily general\_option} = {\ttfamily "scan"}: Solve the equations for first-order quasisymmetry for a range of input parameters.\\
+
+}
+
+\myhrule
+
+\param{verbose\_option}
+{string}
+{{\ttfamily "all"}}
+{Only when \parlink{general\_option}={\ttfamily "scan"}}
+{Determines how much information is printed to the standard output during a scan.\\
+
+{\ttfamily verbose\_option} = {\ttfamily "all"}: Full information is printed for all solves on all processors.\\
+
+{\ttfamily verbose\_option} = {\ttfamily "proc0"}: Full information is printed for all solves on processor 0, while no information is printed by other processors.\\
+
+{\ttfamily verbose\_option} = {\ttfamily "summary"}: Minimal information is printed.\\
+}
+
+\myhrule
+
+\param{max\_elongation\_to\_keep}
+{double}
+{10}
+{Only when \parlink{general\_option}={\ttfamily "scan"}}
+{Only configurations with elongation equal to or below this value are saved in the output file.}
+
+\myhrule
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+
+\section{Specifying a single calculation}
+
+\param{R0c}
+{double array}
+{[0,0,...]}
+{Only when \parlink{general\_option}={\ttfamily "single"}}
+{Fourier mode amplitudes of the magnetic axis shape. The cylindrical coordinate $R$ is determined by
+\begin{equation}
+R(\phi) = \sum_{n=0}^{\infty} \left[ (\mathtt{R0c})_{n+1} \cos(n \phi) +  (\mathtt{R0s})_{n+1} \sin(n \phi)\right].
+\label{eq:Rseries}
+\end{equation}
+Note that when \parlink{general\_option}={\ttfamily "scan"}, the code overwrites {\ttfamily R0c} with values between \parlink{R0c\_min} and \parlink{R0c\_max}.
+}
+
+\myhrule
+
+\param{R0s}
+{double array}
+{[0,0,...]}
+{Only when \parlink{general\_option}={\ttfamily "single"}}
+{Fourier mode amplitudes of the magnetic axis shape. See (\ref{eq:Rseries}).
+Note that when \parlink{general\_option}={\ttfamily "scan"}, the code overwrites {\ttfamily R0s} with values between \parlink{R0s\_min} and \parlink{R0s\_max}.
+}
+
+\myhrule
+
+\param{Z0c}
+{double array}
+{[0,0,...]}
+{Only when \parlink{general\_option}={\ttfamily "single"}}
+{Fourier mode amplitudes of the magnetic axis shape. The cylindrical coordinate $Z$ is determined by
+\begin{equation}
+Z(\phi) = \sum_{n=0}^{\infty} \left[ (\mathtt{Z0c})_{n+1} \cos(n \phi) +  (\mathtt{Z0s})_{n+1} \sin(n \phi)\right].
+\label{eq:Zseries}
+\end{equation}
+Note that when \parlink{general\_option}={\ttfamily "scan"}, the code overwrites {\ttfamily Z0c} with values between \parlink{Z0c\_min} and \parlink{Z0c\_max}.
+}
+
+\myhrule
+
+\param{Z0s}
+{double array}
+{[0,0,...]}
+{Only when \parlink{general\_option}={\ttfamily "single"}}
+{Fourier mode amplitudes of the magnetic axis shape. See (\ref{eq:Zseries}).
+Note that when \parlink{general\_option}={\ttfamily "scan"}, the code overwrites {\ttfamily Z0s} with values between \parlink{Z0s\_min} and \parlink{Z0s\_max}.
+}
+
+\myhrule
+
+\param{eta\_bar}
+{double}
+{1.0}
+{Only when \parlink{general\_option}={\ttfamily "single"}}
+{Garren and Boozer's parameter $\bar{\eta}$. For a given axis shape, different values of this parameter result in different solutions for quasisymmetric flux surface shapes.
+}
+
+\myhrule
+
+\param{sigma\_initial}
+{double}
+{0.0}
+{Only when \parlink{general\_option}={\ttfamily "single"}}
+{Determines the value of $\sigma$ at $\phi=0$. Setting this quantity to a nonzero value results in a non-stellarator-symmetric flu surface shape, even if the axis shape is stellarator-symmetric.
+}
+
+\myhrule
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+
+\section{Specifying a scan over axis shapes}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+
+\section{Other physical parameters}
+
+\param{nfp}
+{integer}
+{3}
+{Always}
+{Number of field periods, equivalent to the VMEC parameter of the same name.}
+
+\myhrule
+
+\param{sign\_G}
+{integer}
+{1}
+{Always}
+{This variable can only be $\pm 1$. It is $+1$ if the magnetic field has a positive projection onto the toroidal unit vector $\vect{e}_\phi$
+in $(R,\phi,z)$ cylindrical coordinates, or $-1$ otherwise.}
+
+\myhrule
+
+\param{I2\_over\_B0}
+{double}
+{0.0}
+{Always}
+{Toroidal current density on the magnetic axis. This variable should usually be zero in a stellarator.  (Even in a stellarator with substantial plasma pressure, the diamagnetic and bootstrap currents vanish on the axis because the pressure gradient vanishes there.)}
+
+\myhrule
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+
+\section{Numerical resolution and tolerance parameters}
+
+\param{resolution\_option}
+{string}
+{{\ttfamily "fixed"}}
+{Always}
+{Determines how the number of grid points $N_{\phi}$ is chosen.\\
+
+{\ttfamily resolution\_option} = {\ttfamily "fixed"}: Solve the equations for a single resolution, \parlink{N\_phi}.\\
+
+{\ttfamily resolution\_option} = {\ttfamily "adaptive"}: Solve the equations first for \parlink{N\_phi}, then keep doubling the resolution until the change to $\iota$ and elongation are smaller than the specified tolerances \parlink{iota\_tolerance} and \parlink{elongation\_tolerance}, or until \parlink{max\_N\_phi} is reached, whichever comes first. (The resolution is not exactly doubled, since it must be odd.)\\
+
+}
+
+\myhrule
+
+\param{N\_phi}
+{integer}
+{15}
+{Always}
+{Number of grid points in the toroidal angle. If even, 1 will be added to obtain an odd number, since an odd number of points is required by the pseudospectral discretization. If \parlink{resolution\_option}={\ttfamily "fixed"}, then this parameter sets the resolution directly. If \parlink{resolution\_option}={\ttfamily "adaptive"}, then this parameter sets the lowest resolution attempted.}
+
+\myhrule
+
+\param{max\_N\_phi}
+{integer}
+{100}
+{When \parlink{resolution\_option}={\ttfamily "adaptive"}}
+{Maximum number of grid points in the toroidal angle that will be allowed by the adaptive resolution algorithm.}
+
+\myhrule
+
+\param{N\_iterations}
+{integer}
+{20}
+{Always}
+{Maximum number of Newton iterations that will be performed to solve the Garren-Boozer Ricatti ODE.  The Newton iteration will terminate with fewer iterations if the tolerance condition associated with \parlink{Newton\_tolerance} is met. Normally {\ttfamily N\_iterations} should be at least 6 so enough iterations are performed.}
+
+\myhrule
+
+\param{N\_line\_search}
+{integer}
+{10}
+{Always}
+{Maximum number of times the step size will be cut in half in the line search that is performed at each Newton iterations. The line search terminates when the residual norm decreases, which often happens when a full Newton step is taken, so this parameter is usually not important.}
+
+\myhrule
+
+\param{Newton\_tolerance}
+{double}
+{1.0d-12}
+{Always}
+{The Newton iteration for solving the Garren-Boozer ODE will terminate when the residual norm is below this value.}
+
+\myhrule
+
+\param{iota\_tolerance}
+{double}
+{1.0d-6}
+{When \parlink{resolution\_option}={\ttfamily "adaptive"}}
+{The number of grid points $N_\phi$ will be increased until a factor-of-2 change to $N_\phi$ causes a change to the rotational transform less than {\ttfamily iota\_tolerance}.}
+
+\myhrule
+
+\param{elongation\_tolerance}
+{double}
+{1.0d-2}
+{When \parlink{resolution\_option}={\ttfamily "adaptive"}}
+{The number of grid points $N_\phi$ will be increased until a factor-of-2 change to $N_\phi$ causes a change to the maximum elongation of less than {\ttfamily elongation\_tolerance}. (Here, ``maximum elongation'' means the maximum over the toroidal angle $\phi$.}
+
+\myhrule
+
+\param{max\_precise\_elongation}
+{double}
+{10}
+{Always}
+{To compute the maximum-over-$\phi$ of the elongation, the following procedure is employed. First the elongation is evaluated at each point on the $\phi$ grid. If the result is smaller than {\ttfamily max\_precise\_elongation}, then a more precise value of emaximum elongation is computed using spectral interpolation between the $\phi$ grid points. The idea is that if the elongation is more than this threshold, we don't care about the precise value because the configuration is irrelevant, so don't invest the time in a precise computation.}
+
+\myhrule
+

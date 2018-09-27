@@ -31,13 +31,6 @@ subroutine quasisymmetry_validate_input
      print *,"Error! Invalid general_option:",general_option
   end select
 
-  select case (trim(constraint_option))
-  case (constraint_option_no_Z_component)
-  case (constraint_option_sigma_initial)
-  case default
-     print *,"Error! Invalid constraint_option:",constraint_option
-  end select
-
   select case (trim(verbose_option))
   case (verbose_option_all)
   case (verbose_option_proc0)
