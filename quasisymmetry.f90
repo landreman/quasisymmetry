@@ -31,6 +31,7 @@ program quasisymmetry
   select case (trim(general_option))
   case (general_option_single)
      call quasisymmetry_single_solve()
+     call quasisymmetry_write_vmec_input()
   case (general_option_scan)
      call quasisymmetry_scan()
      call quasisymmetry_write_output()

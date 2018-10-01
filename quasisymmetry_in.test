@@ -2,12 +2,12 @@
  !resolution_option = 'fixed'
  resolution_option = 'adaptive'
 
- !general_option = 'single'
- general_option = 'scan'
+ general_option = 'single'
+ !general_option = 'scan'
 
- !verbose_option = 'all'
+ verbose_option = 'all'
  !verbose_option = 'proc0'
- verbose_option = 'summary'
+ !verbose_option = 'summary'
 
  N_phi = 15
 
@@ -21,6 +21,8 @@
 
  max_elongation_to_keep = 10
 
+ vmec_template_filename = 'input.li383_1.4m'
+
  ! QA example:
  !nfp = 3
  !R0c = 1 0.03
@@ -32,7 +34,7 @@
  R0c = 1 0.045
  Z0s = 0 -0.045
  B1c_over_B0 = -0.90
- !sigma_initial = -1.0e+6
+ sigma_initial = 0.0
 
  ! QH example:
  !nfp = 4
@@ -74,8 +76,8 @@
  !R0s = 0 0
  !Z0c = 0 -0.025
  !B1c_over_B0 = -1.1d+0
- !!B1s_over_B0 = 0
- !!constraint_option = 2
+ !!!B1s_over_B0 = 0
+ !!!constraint_option = 2
  !sigma_initial = -0.6d+0
 
  !! Testing

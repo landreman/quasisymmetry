@@ -1,20 +1,8 @@
 \chapter{Overview}
 
 This program is an implementation of the \regcoil~algorithm described in \cite{regcoilPaper},
-and was used for the calculations in \cite{regcoilPaper}.
+and was used for the calculations in \cite{PaperII}.
 This paper is available in the Git repository for this program.
-In addition, this program can read output files from the \nescoil~code \cite{nescoil},
-processing the results to compute quantities like the current density
-and residual magnetic field normal to the target plasma surface.
-
-%In the various variable names in the code and output file, `r' refers
-%to the position vector, not to a radius.  In various arrays with a
-%dimension of length 3, this dimension always corresponds to Cartesian
-%coordinates $(x,y,z)$.
-
-%The `normal' quantities in the code and output file refer to the
-%surface normal vector N = (dr/dv) cross (dr/du) as in the NESCOIL
-%paper. Note that this vector does not have unit magnitude.
 
 
 
@@ -24,7 +12,7 @@ and residual magnetic field normal to the target plasma surface.
 
 \item {\ttfamily NetCDF} (for writing the output file)
 \item {\ttfamily BLAS} (for matrix multiplication)
-\item {\ttfamily LAPACK} (for solving linear systems and for singular value decomposiiton)
+\item {\ttfamily LAPACK} (for solving linear systems)
 
 \end{itemize}
 

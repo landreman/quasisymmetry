@@ -10,6 +10,6 @@ subroutine quasisymmetry_residual
 
   residual = residual &
        + iota * ( B1Squared_over_curvatureSquared * B1Squared_over_curvatureSquared + 1 + sigma * sigma) &
-       - 2 * B1Squared_over_curvatureSquared * (torsion + I2_over_B0) / B0_over_abs_G0
+       - 2 * B1Squared_over_curvatureSquared * (sign_psi * torsion + I2_over_B0) / B0_over_abs_G0
 
 end subroutine quasisymmetry_residual

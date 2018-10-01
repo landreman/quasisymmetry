@@ -51,6 +51,22 @@ In this section we describe all the parameters which can be included in the inpu
 
 \myhrule
 
+\param{vmec\_template\_filename}
+{string}
+{{\ttfamily ""}}
+{Only when \parlink{general\_option}={\ttfamily "single"}}
+{A fortran namelist file containing a vmec {\ttfamily \&indata} namelist. This namelist will be copied to create a new vmec input file based on the solution of the Garren-Boozer problem, except for the quantities that are overwritten: the axis shape, boundary shape, number of field periods, {\ttfamily nfp}, and {\ttfamily lasym}. Also {\ttfamily lfreeb} will be set to false.}
+
+\myhrule
+
+\param{r}
+{double}
+{0.1}
+{Only when \parlink{general\_option}={\ttfamily "single"}}
+{Effective minor radius that will be used in the new vmec input file.  This parameter is identical to $r$ in \cite{PaperII}. Note that this parameter does not enter the Garren-Boozer problem directly; it only affects the transformation to a finite-aspect-ratio result.}
+
+\myhrule
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 
@@ -60,9 +76,10 @@ In this section we describe all the parameters which can be included in the inpu
 {double array}
 {[0,0,...]}
 {Only when \parlink{general\_option}={\ttfamily "single"}}
-{Fourier mode amplitudes of the magnetic axis shape. The cylindrical coordinate $R$ is determined by
+{Fourier mode amplitudes of the magnetic axis shape. Elements of this array corresp\
+ond to toroidal modes 0, \parlink{nfp}, 2$\times$\parlink{nfp}, 3$\times$\parlink{nfp}, etc.  The cylindrical coordinate $R$ is determined by
 \begin{equation}
-R(\phi) = \sum_{n=0}^{\infty} \left[ (\mathtt{R0c})_{n+1} \cos(n \phi) +  (\mathtt{R0s})_{n+1} \sin(n \phi)\right].
+R(\phi) = \sum_{n=0}^{\infty} \left[ (\mathtt{R0c})_{n+1} \cos( (\mathtt{nfp})n\phi) +  (\mathtt{R0s})_{n+1} \sin( (\mathtt{nfp})n\phi)\right].
 \label{eq:Rseries}
 \end{equation}
 Note that when \parlink{general\_option}={\ttfamily "scan"}, the code overwrites {\ttfamily R0c} with values between \parlink{R0c\_min} and \parlink{R0c\_max}.
@@ -74,7 +91,7 @@ Note that when \parlink{general\_option}={\ttfamily "scan"}, the code overwrites
 {double array}
 {[0,0,...]}
 {Only when \parlink{general\_option}={\ttfamily "single"}}
-{Fourier mode amplitudes of the magnetic axis shape. See (\ref{eq:Rseries}).
+{Fourier mode amplitudes of the magnetic axis shape. Elements of this array correspond to toroidal modes 0, \parlink{nfp}, 2$\times$\parlink{nfp}, 3$\times$\parlink{nfp}, etc. See (\ref{eq:Rseries}).
 Note that when \parlink{general\_option}={\ttfamily "scan"}, the code overwrites {\ttfamily R0s} with values between \parlink{R0s\_min} and \parlink{R0s\_max}.
 }
 
@@ -84,9 +101,9 @@ Note that when \parlink{general\_option}={\ttfamily "scan"}, the code overwrites
 {double array}
 {[0,0,...]}
 {Only when \parlink{general\_option}={\ttfamily "single"}}
-{Fourier mode amplitudes of the magnetic axis shape. The cylindrical coordinate $Z$ is determined by
+{Fourier mode amplitudes of the magnetic axis shape. Elements of this array correspond to toroidal modes 0, \parlink{nfp}, 2$\times$\parlink{nfp}, 3$\times$\parlink{nfp}, etc. The cylindrical coordinate $Z$ is determined by
 \begin{equation}
-Z(\phi) = \sum_{n=0}^{\infty} \left[ (\mathtt{Z0c})_{n+1} \cos(n \phi) +  (\mathtt{Z0s})_{n+1} \sin(n \phi)\right].
+Z(\phi) = \sum_{n=0}^{\infty} \left[ (\mathtt{Z0c})_{n+1} \cos((\mathtt{nfp})n \phi) +  (\mathtt{Z0s})_{n+1} \sin((\mathtt{nfp})n \phi)\right].
 \label{eq:Zseries}
 \end{equation}
 Note that when \parlink{general\_option}={\ttfamily "scan"}, the code overwrites {\ttfamily Z0c} with values between \parlink{Z0c\_min} and \parlink{Z0c\_max}.
@@ -98,7 +115,7 @@ Note that when \parlink{general\_option}={\ttfamily "scan"}, the code overwrites
 {double array}
 {[0,0,...]}
 {Only when \parlink{general\_option}={\ttfamily "single"}}
-{Fourier mode amplitudes of the magnetic axis shape. See (\ref{eq:Zseries}).
+{Fourier mode amplitudes of the magnetic axis shape. Elements of this array correspond to toroidal modes 0, \parlink{nfp}, 2$\times$\parlink{nfp}, 3$\times$\parlink{nfp}, etc. See (\ref{eq:Zseries}).
 Note that when \parlink{general\_option}={\ttfamily "scan"}, the code overwrites {\ttfamily Z0s} with values between \parlink{Z0s\_min} and \parlink{Z0s\_max}.
 }
 
@@ -117,7 +134,7 @@ Note that when \parlink{general\_option}={\ttfamily "scan"}, the code overwrites
 {double}
 {0.0}
 {Only when \parlink{general\_option}={\ttfamily "single"}}
-{Determines the value of $\sigma$ at $\phi=0$. Setting this quantity to a nonzero value results in a non-stellarator-symmetric flu surface shape, even if the axis shape is stellarator-symmetric.
+{Determines the value of $\sigma$ at $\phi=0$. Setting this quantity to a nonzero value results in a non-stellarator-symmetric flux surface shape, even if the axis shape is stellarator-symmetric.
 }
 
 \myhrule
@@ -126,6 +143,187 @@ Note that when \parlink{general\_option}={\ttfamily "scan"}, the code overwrites
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 
 \section{Specifying a scan over axis shapes}
+
+\param{R0c\_min}
+{double array}
+{[0,0,...]}
+{Only when \parlink{general\_option}={\ttfamily "scan"}}
+{Minimum values of the Fourier mode amplitudes of the magnetic axis shape. Elements of this array correspond to toroidal modes 0, \parlink{nfp}, 2$\times$\parlink{nfp}, 3$\times$\parlink{nfp}, etc.  See (\ref{eq:Rseries}).
+}
+
+\myhrule
+
+\param{R0c\_max}
+{double array}
+{[0,0,...]}
+{Only when \parlink{general\_option}={\ttfamily "scan"}}
+{Maxmum values of the Fourier mode amplitudes of the magnetic axis shape. Elements of this array correspond to toroidal modes 0, \parlink{nfp}, 2$\times$\parlink{nfp}, 3$\times$\parlink{nfp}, etc.  See (\ref{eq:Rseries}).
+}
+
+\myhrule
+
+\param{R0c\_N\_scan}
+{integer array}
+{[0,0,...]}
+{Only when \parlink{general\_option}={\ttfamily "scan"}}
+{Number of values to consider for each Fourier mode amplitude in \parlink{R0c}. When an element of {\ttfamily R0c\_N\_scan} is $>1$, the corresponding element of \parlink{R0c} will be scanned over equally spaced values from the corresponding element of \parlink{R0c\_min} to the corresponding element of \parlink{R0c\_max}.  When an element of {\ttfamily R0c\_N\_scan} is $\le 1$, the corresponding element of \parlink{R0c} will be set to the corresponding element of \parlink{R0c\_min} and no scan will be performed in that Fourier amplitude.
+}
+
+\myhrule
+
+\param{R0s\_min}
+{double array}
+{[0,0,...]}
+{Only when \parlink{general\_option}={\ttfamily "scan"}}
+{Minimum values of the Fourier mode amplitudes of the magnetic axis shape. Elements of this array correspond to toroidal modes 0, \parlink{nfp}, 2$\times$\parlink{nfp}, 3$\times$\parlink{nfp}, etc.  See (\ref{eq:Rseries}).
+}
+
+\myhrule
+
+\param{R0s\_max}
+{double array}
+{[0,0,...]}
+{Only when \parlink{general\_option}={\ttfamily "scan"}}
+{Maxmum values of the Fourier mode amplitudes of the magnetic axis shape. Elements of this array correspond to toroidal modes 0, \parlink{nfp}, 2$\times$\parlink{nfp}, 3$\times$\parlink{nfp}, etc.  See (\ref{eq:Rseries}).
+}
+
+\myhrule
+
+\param{R0s\_N\_scan}
+{integer array}
+{[0,0,...]}
+{Only when \parlink{general\_option}={\ttfamily "scan"}}
+{Number of values to consider for each Fourier mode amplitude in \parlink{R0s}. When an element of {\ttfamily R0s\_N\_scan} is $>1$, the corresponding element of \parlink{R0s} will be scanned over equally spaced values from the corresponding element of \parlink{R0s\_min} to the corresponding element of \parlink{R0s\_max}.  When an element of {\ttfamily R0s\_N\_scan} is $\le 1$, the corresponding element of \parlink{R0s} will be set to the corresponding element of \parlink{R0s\_min} and no scan will be performed in that Fourier amplitude.
+}
+
+\myhrule
+
+\param{Z0c\_min}
+{double array}
+{[0,0,...]}
+{Only when \parlink{general\_option}={\ttfamily "scan"}}
+{Minimum values of the Fourier mode amplitudes of the magnetic axis shape. Elements of this array correspond to toroidal modes 0, \parlink{nfp}, 2$\times$\parlink{nfp}, 3$\times$\parlink{nfp}, etc.  See (\ref{eq:Zseries}).
+}
+
+\myhrule
+
+\param{Z0c\_max}
+{double array}
+{[0,0,...]}
+{Only when \parlink{general\_option}={\ttfamily "scan"}}
+{Maxmum values of the Fourier mode amplitudes of the magnetic axis shape. Elements of this array correspond to toroidal modes 0, \parlink{nfp}, 2$\times$\parlink{nfp}, 3$\times$\parlink{nfp}, etc.  See (\ref{eq:Zseries}).
+}
+
+\myhrule
+
+\param{Z0c\_N\_scan}
+{integer array}
+{[0,0,...]}
+{Only when \parlink{general\_option}={\ttfamily "scan"}}
+{Number of values to consider for each Fourier mode amplitude in \parlink{Z0c}. When an element of {\ttfamily Z0c\_N\_scan} is $>1$, the corresponding element of \parlink{Z0c} will be scanned over equally spaced values from the corresponding element of \parlink{Z0c\_min} to the corresponding element of \parlink{Z0c\_max}.  When an element of {\ttfamily Z0c\_N\_scan} is $\le 1$, the corresponding element of \parlink{Z0c} will be set to the corresponding element of \parlink{Z0c\_min} and no scan will be performed in that Fourier amplitude.
+}
+
+\myhrule
+
+\param{Z0s\_min}
+{double array}
+{[0,0,...]}
+{Only when \parlink{general\_option}={\ttfamily "scan"}}
+{Minimum values of the Fourier mode amplitudes of the magnetic axis shape. Elements of this array correspond to toroidal modes 0, \parlink{nfp}, 2$\times$\parlink{nfp}, 3$\times$\parlink{nfp}, etc.  See (\ref{eq:Zseries}).
+}
+
+\myhrule
+
+\param{Z0s\_max}
+{double array}
+{[0,0,...]}
+{Only when \parlink{general\_option}={\ttfamily "scan"}}
+{Maxmum values of the Fourier mode amplitudes of the magnetic axis shape. Elements of this array correspond to toroidal modes 0, \parlink{nfp}, 2$\times$\parlink{nfp}, 3$\times$\parlink{nfp}, etc.  See (\ref{eq:Zseries}).
+}
+
+\myhrule
+
+\param{Z0s\_N\_scan}
+{integer array}
+{[0,0,...]}
+{Only when \parlink{general\_option}={\ttfamily "scan"}}
+{Number of values to consider for each Fourier mode amplitude in \parlink{Z0s}. When an element of {\ttfamily Z0s\_N\_scan} is $>1$, the corresponding element of \parlink{Z0s} will be scanned over equally spaced values from the corresponding element of \parlink{Z0s\_min} to the corresponding element of \parlink{Z0s\_max}.  When an element of {\ttfamily Z0s\_N\_scan} is $\le 1$, the corresponding element of \parlink{Z0s} will be set to the corresponding element of \parlink{Z0s\_min} and no scan will be performed in that Fourier amplitude.
+}
+
+\myhrule
+
+\param{eta\_bar\_min}
+{double}
+{1.0}
+{Only when \parlink{general\_option}={\ttfamily "scan"}}
+{Minimum value of \parlink{eta\_bar} for a scan. If \parlink{eta\_bar\_N\_scan}$\le 1$, then \parlink{eta\_bar} will be set to \parlink{eta\_bar\_min} and no scan in this quantity will be performed.
+}
+
+\myhrule
+
+\param{eta\_bar\_max}
+{double}
+{1.0}
+{Only when \parlink{general\_option}={\ttfamily "scan"}}
+{Maxmum value of \parlink{eta\_bar} for a scan.
+}
+
+\myhrule
+
+\param{eta\_bar\_N\_scan}
+{integer}
+{0}
+{Only when \parlink{general\_option}={\ttfamily "scan"}}
+{Number of values to consider for \parlink{eta\_bar} in a scan. If {\ttfamily eta\_bar\_N\_scan} $>1$, then \parlink{eta\_bar} will be scanned from \parlink{eta\_bar\_min} to \parlink{eta\_bar\_max} spaced according to \parlink{eta\_bar\_scan\_option}.
+If {\ttfamily eta\_bar\_N\_scan} $\le 1$, then \parlink{eta\_bar} will be set to \parlink{eta\_bar\_min} and no scan in
+this quantity will be performed.
+}
+
+\myhrule
+
+\param{eta\_bar\_scan\_option}
+{string}
+{{\ttfamily "linear"}}
+{Always}
+{Determines the spacing of values of \parlink{eta\_bar} in a scan.\\
+
+{\ttfamily eta\_bar\_scan\_option} = {\ttfamily "linear"}: Use uniform linear spacing.\\
+
+{\ttfamily eta\_bar\_scan\_option} = {\ttfamily "log"}: Use logarithmic spacing.\\
+
+}
+
+\myhrule
+
+\param{sigma\_initial\_min}
+{double}
+{1.0}
+{Only when \parlink{general\_option}={\ttfamily "scan"}}
+{Minimum value of \parlink{sigma\_initial} for a scan. If \parlink{sigma\_initial\_N\_scan}$\le 1$, then \parlink{sigma\_initial} will be set to \parlink{sigma\_initial\_min} and no scan in this quantity will be performed.
+}
+
+\myhrule
+
+\param{sigma\_initial\_max}
+{double}
+{1.0}
+{Only when \parlink{general\_option}={\ttfamily "scan"}}
+{Maxmum value of \parlink{sigma\_initial} for a scan.
+}
+
+\myhrule
+
+\param{sigma\_initial\_N\_scan}
+{integer}
+{0}
+{Only when \parlink{general\_option}={\ttfamily "scan"}}
+{Number of values to consider for \parlink{sigma\_initial} in a scan. If {\ttfamily sigma\_initial\_N\_scan} $>1$, then \parlink{sigma\_initial} will be scanned with uniform spacing from \parlink{sigma\_initial\_min} to \parlink{sigma\_initial\_max}.
+If {\ttfamily sigma\_initial\_N\_scan} $\le 1$, then \parlink{sigma\_initial} will be set to \parlink{sigma\_initial\_min} and no scan in
+this quantity will be performed.
+}
+
+\myhrule
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5

@@ -79,22 +79,6 @@ subroutine quasisymmetry_solve
   Y1s = sign_G * curvature * ( B1c_over_B0 + B1s_over_B0 * sigma) / (B1c_over_B0*B1c_over_B0 + B1s_over_B0*B1s_over_B0);
   Y1c = sign_G * curvature * (-B1s_over_B0 + B1c_over_B0 * sigma) / (B1c_over_B0*B1c_over_B0 + B1s_over_B0*B1s_over_B0);
     
-!!$  R1c = (RZ_to_XY_d * (X1c * normal_cylindrical(:,1) + Y1c * binormal_cylindrical(:,1)) &
-!!$       - RZ_to_XY_b * (X1c * normal_cylindrical(:,3) + Y1c * binormal_cylindrical(:,3))) &
-!!$       / (RZ_to_XY_a * RZ_to_XY_d - RZ_to_XY_b * RZ_to_XY_b)
-!!$    
-!!$  Z1c = (-RZ_to_XY_b * (X1c * normal_cylindrical(:,1) + Y1c * binormal_cylindrical(:,1)) &
-!!$       + RZ_to_XY_a * (X1c * normal_cylindrical(:,3) + Y1c * binormal_cylindrical(:,3))) &
-!!$       / (RZ_to_XY_a * RZ_to_XY_d - RZ_to_XY_b * RZ_to_XY_b)
-!!$    
-!!$  R1s = (RZ_to_XY_d * (X1s * normal_cylindrical(:,1) + Y1s * binormal_cylindrical(:,1)) &
-!!$       - RZ_to_XY_b * (X1s * normal_cylindrical(:,3) + Y1s * binormal_cylindrical(:,3))) &
-!!$       / (RZ_to_XY_a * RZ_to_XY_d - RZ_to_XY_b * RZ_to_XY_b)
-!!$
-!!$  Z1s = (-RZ_to_XY_b * (X1s * normal_cylindrical(:,1) + Y1s * binormal_cylindrical(:,1)) &
-!!$       + RZ_to_XY_a * (X1s * normal_cylindrical(:,3) + Y1s * binormal_cylindrical(:,3))) &
-!!$       / (RZ_to_XY_a * RZ_to_XY_d - RZ_to_XY_b * RZ_to_XY_b)
-
   R1c = (-binormal_cylindrical(:,3) * X1c + normal_cylindrical(:,3) * Y1c) * d_l_d_phi / R0
   R1s = (-binormal_cylindrical(:,3) * X1s + normal_cylindrical(:,3) * Y1s) * d_l_d_phi / R0
   Z1c = ( binormal_cylindrical(:,1) * X1c - normal_cylindrical(:,1) * Y1c) * d_l_d_phi / R0

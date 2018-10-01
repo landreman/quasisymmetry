@@ -29,6 +29,7 @@ subroutine quasisymmetry_read_input
   end if
 
   output_filename = "quasisymmetry_out" // trim(input_filename(17:)) // ".nc"
+  new_vmec_filename = "input" // trim(input_filename(17:))
 
   fileUnit=11
   open(unit=fileUnit, file=input_filename, action="read", status="old", iostat=didFileAccessWork)

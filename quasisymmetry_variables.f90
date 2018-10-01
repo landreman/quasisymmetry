@@ -34,6 +34,7 @@ module quasisymmetry_variables
   integer :: nfp = 3
 
   integer :: sign_G = 1
+  integer :: sign_psi = 1
   real(dp) :: I2_over_B0 = 0
 
   integer :: N_iterations = 20
@@ -70,11 +71,13 @@ module quasisymmetry_variables
   real(dp), dimension(:,:), allocatable :: sin_n_phi, cos_n_phi
 
   character(len=200) :: output_filename
+  character(len=200) :: vmec_template_filename = ''
+  character(len=200) :: new_vmec_filename
 
   real(dp) :: total_time
 
   real(dp), dimension(max_axis_nmax+1) :: R0s_min, R0s_max, R0c_min, R0c_max, Z0s_min, Z0s_max, Z0c_min, Z0c_max
-  real(dp) :: B1s_min, B1s_max, B1c_min, B1c_max, sigma_initial_min, sigma_initial_max
+  real(dp) :: B1s_min = 1, B1s_max = 1, B1c_min = 1, B1c_max = 1, sigma_initial_min = 0, sigma_initial_max = 0
   integer, dimension(max_axis_nmax+1) :: R0s_N_scan=0, R0c_N_scan=0, Z0s_N_scan=0, Z0c_N_scan=0
   integer :: B1s_N_scan=0, B1c_N_scan=0, sigma_initial_N_scan=0
   integer :: N_scan
@@ -86,11 +89,12 @@ module quasisymmetry_variables
 
   real(dp), dimension(:), allocatable :: scan_B1c, scan_B1s, scan_sigma_initial
   real(dp), dimension(:,:), allocatable :: scan_R0c, scan_R0s, scan_Z0c, scan_Z0s
+  real(dp) :: r = 0.1d+0
 
   integer :: N_procs, mpi_rank
   logical :: proc0, verbose = .true.
 
-  namelist / quasisymmetry / resolution_option, general_option, verbose_option, nfp, sign_G, I2_over_B0, &
+  namelist / quasisymmetry / resolution_option, general_option, verbose_option, nfp, sign_G, sign_psi, I2_over_B0, vmec_template_filename, r, &
        N_iterations, N_line_search, Newton_tolerance, iota_tolerance, elongation_tolerance, max_precise_elongation, max_elongation_to_keep, N_phi, max_N_phi, &
        R0s, R0c, Z0s, Z0c, B1s_over_B0, B1c_over_B0, sigma_initial, B1c_scan_option, &
        R0s_min, R0s_max, R0s_N_scan, R0c_min, R0c_max, R0c_N_scan, Z0s_min, Z0s_max, Z0s_N_scan, Z0c_min, Z0c_max, Z0c_N_scan, &

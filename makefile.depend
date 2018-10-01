@@ -15,6 +15,7 @@ OBJ_FILES = quasisymmetry.o \
 	quasisymmetry_fmin.o \
 	quasisymmetry_scan.o \
 	quasisymmetry_determine_helicity.o \
+	quasisymmetry_write_vmec_input.o \
 	quasisymmetry_write_output.o
 
 # Dependencies:
@@ -33,4 +34,5 @@ quasisymmetry_differentiation_matrix.o:
 quasisymmetry_fmin.o:
 quasisymmetry_scan.o: quasisymmetry_variables.o
 quasisymmetry_determine_helicity.o: quasisymmetry_variables.o
+quasisymmetry_write_vmec_input.o: quasisymmetry_variables.o
 quasisymmetry_write_output.o: quasisymmetry_variables.o

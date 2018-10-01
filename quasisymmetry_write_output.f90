@@ -13,6 +13,8 @@ subroutine quasisymmetry_write_output
   ! Scalars:
   character(len=*), parameter :: &
        vn_nfp = "nfp", &
+       vn_sign_G = "sign_G", &
+       vn_sign_psi = "sign_psi", &
        vn_resolution_option = "resolution_option", &
        vn_B1s_min = "B1s_min", &
        vn_B1s_max = "B1s_max", &
@@ -100,6 +102,9 @@ subroutine quasisymmetry_write_output
   call cdf_setatt(ncid, vn_nfp, 'Number of field periods, i.e. the number of identical toroidal segments, 5 for W7-X, 4 for HSX, etc. ' // &
        'Equivalent to the VMEC variable of the same name.')
 
+  call cdf_define(ncid, vn_sign_G, sign_G)
+  call cdf_define(ncid, vn_sign_psi, sign_psi)
+
   call cdf_define(ncid, vn_resolution_option, resolution_option)
   !call cdf_setatt(ncid, vn_resolution_option, 'Method used to define the geometry of the plasma surface.' // input_parameter_text)
 
@@ -158,6 +163,8 @@ subroutine quasisymmetry_write_output
   ! Scalars
 
   call cdf_write(ncid, vn_nfp, nfp)
+  call cdf_write(ncid, vn_sign_G, sign_G)
+  call cdf_write(ncid, vn_sign_psi, sign_psi)
   call cdf_write(ncid, vn_resolution_option, resolution_option)
   call cdf_write(ncid, vn_B1s_min, B1s_min)
   call cdf_write(ncid, vn_B1s_max, B1s_max)
