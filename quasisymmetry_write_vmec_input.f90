@@ -41,8 +41,8 @@ subroutine quasisymmetry_write_vmec_input
   ! The output is not stellarator-symmetric if (1) R0s is nonzero, (2) Z0c is nonzero, or (3) sigma_initial is nonzero:
   lasym = (maxval(abs(R0s))>0 .or. maxval(abs(Z0c)) > 0 .or. abs(sigma_initial) > 0)
 
-  ! We should be able to resolve N_phi/2 modes (note integer division!), but in case N_phi is very large, don't attempt more than the vmec arrays can handle.
-  ntor = min(N_phi / 2, ntord)
+  ! We should be able to resolve (N_phi-1)/2 modes (note integer division!), but in case N_phi is very large, don't attempt more than the vmec arrays can handle.
+  ntor = min((N_phi - 1) / 2, ntord)
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Over-write vmec axis shape

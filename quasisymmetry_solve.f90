@@ -76,8 +76,10 @@ subroutine quasisymmetry_solve
   ! Now compute quantities that are derived from the solution:
 
 
-  Y1s = sign_G * curvature * ( B1c_over_B0 + B1s_over_B0 * sigma) / (B1c_over_B0*B1c_over_B0 + B1s_over_B0*B1s_over_B0);
-  Y1c = sign_G * curvature * (-B1s_over_B0 + B1c_over_B0 * sigma) / (B1c_over_B0*B1c_over_B0 + B1s_over_B0*B1s_over_B0);
+  !Y1s = sign_G * curvature * ( B1c_over_B0 + B1s_over_B0 * sigma) / (B1c_over_B0*B1c_over_B0 + B1s_over_B0*B1s_over_B0)
+  !Y1c = sign_G * curvature * (-B1s_over_B0 + B1c_over_B0 * sigma) / (B1c_over_B0*B1c_over_B0 + B1s_over_B0*B1s_over_B0)
+  Y1s = sign_G * curvature / eta_bar
+  Y1c = sign_G * curvature * sigma / eta_bar
     
   R1c = (-binormal_cylindrical(:,3) * X1c + normal_cylindrical(:,3) * Y1c) * d_l_d_phi / R0
   R1s = (-binormal_cylindrical(:,3) * X1s + normal_cylindrical(:,3) * Y1s) * d_l_d_phi / R0

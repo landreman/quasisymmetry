@@ -27,26 +27,27 @@
  !nfp = 3
  !R0c = 1 0.03
  !Z0s = 0 0.06
- !B1c_over_B0 = -1.0
+ !eta_bar = -1.0
 
  ! QA example for paper
  nfp = 3
  R0c = 1 0.045
  Z0s = 0 -0.045
- B1c_over_B0 = -0.90
+ eta_bar = -0.90
  sigma_initial = 0.0
 
  ! QH example:
  !nfp = 4
  !R0c = 1  0.17
  !Z0s = 0  0.14
- !B1c_over_B0 = 3.0
+ !eta_bar = 3.0
 
  ! QH example for paper
  !nfp = 4
- !R0c = 1  0.265
+ !!R0c = 1  0.265
+ !R0c = 1  0.27
  !Z0s = 0  -0.21
- !B1c_over_B0 = -2.25
+ !eta_bar = -2.25
 
  ! QA without stellarator symmetry example for paper
  !nfp = 3
@@ -54,8 +55,7 @@
  !Z0s = 0  -0.042
  !R0s = 0 0
  !Z0c = 0 -0.025
- !B1c_over_B0 = -0.95
- !B1s_over_B0 = 0.5
+ !eta_bar = -0.95
  !sigma_initial = 0
 
  ! Same QA without stellarator symmetry example for paper, but using constraint_option=2
@@ -64,8 +64,7 @@
  !Z0s = 0  -0.042
  !R0s = 0 0
  !Z0c = 0 -0.025
- !B1c_over_B0 = -1.07354552767919d+0
- !B1s_over_B0 = 0
+ !eta_bar = -1.07354552767919d+0
  !constraint_option = 2
  !sigma_initial = -6.327962586868797d-01
 
@@ -75,8 +74,7 @@
  !Z0s = 0  -0.042
  !R0s = 0 0
  !Z0c = 0 -0.025
- !B1c_over_B0 = -1.1d+0
- !!!B1s_over_B0 = 0
+ !eta_bar = -1.1d+0
  !!!constraint_option = 2
  !sigma_initial = -0.6d+0
 
@@ -84,9 +82,8 @@
  !nfp = 3
  !R0c = 1 0.042
  !Z0s = 0 0.042
- !!B1c_over_B0 = 1.4142135623731
- !B1c_over_B0 = 1
- !B1s_over_B0 = 1
+ !!eta_bar = 1.4142135623731
+ !eta_bar = 1
  !sigma_initial = 10
 
  ! Scan parameters:
@@ -111,15 +108,11 @@
  Z0c_max    = 0 0
  Z0c_N_scan = 0 0
 
- B1c_min    = 0.5
- B1c_max    = 2
- B1c_N_scan = 5
- !B1c_scan_option = "linear"
- B1c_scan_option = "log"
-
- B1s_min    = 0
- B1s_max    = 0
- B1s_N_scan = 0
+ eta_bar_min    = 0.5
+ eta_bar_max    = 2
+ eta_bar_N_scan = 5
+ !eta_bar_scan_option = "linear"
+ eta_bar_scan_option = "log"
 
  sigma_initial_min = 0
  sigma_initial_max = 0

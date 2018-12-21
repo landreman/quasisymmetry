@@ -6,7 +6,7 @@ subroutine quasisymmetry_scan
 
   include 'mpif.h'
 
-  integer :: j_scan, j_scan_local, j_Fourier_scan, j, k, N_Fourier_scan, j_B1s, j_B1c, j_sigma_initial, index
+  integer :: j_scan, j_scan_local, j_Fourier_scan, j, k, N_Fourier_scan, j_eta_bar, j_sigma_initial, index
   integer, dimension(max_axis_nmax+1, 4) :: scan_state
   integer :: ierr, tag, dummy(1), scan_index_min, scan_index_max, N_scan_local
   integer :: mpi_status(MPI_STATUS_SIZE)
@@ -16,7 +16,7 @@ subroutine quasisymmetry_scan
   integer, dimension(:), allocatable :: helicities_local
   logical, dimension(:), allocatable :: iota_tolerance_achieveds_local, elongation_tolerance_achieveds_local, Newton_tolerance_achieveds_local
   integer, dimension(:), allocatable :: N_solves_kept
-  real(dp), dimension(:), allocatable :: scan_B1c_local, scan_B1s_local, scan_sigma_initial_local
+  real(dp), dimension(:), allocatable :: scan_eta_bar_local, scan_sigma_initial_local
   real(dp), dimension(:,:), allocatable :: scan_R0c_local, scan_R0s_local, scan_Z0c_local, scan_Z0s_local
 
   ! Clean up scan arrays
@@ -31,27 +31,26 @@ subroutine quasisymmetry_scan
      N_scan_array(j,3) = max(Z0s_N_scan(j),1)
      N_scan_array(j,4) = max(Z0c_N_scan(j),1)
   end do
-  if (B1s_N_scan<1) B1s_N_scan = 1
-  if (B1c_N_scan<1) B1c_N_scan = 1
+  if (eta_bar_N_scan<1) eta_bar_N_scan = 1
   if (sigma_initial_N_scan<1) sigma_initial_N_scan = 1
 
-  allocate(B1c_values(B1c_N_scan))
-  do j_B1c = 1, B1c_N_scan
-     select case (trim(B1c_scan_option))
-     case (B1c_scan_option_linear)
-        B1c_values(j_B1c) = B1c_min + (B1c_max - B1c_min) * (j_B1c - 1) / max(B1c_N_scan - 1, 1)
-     case (B1c_scan_option_log)
-        B1c_values(j_B1c) = exp(log(B1c_min) + (log(B1c_max) - log(B1c_min)) * (j_B1c - 1) / max(B1c_N_scan - 1, 1))
+  allocate(eta_bar_values(eta_bar_N_scan))
+  do j_eta_bar = 1, eta_bar_N_scan
+     select case (trim(eta_bar_scan_option))
+     case (eta_bar_scan_option_linear)
+        eta_bar_values(j_eta_bar) = eta_bar_min + (eta_bar_max - eta_bar_min) * (j_eta_bar - 1) / max(eta_bar_N_scan - 1, 1)
+     case (eta_bar_scan_option_log)
+        eta_bar_values(j_eta_bar) = exp(log(eta_bar_min) + (log(eta_bar_max) - log(eta_bar_min)) * (j_eta_bar - 1) / max(eta_bar_N_scan - 1, 1))
      case default
-        print *,"Error! Invalid B1c_scan_option:", B1c_scan_option
+        print *,"Error! Invalid eta_bar_scan_option:", eta_bar_scan_option
         stop
      end select
   end do
-  if (proc0) print *,"B1c_values:",B1c_values
+  if (proc0) print *,"eta_bar_values:",eta_bar_values
 
-  !N_scan = product(R0s_N_scan)*product(R0c_N_scan)*product(Z0s_N_scan)*product(Z0c_N_scan)*product(B1s_N_scan)*product(B1c_N_scan)
+  !N_scan = product(R0s_N_scan)*product(R0c_N_scan)*product(Z0s_N_scan)*product(Z0c_N_scan)*product(eta_bar_N_scan)
   N_Fourier_scan = product(N_scan_array)
-  N_scan = N_Fourier_scan * B1s_N_scan * B1c_N_scan * sigma_initial_N_scan
+  N_scan = N_Fourier_scan * eta_bar_N_scan * sigma_initial_N_scan
   if (proc0) print *,"N_Fourier_scan:",N_Fourier_scan,"N_scan:",N_scan
 
   !print *,"N_procs=",N_procs, "  my_rank=",my_rank
@@ -101,8 +100,7 @@ subroutine quasisymmetry_scan
   allocate(elongation_tolerance_achieveds_local(N_scan_local))
   allocate(Newton_tolerance_achieveds_local(N_scan_local))
 
-  allocate(scan_B1c_local(N_scan_local))
-  allocate(scan_B1s_local(N_scan_local))
+  allocate(scan_eta_bar_local(N_scan_local))
   allocate(scan_sigma_initial_local(N_scan_local))
   allocate(scan_R0c_local(N_scan_local,max_axis_nmax+1))
   allocate(scan_R0s_local(N_scan_local,max_axis_nmax+1))
@@ -128,57 +126,53 @@ subroutine quasisymmetry_scan
 
      do j_sigma_initial = 1, sigma_initial_N_scan
         sigma_initial = sigma_initial_min + (sigma_initial_max - sigma_initial_min) * (j_sigma_initial - 1) / max(sigma_initial_N_scan - 1, 1)
-        do j_B1s = 1, B1s_N_scan
-           B1s_over_B0 = B1s_min + (B1s_max - B1s_min) * (j_B1s - 1) / max(B1s_N_scan - 1, 1)
-           do j_B1c = 1, B1c_N_scan
-              B1c_over_B0 = B1c_values(j_B1c)
-
-              j_scan = j_scan + 1
-
-              ! Only proceed on the appropriate proc
-              if (j_scan < scan_index_min) cycle
-              if (j_scan > scan_index_max) cycle  ! Could replace with goto?
-
-              if (verbose) then
-                 print "(a)"," ###################################################################################"
-                 print "(a,i7,a,i7)"," Scan case",j_scan," of",N_scan
-                 print *,"B1s =", B1s_over_B0, "   B1c =",B1c_over_B0
-                 print *,"sigma_initial = ",sigma_initial
-                 print *,"R0s:",R0s(1:axis_nmax+1)
-                 print *,"R0c:",R0c(1:axis_nmax+1)
-                 print *,"Z0s:",Z0s(1:axis_nmax+1)
-                 print *,"Z0c:",Z0c(1:axis_nmax+1)
-              end if
-              
-              if (trim(verbose_option)==verbose_option_summary .and. mod(j_scan - scan_index_min + 1,1000)==1) then
-                 print "(a,i4,a,i9,a,i9)", " Proc",mpi_rank,": solve",j_scan - scan_index_min + 1," of",N_scan_local
-              end if
-              
-              call quasisymmetry_single_solve()
-              if (max_elongation > max_elongation_to_keep) cycle
-              !if (abs(iota) < 1e-3) cycle
-
-              ! If we made it this far, then record the results
-              j_scan_local = j_scan_local + 1
-
-              scan_B1c_local(j_scan_local) = B1c_over_B0
-              scan_B1s_local(j_scan_local) = B1s_over_B0
-              scan_sigma_initial_local(j_scan_local) = sigma_initial
-              scan_R0c_local(j_scan_local,:) = R0c
-              scan_R0s_local(j_scan_local,:) = R0s
-              scan_Z0c_local(j_scan_local,:) = Z0c
-              scan_Z0s_local(j_scan_local,:) = Z0s
-
-              iotas_local(j_scan_local) = iota
-              max_elongations_local(j_scan_local) = max_elongation
-              helicities_local(j_scan_local) = helicity
-              iota_tolerance_achieveds_local(j_scan_local) = iota_tolerance_achieved
-              elongation_tolerance_achieveds_local(j_scan_local) = elongation_tolerance_achieved
-              Newton_tolerance_achieveds_local(j_scan_local) = Newton_tolerance_achieved
-           end do
+        do j_eta_bar = 1, eta_bar_N_scan
+           eta_bar = eta_bar_values(j_eta_bar)
+           
+           j_scan = j_scan + 1
+           
+           ! Only proceed on the appropriate proc
+           if (j_scan < scan_index_min) cycle
+           if (j_scan > scan_index_max) cycle  ! Could replace with goto?
+           
+           if (verbose) then
+              print "(a)"," ###################################################################################"
+              print "(a,i7,a,i7)"," Scan case",j_scan," of",N_scan
+              print *,"eta_bar =",eta_bar
+              print *,"sigma_initial = ",sigma_initial
+              print *,"R0s:",R0s(1:axis_nmax+1)
+              print *,"R0c:",R0c(1:axis_nmax+1)
+              print *,"Z0s:",Z0s(1:axis_nmax+1)
+              print *,"Z0c:",Z0c(1:axis_nmax+1)
+           end if
+           
+           if (trim(verbose_option)==verbose_option_summary .and. mod(j_scan - scan_index_min + 1,1000)==1) then
+              print "(a,i4,a,i9,a,i9)", " Proc",mpi_rank,": solve",j_scan - scan_index_min + 1," of",N_scan_local
+           end if
+           
+           call quasisymmetry_single_solve()
+           if (max_elongation > max_elongation_to_keep) cycle
+           !if (abs(iota) < 1e-3) cycle
+           
+           ! If we made it this far, then record the results
+           j_scan_local = j_scan_local + 1
+           
+           scan_eta_bar_local(j_scan_local) = eta_bar
+           scan_sigma_initial_local(j_scan_local) = sigma_initial
+           scan_R0c_local(j_scan_local,:) = R0c
+           scan_R0s_local(j_scan_local,:) = R0s
+           scan_Z0c_local(j_scan_local,:) = Z0c
+           scan_Z0s_local(j_scan_local,:) = Z0s
+           
+           iotas_local(j_scan_local) = iota
+           max_elongations_local(j_scan_local) = max_elongation
+           helicities_local(j_scan_local) = helicity
+           iota_tolerance_achieveds_local(j_scan_local) = iota_tolerance_achieved
+           elongation_tolerance_achieveds_local(j_scan_local) = elongation_tolerance_achieved
+           Newton_tolerance_achieveds_local(j_scan_local) = Newton_tolerance_achieved
         end do
      end do
-
+  
      ! Update scan state for the next solve
      k = 1
      !do k = 1,4
@@ -228,8 +222,7 @@ subroutine quasisymmetry_scan
      allocate(elongation_tolerance_achieveds(N_scan))
      allocate(Newton_tolerance_achieveds(N_scan))
 
-     allocate(scan_B1c(N_scan))
-     allocate(scan_B1s(N_scan))
+     allocate(scan_eta_bar(N_scan))
      allocate(scan_sigma_initial(N_scan))
      allocate(scan_R0c(N_scan,max_axis_nmax+1))
      allocate(scan_R0s(N_scan,max_axis_nmax+1))
@@ -244,8 +237,7 @@ subroutine quasisymmetry_scan
      elongation_tolerance_achieveds(1:N_solves_kept(1)) = elongation_tolerance_achieveds_local(1:N_solves_kept(1))
      Newton_tolerance_achieveds(1:N_solves_kept(1)) = Newton_tolerance_achieveds_local(1:N_solves_kept(1))
 
-     scan_B1c(1:N_solves_kept(1)) = scan_B1c_local(1:N_solves_kept(1))
-     scan_B1s(1:N_solves_kept(1)) = scan_B1s_local(1:N_solves_kept(1))
+     scan_eta_bar(1:N_solves_kept(1)) = scan_eta_bar_local(1:N_solves_kept(1))
      scan_sigma_initial(1:N_solves_kept(1)) = scan_sigma_initial_local(1:N_solves_kept(1))
      scan_R0c(1:N_solves_kept(1),:) = scan_R0c_local(1:N_solves_kept(1),:)
      scan_R0s(1:N_solves_kept(1),:) = scan_R0s_local(1:N_solves_kept(1),:)
@@ -262,8 +254,7 @@ subroutine quasisymmetry_scan
         call mpi_recv(iota_tolerance_achieveds(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(elongation_tolerance_achieveds(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
 
-        call mpi_recv(scan_B1c(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
-        call mpi_recv(scan_B1s(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(scan_eta_bar(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(scan_sigma_initial(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(scan_R0c(index:index+N_solves_kept(j+1)-1,:),N_solves_kept(j+1)*(max_axis_nmax+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(scan_R0s(index:index+N_solves_kept(j+1)-1,:),N_solves_kept(j+1)*(max_axis_nmax+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
@@ -291,8 +282,7 @@ subroutine quasisymmetry_scan
      call mpi_send(iota_tolerance_achieveds_local(1:j_scan_local),j_scan_local,MPI_LOGICAL,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(elongation_tolerance_achieveds_local(1:j_scan_local),j_scan_local,MPI_LOGICAL,0,mpi_rank,MPI_COMM_WORLD,ierr)
      
-     call mpi_send(scan_B1c_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
-     call mpi_send(scan_B1s_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(scan_eta_bar_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(scan_sigma_initial_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(scan_R0c_local(1:j_scan_local,:),j_scan_local*(max_axis_nmax+1),MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(scan_R0s_local(1:j_scan_local,:),j_scan_local*(max_axis_nmax+1),MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)

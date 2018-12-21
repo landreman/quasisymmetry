@@ -161,7 +161,8 @@ subroutine quasisymmetry_init_axis
   binormal_Cartesian(:,2) = binormal_cylindrical(:,1) * sinangle + binormal_cylindrical(:,2) * cosangle
   binormal_Cartesian(:,3) = binormal_cylindrical(:,3)
 
-  B1Squared_over_curvatureSquared = (B1s_over_B0*B1s_over_B0 + B1c_over_B0*B1c_over_B0) / (curvature * curvature)
+  !B1Squared_over_curvatureSquared = (B1s_over_B0*B1s_over_B0 + B1c_over_B0*B1c_over_B0) / (curvature * curvature)
+  B1Squared_over_curvatureSquared = eta_bar * eta_bar / (curvature * curvature)
 
   if (allocated(d_d_zeta)) deallocate(d_d_zeta)
   allocate(d_d_zeta(N_phi, N_phi))
@@ -169,8 +170,8 @@ subroutine quasisymmetry_init_axis
      d_d_zeta(j,:) = d_d_phi(j,:) / (B0_over_abs_G0 * d_l_d_phi(j))
   end do
 
-  X1s = B1s_over_B0 / curvature
-  X1c = B1c_over_B0 / curvature
+  X1s = 0
+  X1c = eta_bar / curvature
 
   deallocate(sinangle, cosangle)
   deallocate(d2_l_d_phi2, torsion_numerator, torsion_denominator)
