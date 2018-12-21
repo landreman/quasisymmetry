@@ -2,8 +2,8 @@
  !resolution_option = 'fixed'
  resolution_option = 'adaptive'
 
- general_option = 'single'
- !general_option = 'scan'
+ !general_option = 'single'
+ general_option = 'scan'
 
  verbose_option = 'all'
  !verbose_option = 'proc0'
@@ -115,6 +115,6 @@
  eta_bar_scan_option = "log"
 
  sigma_initial_min = 0
- sigma_initial_max = 0
- sigma_initial_N_scan = 0
+ sigma_initial_max = 0.3
+ sigma_initial_N_scan = 2
 /

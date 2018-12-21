@@ -34,6 +34,12 @@ subroutine quasisymmetry_scan
   if (eta_bar_N_scan<1) eta_bar_N_scan = 1
   if (sigma_initial_N_scan<1) sigma_initial_N_scan = 1
 
+  ! For now, assume sigma_initial values are linearly spaced. May want other options in the future.
+  allocate(sigma_initial_values(sigma_initial_N_scan))
+  do j_sigma_initial = 1, sigma_initial_N_scan
+     sigma_initial_values(j_sigma_initial) = sigma_initial_min + (sigma_initial_max - sigma_initial_min) * (j_sigma_initial - 1) / max(sigma_initial_N_scan - 1, 1)
+  end do
+
   allocate(eta_bar_values(eta_bar_N_scan))
   do j_eta_bar = 1, eta_bar_N_scan
      select case (trim(eta_bar_scan_option))
@@ -125,7 +131,7 @@ subroutine quasisymmetry_scan
      end do
 
      do j_sigma_initial = 1, sigma_initial_N_scan
-        sigma_initial = sigma_initial_min + (sigma_initial_max - sigma_initial_min) * (j_sigma_initial - 1) / max(sigma_initial_N_scan - 1, 1)
+        sigma_initial = sigma_initial_values(j_sigma_initial)
         do j_eta_bar = 1, eta_bar_N_scan
            eta_bar = eta_bar_values(j_eta_bar)
            

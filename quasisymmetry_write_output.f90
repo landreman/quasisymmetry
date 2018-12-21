@@ -16,6 +16,9 @@ subroutine quasisymmetry_write_output
        vn_sign_G = "sign_G", &
        vn_sign_psi = "sign_psi", &
        vn_resolution_option = "resolution_option", &
+       vn_sigma_initial_min = "sigma_initial_min", &
+       vn_sigma_initial_max = "sigma_initial_max", &
+       vn_sigma_initial_N_scan = "sigma_initial_N_scan", &
        vn_eta_bar_min = "eta_bar_min", &
        vn_eta_bar_max = "eta_bar_max", &
        vn_eta_bar_N_scan = "eta_bar_N_scan", &
@@ -44,6 +47,8 @@ subroutine quasisymmetry_write_output
        vn_Z0c_min = "Z0c_min", &
        vn_Z0c_max = "Z0c_max", &
        vn_Z0c_N_scan = "Z0c_N_scan", &
+       vn_scan_sigma_initial = "scan_sigma_initial", &
+       vn_sigma_initial_values = "sigma_initial_values", &
        vn_scan_eta_bar = "scan_eta_bar", &
        vn_eta_bar_values = "eta_bar_values"
 
@@ -67,6 +72,7 @@ subroutine quasisymmetry_write_output
   character(len=*), parameter, dimension(1) :: &
        N_scan_dim = (/'N_scan'/), &
        max_axis_nmax_plus_1_dim = (/'max_axis_nmax_plus_1'/), &
+       sigma_initial_N_scan_dim = (/'sigma_initial_N_scan'/), &
        eta_bar_N_scan_dim = (/'eta_bar_N_scan'/)
 
   ! Arrays with dimension 2:
@@ -104,6 +110,9 @@ subroutine quasisymmetry_write_output
   call cdf_define(ncid, vn_resolution_option, resolution_option)
   !call cdf_setatt(ncid, vn_resolution_option, 'Method used to define the geometry of the plasma surface.' // input_parameter_text)
 
+  call cdf_define(ncid, vn_sigma_initial_min, sigma_initial_min)
+  call cdf_define(ncid, vn_sigma_initial_max, sigma_initial_max)
+  call cdf_define(ncid, vn_sigma_initial_N_scan, sigma_initial_N_scan)
   call cdf_define(ncid, vn_eta_bar_min, eta_bar_min)
   call cdf_define(ncid, vn_eta_bar_max, eta_bar_max)
   call cdf_define(ncid, vn_eta_bar_N_scan, eta_bar_N_scan)
@@ -132,6 +141,8 @@ subroutine quasisymmetry_write_output
   call cdf_define(ncid, vn_Z0c_min, Z0c_min, dimname=max_axis_nmax_plus_1_dim)
   call cdf_define(ncid, vn_Z0c_max, Z0c_max, dimname=max_axis_nmax_plus_1_dim)
   call cdf_define(ncid, vn_Z0c_N_scan, Z0c_N_scan, dimname=max_axis_nmax_plus_1_dim)
+  call cdf_define(ncid, vn_scan_sigma_initial, scan_sigma_initial, dimname=N_scan_dim)
+  call cdf_define(ncid, vn_sigma_initial_values, sigma_initial_values, dimname=sigma_initial_N_scan_dim)
   call cdf_define(ncid, vn_scan_eta_bar, scan_eta_bar, dimname=N_scan_dim)
   call cdf_define(ncid, vn_eta_bar_values, eta_bar_values, dimname=eta_bar_N_scan_dim)
 
@@ -158,6 +169,9 @@ subroutine quasisymmetry_write_output
   call cdf_write(ncid, vn_sign_G, sign_G)
   call cdf_write(ncid, vn_sign_psi, sign_psi)
   call cdf_write(ncid, vn_resolution_option, resolution_option)
+  call cdf_write(ncid, vn_sigma_initial_min, sigma_initial_min)
+  call cdf_write(ncid, vn_sigma_initial_max, sigma_initial_max)
+  call cdf_write(ncid, vn_sigma_initial_N_scan, sigma_initial_N_scan)
   call cdf_write(ncid, vn_eta_bar_min, eta_bar_min)
   call cdf_write(ncid, vn_eta_bar_max, eta_bar_max)
   call cdf_write(ncid, vn_eta_bar_N_scan, eta_bar_N_scan)
@@ -186,6 +200,8 @@ subroutine quasisymmetry_write_output
   call cdf_write(ncid, vn_Z0c_min, Z0c_min)
   call cdf_write(ncid, vn_Z0c_max, Z0c_max)
   call cdf_write(ncid, vn_Z0c_N_scan, Z0c_N_scan)
+  call cdf_write(ncid, vn_scan_sigma_initial, scan_sigma_initial)
+  call cdf_write(ncid, vn_sigma_initial_values, sigma_initial_values)
   call cdf_write(ncid, vn_scan_eta_bar, scan_eta_bar)
   call cdf_write(ncid, vn_eta_bar_values, eta_bar_values)
 

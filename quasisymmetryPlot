@@ -18,8 +18,8 @@ f = netcdf.netcdf_file(filename,mode='r',mmap=False)
 iotas = f.variables['iotas'][()]
 max_elongations = f.variables['max_elongations'][()]
 helicities = f.variables['helicities'][()]
-scan_B1c = f.variables['scan_B1c'][()]
-scan_B1s = f.variables['scan_B1s'][()]
+scan_eta_bar = f.variables['scan_eta_bar'][()]
+scan_sigma_initial = f.variables['scan_sigma_initial'][()]
 scan_R0c = f.variables['scan_R0c'][()]
 scan_R0s = f.variables['scan_R0s'][()]
 scan_Z0c = f.variables['scan_Z0c'][()]
@@ -31,8 +31,8 @@ iotas = iotas[mask]
 print "Number of filtered scan entries:",len(iotas)
 max_elongations = max_elongations[mask]
 helicities = helicities[mask]
-scan_B1s = scan_B1s[mask]
-scan_B1c = scan_B1c[mask]
+scan_sigma_initial = scan_sigma_initial[mask]
+scan_eta_bar = scan_eta_bar[mask]
 scan_R0s = scan_R0s[:,mask]
 scan_R0c = scan_R0c[:,mask]
 scan_Z0s = scan_Z0s[:,mask]
@@ -72,12 +72,12 @@ plt.title('Color = helicity')
 
 ax = plt.subplot(numRows,numCols,plotNum)
 plotNum += 1
-scatterplot_handle = plt.scatter(np.abs(iotas), max_elongations,c=scan_B1c,s=4)
+scatterplot_handle = plt.scatter(np.abs(iotas), max_elongations,c=scan_eta_bar,s=4)
 plt.ylim([1,max_max_elongation])
 plt.xlabel('|iota|')
 plt.ylabel('max elongation')
 plt.colorbar()
-plt.title('Color = B1c')
+plt.title('Color = eta_bar')
 #plt.xlim(iota_range)
 
 for n in range(1,axis_nmax+1):
@@ -104,12 +104,12 @@ for n in range(1,axis_nmax+1):
 if False:
     plt.subplot(numRows,numCols,plotNum)
     plotNum += 1
-    plt.scatter(np.abs(iotas), max_elongations,c=scan_B1s,s=4)
+    plt.scatter(np.abs(iotas), max_elongations,c=scan_sigma_initial,s=4)
     plt.ylim([1,6])
     plt.xlabel('|iota|')
     plt.ylabel('max elongation')
     plt.colorbar()
-    plt.title('Color = B1s')
+    plt.title('Color = sigma_initial')
 
 plt.figtext(0.5,0.99,os.path.abspath(filename),va='top',ha='center',fontsize=7)
 plt.figtext(0.5,0.01,'Plotted by '+os.path.abspath(__file__),va='bottom',ha='center',fontsize=7)
@@ -127,8 +127,8 @@ def update_annot(ind):
     index = ind["ind"][0]
     pos = scatterplot_handle.get_offsets()[index]
     annot.xy = pos
-    text = "iota={:.2g}, elong={:.2g}\nindex={}, B1c={:.4g}, B1s={:.4g}\nR0c={}\nZ0s={}\nR0s={}\nZ0c={}".format( \
-        iotas[index], max_elongations[index], str(index),scan_B1c[index],scan_B1s[index], \
+    text = "iota={:.2g}, elong={:.2g}\nindex={}, eta_bar={:.4g}\nsigma_initial={:.4g}\nR0c={}\nZ0s={}\nR0s={}\nZ0c={}".format( \
+        iotas[index], max_elongations[index], str(index),scan_eta_bar[index],scan_sigma_initial[index], \
             ", ".join('{:.4g}'.format(k) for k in scan_R0c[:,index]), \
             ", ".join('{:.4g}'.format(k) for k in scan_Z0s[:,index]), \
             ", ".join('{:.4g}'.format(k) for k in scan_R0s[:,index]), \
