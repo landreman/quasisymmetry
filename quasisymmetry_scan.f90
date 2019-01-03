@@ -12,7 +12,7 @@ subroutine quasisymmetry_scan
   integer :: mpi_status(MPI_STATUS_SIZE)
   integer, parameter :: buffer_length = 100
   character(len=buffer_length) :: proc_assignments_string
-  real(dp), dimension(:), allocatable :: iotas_local, max_elongations_local
+  real(dp), dimension(:), allocatable :: iotas_local, max_elongations_local, rms_curvatures_local, max_curvatures_local, axis_lengths_local
   integer, dimension(:), allocatable :: helicities_local
   logical, dimension(:), allocatable :: iota_tolerance_achieveds_local, elongation_tolerance_achieveds_local, Newton_tolerance_achieveds_local
   integer, dimension(:), allocatable :: N_solves_kept
@@ -101,6 +101,9 @@ subroutine quasisymmetry_scan
 
   allocate(iotas_local(N_scan_local))
   allocate(max_elongations_local(N_scan_local))
+  allocate(rms_curvatures_local(N_scan_local))
+  allocate(max_curvatures_local(N_scan_local))
+  allocate(axis_lengths_local(N_scan_local))
   allocate(helicities_local(N_scan_local))
   allocate(iota_tolerance_achieveds_local(N_scan_local))
   allocate(elongation_tolerance_achieveds_local(N_scan_local))
@@ -108,10 +111,10 @@ subroutine quasisymmetry_scan
 
   allocate(scan_eta_bar_local(N_scan_local))
   allocate(scan_sigma_initial_local(N_scan_local))
-  allocate(scan_R0c_local(N_scan_local,max_axis_nmax+1))
-  allocate(scan_R0s_local(N_scan_local,max_axis_nmax+1))
-  allocate(scan_Z0c_local(N_scan_local,max_axis_nmax+1))
-  allocate(scan_Z0s_local(N_scan_local,max_axis_nmax+1))
+  allocate(scan_R0c_local(N_scan_local,axis_nmax+1))
+  allocate(scan_R0s_local(N_scan_local,axis_nmax+1))
+  allocate(scan_Z0c_local(N_scan_local,axis_nmax+1))
+  allocate(scan_Z0s_local(N_scan_local,axis_nmax+1))
 
   scan_state = 1
   j_scan = 0
@@ -165,13 +168,16 @@ subroutine quasisymmetry_scan
            
            scan_eta_bar_local(j_scan_local) = eta_bar
            scan_sigma_initial_local(j_scan_local) = sigma_initial
-           scan_R0c_local(j_scan_local,:) = R0c
-           scan_R0s_local(j_scan_local,:) = R0s
-           scan_Z0c_local(j_scan_local,:) = Z0c
-           scan_Z0s_local(j_scan_local,:) = Z0s
+           scan_R0c_local(j_scan_local,:) = R0c(1:axis_nmax+1)
+           scan_R0s_local(j_scan_local,:) = R0s(1:axis_nmax+1)
+           scan_Z0c_local(j_scan_local,:) = Z0c(1:axis_nmax+1)
+           scan_Z0s_local(j_scan_local,:) = Z0s(1:axis_nmax+1)
            
            iotas_local(j_scan_local) = iota
            max_elongations_local(j_scan_local) = max_elongation
+           rms_curvatures_local(j_scan_local) = rms_curvature
+           max_curvatures_local(j_scan_local) = max_curvature
+           axis_lengths_local(j_scan_local) = axis_length
            helicities_local(j_scan_local) = helicity
            iota_tolerance_achieveds_local(j_scan_local) = iota_tolerance_achieved
            elongation_tolerance_achieveds_local(j_scan_local) = elongation_tolerance_achieved
@@ -223,6 +229,9 @@ subroutine quasisymmetry_scan
      ! Now that we know the total number of runs that were kept, we can allocate the arrays for the final results:
      allocate(iotas(N_scan))
      allocate(max_elongations(N_scan))
+     allocate(rms_curvatures(N_scan))
+     allocate(max_curvatures(N_scan))
+     allocate(axis_lengths(N_scan))
      allocate(helicities(N_scan))
      allocate(iota_tolerance_achieveds(N_scan))
      allocate(elongation_tolerance_achieveds(N_scan))
@@ -230,14 +239,17 @@ subroutine quasisymmetry_scan
 
      allocate(scan_eta_bar(N_scan))
      allocate(scan_sigma_initial(N_scan))
-     allocate(scan_R0c(N_scan,max_axis_nmax+1))
-     allocate(scan_R0s(N_scan,max_axis_nmax+1))
-     allocate(scan_Z0c(N_scan,max_axis_nmax+1))
-     allocate(scan_Z0s(N_scan,max_axis_nmax+1))
+     allocate(scan_R0c(N_scan,axis_nmax+1))
+     allocate(scan_R0s(N_scan,axis_nmax+1))
+     allocate(scan_Z0c(N_scan,axis_nmax+1))
+     allocate(scan_Z0s(N_scan,axis_nmax+1))
 
      ! Store results from proc0 in the final arrays:
      iotas(1:N_solves_kept(1)) = iotas_local(1:N_solves_kept(1))
      max_elongations(1:N_solves_kept(1)) = max_elongations_local(1:N_solves_kept(1))
+     rms_curvatures(1:N_solves_kept(1)) = rms_curvatures_local(1:N_solves_kept(1))
+     max_curvatures(1:N_solves_kept(1)) = max_curvatures_local(1:N_solves_kept(1))
+     axis_lengths(1:N_solves_kept(1)) = axis_lengths_local(1:N_solves_kept(1))
      helicities(1:N_solves_kept(1)) = helicities_local(1:N_solves_kept(1))
      iota_tolerance_achieveds(1:N_solves_kept(1)) = iota_tolerance_achieveds_local(1:N_solves_kept(1))
      elongation_tolerance_achieveds(1:N_solves_kept(1)) = elongation_tolerance_achieveds_local(1:N_solves_kept(1))
@@ -255,6 +267,9 @@ subroutine quasisymmetry_scan
         print "(a,i8,a,i4)"," Proc 0 is receiving results from ",N_solves_kept(j+1)," solves from proc",j
         call mpi_recv(iotas(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(max_elongations(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(rms_curvatures(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(max_curvatures(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(axis_lengths(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(helicities(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(Newton_tolerance_achieveds(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(iota_tolerance_achieveds(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
@@ -262,10 +277,10 @@ subroutine quasisymmetry_scan
 
         call mpi_recv(scan_eta_bar(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(scan_sigma_initial(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
-        call mpi_recv(scan_R0c(index:index+N_solves_kept(j+1)-1,:),N_solves_kept(j+1)*(max_axis_nmax+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
-        call mpi_recv(scan_R0s(index:index+N_solves_kept(j+1)-1,:),N_solves_kept(j+1)*(max_axis_nmax+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
-        call mpi_recv(scan_Z0c(index:index+N_solves_kept(j+1)-1,:),N_solves_kept(j+1)*(max_axis_nmax+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
-        call mpi_recv(scan_Z0s(index:index+N_solves_kept(j+1)-1,:),N_solves_kept(j+1)*(max_axis_nmax+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(scan_R0c(index:index+N_solves_kept(j+1)-1,:),N_solves_kept(j+1)*(axis_nmax+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(scan_R0s(index:index+N_solves_kept(j+1)-1,:),N_solves_kept(j+1)*(axis_nmax+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(scan_Z0c(index:index+N_solves_kept(j+1)-1,:),N_solves_kept(j+1)*(axis_nmax+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(scan_Z0s(index:index+N_solves_kept(j+1)-1,:),N_solves_kept(j+1)*(axis_nmax+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         !do k = 1,max_axis_nmax+1
         !   call mpi_recv(scan_R0c(index:index+N_solves_kept(j+1)-1,k),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         !end do
@@ -283,6 +298,9 @@ subroutine quasisymmetry_scan
      ! Send the other results:
      call mpi_send(iotas_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(max_elongations_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(rms_curvatures_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(max_curvatures_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(axis_lengths_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(helicities_local(1:j_scan_local),j_scan_local,MPI_INT,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(Newton_tolerance_achieveds_local(1:j_scan_local),j_scan_local,MPI_LOGICAL,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(iota_tolerance_achieveds_local(1:j_scan_local),j_scan_local,MPI_LOGICAL,0,mpi_rank,MPI_COMM_WORLD,ierr)
@@ -290,10 +308,10 @@ subroutine quasisymmetry_scan
      
      call mpi_send(scan_eta_bar_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(scan_sigma_initial_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
-     call mpi_send(scan_R0c_local(1:j_scan_local,:),j_scan_local*(max_axis_nmax+1),MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
-     call mpi_send(scan_R0s_local(1:j_scan_local,:),j_scan_local*(max_axis_nmax+1),MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
-     call mpi_send(scan_Z0c_local(1:j_scan_local,:),j_scan_local*(max_axis_nmax+1),MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
-     call mpi_send(scan_Z0s_local(1:j_scan_local,:),j_scan_local*(max_axis_nmax+1),MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(scan_R0c_local(1:j_scan_local,:),j_scan_local*(axis_nmax+1),MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(scan_R0s_local(1:j_scan_local,:),j_scan_local*(axis_nmax+1),MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(scan_Z0c_local(1:j_scan_local,:),j_scan_local*(axis_nmax+1),MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(scan_Z0s_local(1:j_scan_local,:),j_scan_local*(axis_nmax+1),MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      !do k = 1,max_axis_nmax+1
      !   call mpi_send(scan_R0c_local(1:j_scan_local,k),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      !end do
@@ -306,6 +324,12 @@ subroutine quasisymmetry_scan
         print "(a,99999(f8.2))"," iotas:",iotas
         print *," "
         print "(a,99999(f8.1))"," elongations:",max_elongations
+        print *," "
+        print "(a,99999(f8.2))"," rms_curvatures:",rms_curvatures
+        print *," "
+        print "(a,99999(f8.2))"," max_curvatures:",max_curvatures
+        print *," "
+        print "(a,99999(f8.2))"," axis_lengths:",axis_lengths
         print *," "
         print "(a,99999(i2))","                     helicities:",helicities
         print *,"    Newton_tolerance_achieveds:",Newton_tolerance_achieveds

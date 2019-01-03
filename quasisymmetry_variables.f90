@@ -47,7 +47,7 @@ module quasisymmetry_variables
   integer :: N_phi_original
   integer :: max_N_phi = 100
 
-  integer, parameter :: max_axis_nmax = 1
+  integer, parameter :: max_axis_nmax = 5
   integer :: axis_nmax = 1
   real(dp), dimension(max_axis_nmax + 1) :: R0s, R0c, Z0s, Z0c ! Fourier coefficients for the magnetic axis
   real(dp) :: eta_bar
@@ -61,7 +61,7 @@ module quasisymmetry_variables
   real(dp), dimension(:,:), allocatable :: tangent_cylindrical, normal_cylindrical, binormal_cylindrical
   real(dp), dimension(:,:), allocatable :: tangent_Cartesian, normal_Cartesian, binormal_Cartesian
   real(dp), dimension(:), allocatable :: sigma, X1s, X1c, Y1s, Y1c, R1s, R1c, Z1s, Z1c, elongation
-  real(dp) :: B0_over_abs_G0, iota, max_elongation
+  real(dp) :: B0_over_abs_G0, iota, max_elongation, rms_curvature, max_curvature, axis_length
   real(dp) :: max_precise_elongation = 10 ! Above this value, we won't do a precise solve, just take maxval over the phi grid.
   real(dp) :: max_elongation_to_keep = 10 ! Discard solutions with max(elongation) higher than this value. Set to e.g. 1.0e200 to keep all solutions.
   real(dp), dimension(:,:), allocatable :: Jacobian
@@ -81,7 +81,7 @@ module quasisymmetry_variables
   integer, dimension(max_axis_nmax+1) :: R0s_N_scan=0, R0c_N_scan=0, Z0s_N_scan=0, Z0c_N_scan=0
   integer :: eta_bar_N_scan=0, sigma_initial_N_scan=0
   integer :: N_scan
-  real(dp), dimension(:), allocatable :: iotas, max_elongations, eta_bar_values, sigma_initial_values
+  real(dp), dimension(:), allocatable :: iotas, max_elongations, rms_curvatures, max_curvatures, axis_lengths, eta_bar_values, sigma_initial_values
   integer, dimension(:), allocatable :: helicities
   logical, dimension(:), allocatable :: iota_tolerance_achieveds, elongation_tolerance_achieveds, Newton_tolerance_achieveds
   logical :: iota_tolerance_achieved, elongation_tolerance_achieved, Newton_tolerance_achieved

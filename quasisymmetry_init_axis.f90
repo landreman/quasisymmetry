@@ -93,6 +93,7 @@ subroutine quasisymmetry_init_axis
   end do
 
   d_l_d_phi = sqrt(R0 * R0 + R0p * R0p + Z0p * Z0p)
+  axis_length = sum(d_l_d_phi) * d_phi * nfp
   d2_l_d_phi2 = (R0 * R0p + R0p * R0pp + Z0p * Z0pp) / d_l_d_phi
   B0_over_abs_G0 = N_phi / sum(d_l_d_phi)
 
@@ -121,6 +122,9 @@ subroutine quasisymmetry_init_axis
        d_tangent_d_l_cylindrical(:,1) * d_tangent_d_l_cylindrical(:,1) + &
        d_tangent_d_l_cylindrical(:,2) * d_tangent_d_l_cylindrical(:,2) + &
        d_tangent_d_l_cylindrical(:,3) * d_tangent_d_l_cylindrical(:,3))
+
+  rms_curvature = sqrt((sum(curvature * curvature) * d_phi * nfp) / axis_length)
+  max_curvature = maxval(curvature)
 
   do j = 1,3
      normal_cylindrical(:,j) = d_tangent_d_l_cylindrical(:,j) / curvature

@@ -31,6 +31,9 @@ subroutine quasisymmetry_write_output
   character(len=*), parameter :: &
        vn_iotas = "iotas", &
        vn_max_elongations = "max_elongations", &
+       vn_rms_curvatures = "rms_curvatures", &
+       vn_max_curvatures = "max_curvatures", &
+       vn_axis_lengths = "axis_lengths", &
        vn_helicities = "helicities", &
        vn_Newton_tolerance_achieveds = "Newton_tolerance_achieveds", &
        vn_iota_tolerance_achieveds = "iota_tolerance_achieveds", &
@@ -71,7 +74,7 @@ subroutine quasisymmetry_write_output
   ! Arrays with dimension 1:
   character(len=*), parameter, dimension(1) :: &
        N_scan_dim = (/'N_scan'/), &
-       max_axis_nmax_plus_1_dim = (/'max_axis_nmax_plus_1'/), &
+       axis_nmax_plus_1_dim = (/'axis_nmax_plus_1'/), &
        sigma_initial_N_scan_dim = (/'sigma_initial_N_scan'/), &
        eta_bar_N_scan_dim = (/'eta_bar_N_scan'/)
 
@@ -79,8 +82,8 @@ subroutine quasisymmetry_write_output
   ! The form of the array declarations here is inspired by
   ! http://stackoverflow.com/questions/21552430/gfortran-does-not-allow-character-arrays-with-varying-component-lengths
   character(len=*), parameter, dimension(2) :: &
-       max_axis_nmax_plus_1_4_dim = (/ character(len=50) :: 'max_axis_nmax_plus_1','4'/), &
-       N_scan_max_axis_nmax_plus_1_dim = (/ character(len=50) :: 'N_scan','max_axis_nmax_plus_1'/)
+       axis_nmax_plus_1_4_dim = (/ character(len=50) :: 'axis_nmax_plus_1','4'/), &
+       N_scan_axis_nmax_plus_1_dim = (/ character(len=50) :: 'N_scan','axis_nmax_plus_1'/)
 
 !!$  ! Arrays with dimension 3:
 !!$  character(len=*), parameter, dimension(3) :: &
@@ -125,22 +128,25 @@ subroutine quasisymmetry_write_output
 
   call cdf_define(ncid, vn_iotas, iotas, dimname=N_scan_dim)
   call cdf_define(ncid, vn_max_elongations, max_elongations, dimname=N_scan_dim)
+  call cdf_define(ncid, vn_rms_curvatures, rms_curvatures, dimname=N_scan_dim)
+  call cdf_define(ncid, vn_max_curvatures, max_curvatures, dimname=N_scan_dim)
+  call cdf_define(ncid, vn_axis_lengths, axis_lengths, dimname=N_scan_dim)
   call cdf_define(ncid, vn_helicities, helicities, dimname=N_scan_dim)
   call cdf_define(ncid, vn_Newton_tolerance_achieveds, Newton_tolerance_achieveds, dimname=N_scan_dim)
   call cdf_define(ncid, vn_iota_tolerance_achieveds, iota_tolerance_achieveds, dimname=N_scan_dim)
   call cdf_define(ncid, vn_elongation_tolerance_achieveds, elongation_tolerance_achieveds, dimname=N_scan_dim)
-  call cdf_define(ncid, vn_R0s_min, R0s_min, dimname=max_axis_nmax_plus_1_dim)
-  call cdf_define(ncid, vn_R0s_max, R0s_max, dimname=max_axis_nmax_plus_1_dim)
-  call cdf_define(ncid, vn_R0s_N_scan, R0s_N_scan, dimname=max_axis_nmax_plus_1_dim)
-  call cdf_define(ncid, vn_R0c_min, R0c_min, dimname=max_axis_nmax_plus_1_dim)
-  call cdf_define(ncid, vn_R0c_max, R0c_max, dimname=max_axis_nmax_plus_1_dim)
-  call cdf_define(ncid, vn_R0c_N_scan, R0c_N_scan, dimname=max_axis_nmax_plus_1_dim)
-  call cdf_define(ncid, vn_Z0s_min, Z0s_min, dimname=max_axis_nmax_plus_1_dim)
-  call cdf_define(ncid, vn_Z0s_max, Z0s_max, dimname=max_axis_nmax_plus_1_dim)
-  call cdf_define(ncid, vn_Z0s_N_scan, Z0s_N_scan, dimname=max_axis_nmax_plus_1_dim)
-  call cdf_define(ncid, vn_Z0c_min, Z0c_min, dimname=max_axis_nmax_plus_1_dim)
-  call cdf_define(ncid, vn_Z0c_max, Z0c_max, dimname=max_axis_nmax_plus_1_dim)
-  call cdf_define(ncid, vn_Z0c_N_scan, Z0c_N_scan, dimname=max_axis_nmax_plus_1_dim)
+  call cdf_define(ncid, vn_R0s_min, R0s_min(1:axis_nmax+1), dimname=axis_nmax_plus_1_dim)
+  call cdf_define(ncid, vn_R0s_max, R0s_max(1:axis_nmax+1), dimname=axis_nmax_plus_1_dim)
+  call cdf_define(ncid, vn_R0s_N_scan, R0s_N_scan(1:axis_nmax+1), dimname=axis_nmax_plus_1_dim)
+  call cdf_define(ncid, vn_R0c_min, R0c_min(1:axis_nmax+1), dimname=axis_nmax_plus_1_dim)
+  call cdf_define(ncid, vn_R0c_max, R0c_max(1:axis_nmax+1), dimname=axis_nmax_plus_1_dim)
+  call cdf_define(ncid, vn_R0c_N_scan, R0c_N_scan(1:axis_nmax+1), dimname=axis_nmax_plus_1_dim)
+  call cdf_define(ncid, vn_Z0s_min, Z0s_min(1:axis_nmax+1), dimname=axis_nmax_plus_1_dim)
+  call cdf_define(ncid, vn_Z0s_max, Z0s_max(1:axis_nmax+1), dimname=axis_nmax_plus_1_dim)
+  call cdf_define(ncid, vn_Z0s_N_scan, Z0s_N_scan(1:axis_nmax+1), dimname=axis_nmax_plus_1_dim)
+  call cdf_define(ncid, vn_Z0c_min, Z0c_min(1:axis_nmax+1), dimname=axis_nmax_plus_1_dim)
+  call cdf_define(ncid, vn_Z0c_max, Z0c_max(1:axis_nmax+1), dimname=axis_nmax_plus_1_dim)
+  call cdf_define(ncid, vn_Z0c_N_scan, Z0c_N_scan(1:axis_nmax+1), dimname=axis_nmax_plus_1_dim)
   call cdf_define(ncid, vn_scan_sigma_initial, scan_sigma_initial, dimname=N_scan_dim)
   call cdf_define(ncid, vn_sigma_initial_values, sigma_initial_values, dimname=sigma_initial_N_scan_dim)
   call cdf_define(ncid, vn_scan_eta_bar, scan_eta_bar, dimname=N_scan_dim)
@@ -149,11 +155,11 @@ subroutine quasisymmetry_write_output
 
   ! Arrays with dimension 2
 
-  call cdf_define(ncid, vn_N_scan_array,  N_scan_array, dimname=max_axis_nmax_plus_1_4_dim)
-  call cdf_define(ncid, vn_scan_R0c,  scan_R0c, dimname=N_scan_max_axis_nmax_plus_1_dim)
-  call cdf_define(ncid, vn_scan_R0s,  scan_R0s, dimname=N_scan_max_axis_nmax_plus_1_dim)
-  call cdf_define(ncid, vn_scan_Z0c,  scan_Z0c, dimname=N_scan_max_axis_nmax_plus_1_dim)
-  call cdf_define(ncid, vn_scan_Z0s,  scan_Z0s, dimname=N_scan_max_axis_nmax_plus_1_dim)
+  call cdf_define(ncid, vn_N_scan_array,  N_scan_array(1:axis_nmax+1,:), dimname=axis_nmax_plus_1_4_dim)
+  call cdf_define(ncid, vn_scan_R0c,  scan_R0c, dimname=N_scan_axis_nmax_plus_1_dim)
+  call cdf_define(ncid, vn_scan_R0s,  scan_R0s, dimname=N_scan_axis_nmax_plus_1_dim)
+  call cdf_define(ncid, vn_scan_Z0c,  scan_Z0c, dimname=N_scan_axis_nmax_plus_1_dim)
+  call cdf_define(ncid, vn_scan_Z0s,  scan_Z0s, dimname=N_scan_axis_nmax_plus_1_dim)
 
   ! Arrays with dimension 3
 
@@ -184,22 +190,25 @@ subroutine quasisymmetry_write_output
 
   call cdf_write(ncid, vn_iotas, iotas)
   call cdf_write(ncid, vn_max_elongations, max_elongations)
+  call cdf_write(ncid, vn_rms_curvatures, rms_curvatures)
+  call cdf_write(ncid, vn_max_curvatures, max_curvatures)
+  call cdf_write(ncid, vn_axis_lengths, axis_lengths)
   call cdf_write(ncid, vn_helicities, helicities)
   call cdf_write(ncid, vn_Newton_tolerance_achieveds, Newton_tolerance_achieveds)
   call cdf_write(ncid, vn_iota_tolerance_achieveds, iota_tolerance_achieveds)
   call cdf_write(ncid, vn_elongation_tolerance_achieveds, elongation_tolerance_achieveds)
-  call cdf_write(ncid, vn_R0s_min, R0s_min)
-  call cdf_write(ncid, vn_R0s_max, R0s_max)
-  call cdf_write(ncid, vn_R0s_N_scan, R0s_N_scan)
-  call cdf_write(ncid, vn_R0c_min, R0c_min)
-  call cdf_write(ncid, vn_R0c_max, R0c_max)
-  call cdf_write(ncid, vn_R0c_N_scan, R0c_N_scan)
-  call cdf_write(ncid, vn_Z0s_min, Z0s_min)
-  call cdf_write(ncid, vn_Z0s_max, Z0s_max)
-  call cdf_write(ncid, vn_Z0s_N_scan, Z0s_N_scan)
-  call cdf_write(ncid, vn_Z0c_min, Z0c_min)
-  call cdf_write(ncid, vn_Z0c_max, Z0c_max)
-  call cdf_write(ncid, vn_Z0c_N_scan, Z0c_N_scan)
+  call cdf_write(ncid, vn_R0s_min, R0s_min(1:axis_nmax+1))
+  call cdf_write(ncid, vn_R0s_max, R0s_max(1:axis_nmax+1))
+  call cdf_write(ncid, vn_R0s_N_scan, R0s_N_scan(1:axis_nmax+1))
+  call cdf_write(ncid, vn_R0c_min, R0c_min(1:axis_nmax+1))
+  call cdf_write(ncid, vn_R0c_max, R0c_max(1:axis_nmax+1))
+  call cdf_write(ncid, vn_R0c_N_scan, R0c_N_scan(1:axis_nmax+1))
+  call cdf_write(ncid, vn_Z0s_min, Z0s_min(1:axis_nmax+1))
+  call cdf_write(ncid, vn_Z0s_max, Z0s_max(1:axis_nmax+1))
+  call cdf_write(ncid, vn_Z0s_N_scan, Z0s_N_scan(1:axis_nmax+1))
+  call cdf_write(ncid, vn_Z0c_min, Z0c_min(1:axis_nmax+1))
+  call cdf_write(ncid, vn_Z0c_max, Z0c_max(1:axis_nmax+1))
+  call cdf_write(ncid, vn_Z0c_N_scan, Z0c_N_scan(1:axis_nmax+1))
   call cdf_write(ncid, vn_scan_sigma_initial, scan_sigma_initial)
   call cdf_write(ncid, vn_sigma_initial_values, sigma_initial_values)
   call cdf_write(ncid, vn_scan_eta_bar, scan_eta_bar)
@@ -207,7 +216,7 @@ subroutine quasisymmetry_write_output
 
   ! Arrays with dimension 2
 
-  call cdf_write(ncid, vn_N_scan_array,  N_scan_array)
+  call cdf_write(ncid, vn_N_scan_array,  N_scan_array(1:axis_nmax+1,:))
   call cdf_write(ncid, vn_scan_R0c,  scan_R0c)
   call cdf_write(ncid, vn_scan_R0s,  scan_R0s)
   call cdf_write(ncid, vn_scan_Z0c,  scan_Z0c)
