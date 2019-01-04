@@ -124,7 +124,8 @@ subroutine quasisymmetry_init_axis
        d_tangent_d_l_cylindrical(:,3) * d_tangent_d_l_cylindrical(:,3))
 
   rms_curvature = sqrt((sum(curvature * curvature) * d_phi * nfp) / axis_length)
-  max_curvature = maxval(curvature)
+  !max_curvature = maxval(curvature)
+  if (.not. already_found_max_curvature) call quasisymmetry_max_curvature()
 
   do j = 1,3
      normal_cylindrical(:,j) = d_tangent_d_l_cylindrical(:,j) / curvature

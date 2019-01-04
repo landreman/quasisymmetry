@@ -10,6 +10,7 @@ subroutine quasisymmetry_single_solve
   elongation_tolerance_achieved = .false.
   iteration = 0
   N_phi = N_phi_original
+  already_found_max_curvature = .false.
   do 
      iteration = iteration + 1
      if (verbose) then

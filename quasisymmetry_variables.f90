@@ -66,7 +66,7 @@ module quasisymmetry_variables
   real(dp) :: max_elongation_to_keep = 10 ! Discard solutions with max(elongation) higher than this value. Set to e.g. 1.0e200 to keep all solutions.
   real(dp), dimension(:,:), allocatable :: Jacobian
   real(dp), dimension(:), allocatable :: residual, step_direction
-
+  logical :: already_found_max_curvature
   integer :: dimension_Fourier = 0
   real(dp), dimension(:,:), allocatable :: sin_n_phi, cos_n_phi
 
