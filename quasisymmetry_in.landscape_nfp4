@@ -1,0 +1,86 @@
+&quasisymmetry 
+ !resolution_option = 'fixed'
+ resolution_option = 'adaptive'
+
+ !general_option = 'single'
+ general_option = 'scan'
+
+ !verbose_option = 'all'
+ !verbose_option = 'proc0'
+ verbose_option = 'summary'
+
+ N_phi = 15
+
+ max_N_phi = 1000
+
+ iota_tolerance =  0.001
+ elongation_tolerance = 0.001
+ Newton_tolerance = 1e-12
+
+ max_precise_elongation = 15
+
+ max_elongation_to_keep = 10
+
+ N_iterations = 10
+ N_line_search = 10
+
+ ! QA example:
+ !nfp = 3
+ !R0c = 1 0.03
+ !Z0s = 0 0.06
+ !eta_bar = -1.0
+
+ ! QA example:
+ !nfp = 3
+ !R0c = 1 0.045
+ !Z0s = 0 -0.045
+ !eta_bar = -0.90
+
+ ! QH example:
+ nfp = 4
+ R0c = 1  0.45
+ Z0s = 0  0.08
+ eta_bar = 1.5
+
+ !! Testing
+ !nfp = 3
+ !R0c = 1  0.9
+ !Z0s = 0  1.0
+ !eta_bar = -1
+
+ ! Scan parameters:
+
+ R0s_min    = 0 0
+ R0s_max    = 0 0
+ R0s_N_scan = 0 0
+
+ R0c_min    = 1 0
+ !R0c_max    = 1 0.8
+ !R0c_N_scan = 0 27
+ R0c_max    = 1 1.0
+ R0c_N_scan = 0 65
+
+ Z0s_min    = 0 0
+ !Z0s_max    = 0 0.6
+ !Z0s_N_scan = 0 25
+ Z0s_max    = 0 0.9
+ Z0s_N_scan = 0 64
+
+ Z0c_min    = 0 0
+ Z0c_max    = 0 0
+ Z0c_N_scan = 0 0
+
+ eta_bar_min    = 0.2
+ eta_bar_max    = 4.5
+ eta_bar_N_scan = 66 !28
+ !eta_bar_min    = 0.9
+ !eta_bar_max    = 1.0
+ !eta_bar_N_scan = 2
+ !eta_bar_scan_option = "linear"
+ eta_bar_scan_option = "log"
+
+
+ sigma_initial_min = 0
+ sigma_initial_max = 0
+ sigma_initial_N_scan = 0
+/

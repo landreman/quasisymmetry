@@ -88,7 +88,7 @@ subroutine quasisymmetry_solve
 
   call quasisymmetry_elongation()
 
-  call quasisymmetry_determine_helicity()
+  call quasisymmetry_determine_B_helicity()
 
   !print *,"elongation:"
   !print *,elongation

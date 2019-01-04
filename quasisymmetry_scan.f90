@@ -13,7 +13,7 @@ subroutine quasisymmetry_scan
   integer, parameter :: buffer_length = 100
   character(len=buffer_length) :: proc_assignments_string
   real(dp), dimension(:), allocatable :: iotas_local, max_elongations_local, rms_curvatures_local, max_curvatures_local, axis_lengths_local
-  integer, dimension(:), allocatable :: helicities_local
+  integer, dimension(:), allocatable :: axis_helicities_local, B_helicities_local
   logical, dimension(:), allocatable :: iota_tolerance_achieveds_local, elongation_tolerance_achieveds_local, Newton_tolerance_achieveds_local
   integer, dimension(:), allocatable :: N_solves_kept
   real(dp), dimension(:), allocatable :: scan_eta_bar_local, scan_sigma_initial_local
@@ -104,7 +104,8 @@ subroutine quasisymmetry_scan
   allocate(rms_curvatures_local(N_scan_local))
   allocate(max_curvatures_local(N_scan_local))
   allocate(axis_lengths_local(N_scan_local))
-  allocate(helicities_local(N_scan_local))
+  allocate(axis_helicities_local(N_scan_local))
+  allocate(B_helicities_local(N_scan_local))
   allocate(iota_tolerance_achieveds_local(N_scan_local))
   allocate(elongation_tolerance_achieveds_local(N_scan_local))
   allocate(Newton_tolerance_achieveds_local(N_scan_local))
@@ -178,7 +179,8 @@ subroutine quasisymmetry_scan
            rms_curvatures_local(j_scan_local) = rms_curvature
            max_curvatures_local(j_scan_local) = max_curvature
            axis_lengths_local(j_scan_local) = axis_length
-           helicities_local(j_scan_local) = helicity
+           axis_helicities_local(j_scan_local) = axis_helicity
+           B_helicities_local(j_scan_local) = B_helicity
            iota_tolerance_achieveds_local(j_scan_local) = iota_tolerance_achieved
            elongation_tolerance_achieveds_local(j_scan_local) = elongation_tolerance_achieved
            Newton_tolerance_achieveds_local(j_scan_local) = Newton_tolerance_achieved
@@ -232,7 +234,8 @@ subroutine quasisymmetry_scan
      allocate(rms_curvatures(N_scan))
      allocate(max_curvatures(N_scan))
      allocate(axis_lengths(N_scan))
-     allocate(helicities(N_scan))
+     allocate(axis_helicities(N_scan))
+     allocate(B_helicities(N_scan))
      allocate(iota_tolerance_achieveds(N_scan))
      allocate(elongation_tolerance_achieveds(N_scan))
      allocate(Newton_tolerance_achieveds(N_scan))
@@ -250,7 +253,8 @@ subroutine quasisymmetry_scan
      rms_curvatures(1:N_solves_kept(1)) = rms_curvatures_local(1:N_solves_kept(1))
      max_curvatures(1:N_solves_kept(1)) = max_curvatures_local(1:N_solves_kept(1))
      axis_lengths(1:N_solves_kept(1)) = axis_lengths_local(1:N_solves_kept(1))
-     helicities(1:N_solves_kept(1)) = helicities_local(1:N_solves_kept(1))
+     axis_helicities(1:N_solves_kept(1)) = axis_helicities_local(1:N_solves_kept(1))
+     B_helicities(1:N_solves_kept(1)) = B_helicities_local(1:N_solves_kept(1))
      iota_tolerance_achieveds(1:N_solves_kept(1)) = iota_tolerance_achieveds_local(1:N_solves_kept(1))
      elongation_tolerance_achieveds(1:N_solves_kept(1)) = elongation_tolerance_achieveds_local(1:N_solves_kept(1))
      Newton_tolerance_achieveds(1:N_solves_kept(1)) = Newton_tolerance_achieveds_local(1:N_solves_kept(1))
@@ -270,7 +274,8 @@ subroutine quasisymmetry_scan
         call mpi_recv(rms_curvatures(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(max_curvatures(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(axis_lengths(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
-        call mpi_recv(helicities(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(axis_helicities(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(B_helicities(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(Newton_tolerance_achieveds(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(iota_tolerance_achieveds(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(elongation_tolerance_achieveds(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
@@ -301,7 +306,8 @@ subroutine quasisymmetry_scan
      call mpi_send(rms_curvatures_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(max_curvatures_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(axis_lengths_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
-     call mpi_send(helicities_local(1:j_scan_local),j_scan_local,MPI_INT,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(axis_helicities_local(1:j_scan_local),j_scan_local,MPI_INT,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(B_helicities_local(1:j_scan_local),j_scan_local,MPI_INT,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(Newton_tolerance_achieveds_local(1:j_scan_local),j_scan_local,MPI_LOGICAL,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(iota_tolerance_achieveds_local(1:j_scan_local),j_scan_local,MPI_LOGICAL,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(elongation_tolerance_achieveds_local(1:j_scan_local),j_scan_local,MPI_LOGICAL,0,mpi_rank,MPI_COMM_WORLD,ierr)
@@ -331,7 +337,9 @@ subroutine quasisymmetry_scan
         print *," "
         print "(a,99999(f8.2))"," axis_lengths:",axis_lengths
         print *," "
-        print "(a,99999(i2))","                     helicities:",helicities
+        print "(a,99999(i2))","                axis_helicities:",axis_helicities
+        print "(a,99999(i2))","                   B_helicities:",B_helicities
+        print *," axis_helicities==B_helicities:",B_helicities==axis_helicities
         print *,"    Newton_tolerance_achieveds:",Newton_tolerance_achieveds
         print *,"      iota_tolerance_achieveds:",iota_tolerance_achieveds
         print *,"elongation_tolerance_achieveds:",elongation_tolerance_achieveds

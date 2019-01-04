@@ -181,5 +181,6 @@ subroutine quasisymmetry_init_axis
   deallocate(d2_l_d_phi2, torsion_numerator, torsion_denominator)
   deallocate(d_r_d_phi_cylindrical, d2_r_d_phi2_cylindrical, d3_r_d_phi3_cylindrical)
 
+  call quasisymmetry_determine_axis_helicity()
 
 end subroutine quasisymmetry_init_axis

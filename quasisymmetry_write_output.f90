@@ -34,7 +34,8 @@ subroutine quasisymmetry_write_output
        vn_rms_curvatures = "rms_curvatures", &
        vn_max_curvatures = "max_curvatures", &
        vn_axis_lengths = "axis_lengths", &
-       vn_helicities = "helicities", &
+       vn_axis_helicities = "axis_helicities", &
+       vn_B_helicities = "B_helicities", &
        vn_Newton_tolerance_achieveds = "Newton_tolerance_achieveds", &
        vn_iota_tolerance_achieveds = "iota_tolerance_achieveds", &
        vn_elongation_tolerance_achieveds = "elongation_tolerance_achieveds", &
@@ -131,7 +132,8 @@ subroutine quasisymmetry_write_output
   call cdf_define(ncid, vn_rms_curvatures, rms_curvatures, dimname=N_scan_dim)
   call cdf_define(ncid, vn_max_curvatures, max_curvatures, dimname=N_scan_dim)
   call cdf_define(ncid, vn_axis_lengths, axis_lengths, dimname=N_scan_dim)
-  call cdf_define(ncid, vn_helicities, helicities, dimname=N_scan_dim)
+  call cdf_define(ncid, vn_axis_helicities, axis_helicities, dimname=N_scan_dim)
+  call cdf_define(ncid, vn_B_helicities, B_helicities, dimname=N_scan_dim)
   call cdf_define(ncid, vn_Newton_tolerance_achieveds, Newton_tolerance_achieveds, dimname=N_scan_dim)
   call cdf_define(ncid, vn_iota_tolerance_achieveds, iota_tolerance_achieveds, dimname=N_scan_dim)
   call cdf_define(ncid, vn_elongation_tolerance_achieveds, elongation_tolerance_achieveds, dimname=N_scan_dim)
@@ -193,7 +195,8 @@ subroutine quasisymmetry_write_output
   call cdf_write(ncid, vn_rms_curvatures, rms_curvatures)
   call cdf_write(ncid, vn_max_curvatures, max_curvatures)
   call cdf_write(ncid, vn_axis_lengths, axis_lengths)
-  call cdf_write(ncid, vn_helicities, helicities)
+  call cdf_write(ncid, vn_axis_helicities, axis_helicities)
+  call cdf_write(ncid, vn_B_helicities, B_helicities)
   call cdf_write(ncid, vn_Newton_tolerance_achieveds, Newton_tolerance_achieveds)
   call cdf_write(ncid, vn_iota_tolerance_achieveds, iota_tolerance_achieveds)
   call cdf_write(ncid, vn_elongation_tolerance_achieveds, elongation_tolerance_achieveds)
