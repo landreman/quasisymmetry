@@ -68,7 +68,7 @@ subroutine quasisymmetry_solve
      end do line_search
 
      if (residual_norm > last_residual_norm) then
-        print *,"Line search failed to reduce residual."
+        if (verbose) print *,"Line search failed to reduce residual."
         exit Newton
      end if
   end do Newton

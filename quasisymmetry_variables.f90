@@ -26,8 +26,15 @@ module quasisymmetry_variables
 
   character(len=*), parameter :: &
        eta_bar_scan_option_linear = "linear", &
-       eta_bar_scan_option_log = "log"
+       eta_bar_scan_option_log = "log", &
+       eta_bar_scan_option_2_sided_log = "2_sided_log"
   character(len=50) :: eta_bar_scan_option = eta_bar_scan_option_linear
+
+  character(len=*), parameter :: &
+       sigma_initial_scan_option_linear = "linear", &
+       sigma_initial_scan_option_log = "log", &
+       sigma_initial_scan_option_2_sided_log = "2_sided_log"
+  character(len=50) :: sigma_initial_scan_option = sigma_initial_scan_option_linear
 
   real(dp) :: sigma_initial = 0
 
@@ -52,7 +59,7 @@ module quasisymmetry_variables
   real(dp), dimension(max_axis_nmax + 1) :: R0s, R0c, Z0s, Z0c ! Fourier coefficients for the magnetic axis
   real(dp) :: eta_bar
 
-  integer :: matrix_size, axis_helicity, B_helicity
+  integer :: matrix_size, axis_helicity, B_helicity, effective_nfp
   real(dp) :: last_iota, last_max_elongation, d_phi
   real(dp), dimension(:,:), allocatable :: d_d_phi, d_d_zeta
   real(dp), dimension(:), allocatable :: phi_extended, R0_extended, Z0_extended
@@ -67,6 +74,7 @@ module quasisymmetry_variables
   real(dp), dimension(:,:), allocatable :: Jacobian
   real(dp), dimension(:), allocatable :: residual, step_direction
   logical :: already_found_max_curvature, skipped_solve
+  logical :: consider_only_nfp = .false.
   integer :: dimension_Fourier = 0
   real(dp), dimension(:,:), allocatable :: sin_n_phi, cos_n_phi
 
@@ -82,7 +90,7 @@ module quasisymmetry_variables
   integer :: eta_bar_N_scan=0, sigma_initial_N_scan=0
   integer :: N_scan
   real(dp), dimension(:), allocatable :: iotas, max_elongations, rms_curvatures, max_curvatures, axis_lengths, eta_bar_values, sigma_initial_values
-  integer, dimension(:), allocatable :: axis_helicities, B_helicities
+  integer, dimension(:), allocatable :: axis_helicities, B_helicities, effective_nfps
   logical, dimension(:), allocatable :: iota_tolerance_achieveds, elongation_tolerance_achieveds, Newton_tolerance_achieveds
   logical :: iota_tolerance_achieved, elongation_tolerance_achieved, Newton_tolerance_achieved
   integer, dimension(max_axis_nmax+1, 4) :: N_scan_array
@@ -96,7 +104,7 @@ module quasisymmetry_variables
 
   namelist / quasisymmetry / resolution_option, general_option, verbose_option, nfp, sign_G, sign_psi, I2_over_B0, vmec_template_filename, r, &
        N_iterations, N_line_search, Newton_tolerance, iota_tolerance, elongation_tolerance, max_precise_elongation, max_elongation_to_keep, N_phi, max_N_phi, &
-       R0s, R0c, Z0s, Z0c, eta_bar, sigma_initial, eta_bar_scan_option, &
+       R0s, R0c, Z0s, Z0c, eta_bar, sigma_initial, eta_bar_scan_option, sigma_initial_scan_option, consider_only_nfp, &
        R0s_min, R0s_max, R0s_N_scan, R0c_min, R0c_max, R0c_N_scan, Z0s_min, Z0s_max, Z0s_N_scan, Z0c_min, Z0c_max, Z0c_N_scan, &
        eta_bar_min, eta_bar_max, eta_bar_N_scan, sigma_initial_min, sigma_initial_max, sigma_initial_N_scan
 

@@ -144,6 +144,14 @@ Note that when \parlink{general\_option}={\ttfamily "scan"}, the code overwrites
 
 \section{Specifying a scan over axis shapes}
 
+\param{consider\_only\_nfp}
+{logical}
+{{\ttfamily .false.}}
+{Only when \parlink{general\_option}={\ttfamily "scan"}}
+{If true, axis shapes will be skipped in a scan if they really correspond to a different number of field periods than the specified \parlink{nfp}. For instance, if all the odd $n$ Fourier modes in the axis shape have amplitude 0, then really the number of field periods is $2\times$ \parlink{nfp} rather than \parlink{nfp}, so such a case would be skipped.}
+
+\myhrule
+
 \param{R0c\_min}
 {double array}
 {[0,0,...]}
@@ -291,6 +299,8 @@ this quantity will be performed.
 
 {\ttfamily eta\_bar\_scan\_option} = {\ttfamily "log"}: Use logarithmic spacing.\\
 
+{\ttfamily eta\_bar\_scan\_option} = {\ttfamily "2\_sided\_log"}: Use logarithmic spacing, and also include $(-1)\times$ the values. A value at 0 will not be included. For this option, \parlink{eta\_bar\_N\_scan} must be even.
+
 }
 
 \myhrule
@@ -320,6 +330,22 @@ this quantity will be performed.
 {Number of values to consider for \parlink{sigma\_initial} in a scan. If {\ttfamily sigma\_initial\_N\_scan} $>1$, then \parlink{sigma\_initial} will be scanned with uniform spacing from \parlink{sigma\_initial\_min} to \parlink{sigma\_initial\_max}.
 If {\ttfamily sigma\_initial\_N\_scan} $\le 1$, then \parlink{sigma\_initial} will be set to \parlink{sigma\_initial\_min} and no scan in
 this quantity will be performed.
+}
+
+\myhrule
+
+\param{sigma\_initial\_scan\_option}
+{string}
+{{\ttfamily "linear"}}
+{Always}
+{Determines the spacing of values of \parlink{sigma\_initial} in a scan.\\
+
+{\ttfamily sigma\_initial\_scan\_option} = {\ttfamily "linear"}: Use uniform linear spacing.\\
+
+{\ttfamily sigma\_initial\_scan\_option} = {\ttfamily "log"}: Use logarithmic spacing.\\
+
+{\ttfamily sigma\_initial\_scan\_option} = {\ttfamily "2\_sided\_log"}: Use logarithmic spacing, and also include $(-1)\times$ the values. A value at 0 will also be included. For this option, \parlink{sigma\_initial\_N\_scan} must be odd.
+
 }
 
 \myhrule

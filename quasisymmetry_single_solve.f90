@@ -4,6 +4,7 @@ subroutine quasisymmetry_single_solve
 
   implicit none
 
+  real(dp) :: x
   integer :: iteration, new_N_phi
 
   iota_tolerance_achieved = .false.
@@ -12,6 +13,19 @@ subroutine quasisymmetry_single_solve
   N_phi = N_phi_original
   already_found_max_curvature = .false.
   skipped_solve = .false.
+
+  if (sum(R0c) <= 1.0e-10) then
+     if (verbose) print *,"R0 will be <= 0 at phi=0, so skipping solve."
+     skipped_solve = .true.
+     return
+  end if
+
+  if (sum(R0c(1::2)) - sum(R0c(2::2)) <= 1.0e-10) then
+     if (verbose) print *,"R0 will be <= 0 at phi=pi/nfp, so skipping solve."
+     skipped_solve = .true.
+     return
+  end if
+
   do 
      iteration = iteration + 1
      if (verbose) then
