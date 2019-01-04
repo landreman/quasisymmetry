@@ -162,6 +162,7 @@ subroutine quasisymmetry_scan
            
            call quasisymmetry_single_solve()
            if (max_elongation > max_elongation_to_keep) cycle
+           if (skipped_solve) cycle ! In case R0 <= 0 or some other reason caused quasisymmetry_single_solve to exit prematurely.
            !if (abs(iota) < 1e-3) cycle
            
            ! If we made it this far, then record the results

@@ -11,6 +11,7 @@ subroutine quasisymmetry_single_solve
   iteration = 0
   N_phi = N_phi_original
   already_found_max_curvature = .false.
+  skipped_solve = .false.
   do 
      iteration = iteration + 1
      if (verbose) then
@@ -21,6 +22,12 @@ subroutine quasisymmetry_single_solve
      call quasisymmetry_init_phi()
 
      call quasisymmetry_init_axis()
+
+     if (any(R0 < 1.0d-10)) then
+        if (verbose) print *,"R0 is <= 0, so skipping solve."
+        skipped_solve = .true.
+        exit
+     end if
 
      call quasisymmetry_solve()
 

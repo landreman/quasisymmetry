@@ -45,7 +45,7 @@ module quasisymmetry_variables
 
   integer :: N_phi = 15
   integer :: N_phi_original
-  integer :: max_N_phi = 100
+  integer :: max_N_phi = 500
 
   integer, parameter :: max_axis_nmax = 5
   integer :: axis_nmax = 1
@@ -66,7 +66,7 @@ module quasisymmetry_variables
   real(dp) :: max_elongation_to_keep = 10 ! Discard solutions with max(elongation) higher than this value. Set to e.g. 1.0e200 to keep all solutions.
   real(dp), dimension(:,:), allocatable :: Jacobian
   real(dp), dimension(:), allocatable :: residual, step_direction
-  logical :: already_found_max_curvature
+  logical :: already_found_max_curvature, skipped_solve
   integer :: dimension_Fourier = 0
   real(dp), dimension(:,:), allocatable :: sin_n_phi, cos_n_phi
 
