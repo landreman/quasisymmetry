@@ -263,7 +263,7 @@ Note that when \parlink{general\_option}={\ttfamily "scan"}, the code overwrites
 \param{Fourier\_scan\_option}
 {string}
 {{\ttfamily "linear"}}
-{Always}
+{Only when \parlink{general\_option}={\ttfamily ``scan''}}
 {Determines the spacing of values of \parlink{R0s}, \parlink{R0c}, \parlink{Z0s}, and \parlink{Z0c} in a scan.\\
 
 {\ttfamily Fourier\_scan\_option} = {\ttfamily "linear"}: Use uniform linear spacing.\\
@@ -308,7 +308,7 @@ this quantity will be performed.
 \param{eta\_bar\_scan\_option}
 {string}
 {{\ttfamily "linear"}}
-{Always}
+{Only when \parlink{general\_option}={\ttfamily ``scan''}}
 {Determines the spacing of values of \parlink{eta\_bar} in a scan.\\
 
 {\ttfamily eta\_bar\_scan\_option} = {\ttfamily "linear"}: Use uniform linear spacing.\\
@@ -353,7 +353,7 @@ this quantity will be performed.
 \param{sigma\_initial\_scan\_option}
 {string}
 {{\ttfamily "linear"}}
-{Always}
+{Only when \parlink{general\_option}={\ttfamily ``scan''}}
 {Determines the spacing of values of \parlink{sigma\_initial} in a scan.\\
 
 {\ttfamily sigma\_initial\_scan\_option} = {\ttfamily "linear"}: Use uniform linear spacing.\\
@@ -362,6 +362,24 @@ this quantity will be performed.
 
 {\ttfamily sigma\_initial\_scan\_option} = {\ttfamily "2\_sided\_log"}: Use logarithmic spacing, and also include $(-1)\times$ the values. A value at 0 will also be included. For this option, \parlink{sigma\_initial\_N\_scan} must be odd.
 
+}
+
+\myhrule
+
+\param{max\_max\_curvature\_to\_keep}
+{double}
+{2.0}
+{Only when \parlink{general\_option}={\ttfamily ``scan''}}
+{If the curvature of the axis exceeds this value, this configuration will not be saved in the output file.
+}
+
+\myhrule
+
+\param{min\_iota\_to\_keep}
+{double}
+{0.05}
+{Only when \parlink{general\_option}={\ttfamily ``scan''}}
+{If the absolute value of the rotational transform is smaller than this value, this configuration will not be saved in the output file.
 }
 
 \myhrule

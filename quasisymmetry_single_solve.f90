@@ -43,6 +43,12 @@ subroutine quasisymmetry_single_solve
         exit
      end if
 
+     if (max_curvature > max_max_curvature_to_keep) then
+        if (verbose) print *,"max_curvature > max_max_curvature_to_keep, so skipping solve."
+        skipped_solve = .true.
+        exit
+     end if
+
      call quasisymmetry_solve()
 
      if (trim(resolution_option) == resolution_option_fixed) exit

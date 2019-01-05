@@ -59,10 +59,12 @@ module quasisymmetry_variables
   integer :: N_phi_original
   integer :: max_N_phi = 500
 
-  integer, parameter :: max_axis_nmax = 5
+  integer, parameter :: max_axis_nmax = 20
   integer :: axis_nmax = 1
   real(dp), dimension(max_axis_nmax + 1) :: R0s, R0c, Z0s, Z0c ! Fourier coefficients for the magnetic axis
   real(dp) :: eta_bar
+  real(dp) :: max_max_curvature_to_keep = 5.0d+0
+  real(dp) :: min_iota_to_keep = 0.05d+0
 
   integer :: matrix_size, axis_helicity, B_helicity, effective_nfp
   real(dp) :: last_iota, last_max_elongation, d_phi
@@ -93,7 +95,7 @@ module quasisymmetry_variables
   real(dp) :: eta_bar_min = 1, eta_bar_max = 1, sigma_initial_min = 0, sigma_initial_max = 0
   integer, dimension(max_axis_nmax+1) :: R0s_N_scan=0, R0c_N_scan=0, Z0s_N_scan=0, Z0c_N_scan=0
   integer :: eta_bar_N_scan=0, sigma_initial_N_scan=0
-  integer*16 :: N_scan
+  integer*8 :: N_scan
   real(dp), dimension(:), allocatable :: iotas, max_elongations, rms_curvatures, max_curvatures, axis_lengths, eta_bar_values, sigma_initial_values
   integer, dimension(:), allocatable :: axis_helicities, B_helicities, effective_nfps
   logical, dimension(:), allocatable :: iota_tolerance_achieveds, elongation_tolerance_achieveds, Newton_tolerance_achieveds
@@ -111,7 +113,7 @@ module quasisymmetry_variables
        N_iterations, N_line_search, Newton_tolerance, iota_tolerance, elongation_tolerance, max_precise_elongation, max_elongation_to_keep, N_phi, max_N_phi, &
        R0s, R0c, Z0s, Z0c, eta_bar, sigma_initial, eta_bar_scan_option, sigma_initial_scan_option, Fourier_scan_option, consider_only_nfp, &
        R0s_min, R0s_max, R0s_N_scan, R0c_min, R0c_max, R0c_N_scan, Z0s_min, Z0s_max, Z0s_N_scan, Z0c_min, Z0c_max, Z0c_N_scan, &
-       eta_bar_min, eta_bar_max, eta_bar_N_scan, sigma_initial_min, sigma_initial_max, sigma_initial_N_scan
+       eta_bar_min, eta_bar_max, eta_bar_N_scan, sigma_initial_min, sigma_initial_max, sigma_initial_N_scan, max_max_curvature_to_keep, min_iota_to_keep
 
 end module quasisymmetry_variables
 

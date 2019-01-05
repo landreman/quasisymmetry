@@ -22,7 +22,8 @@ subroutine quasisymmetry_max_curvature
      print *,"max curvature from fmin:",max_curvature
   end if
   if (maxval_curvature > max_curvature * (1 + 1.0d-10)) then
-     print *,"Error! Something went wrong with the max_curvature search."
+     print *,"Error! Something went wrong with the max_curvature search. maxval_curvature=",maxval_curvature,", max_curvature=",max_curvature,", curvature=",curvature
+     max_curvature = maxval_curvature ! Use the bigger number, going forward.
      if (maxval_curvature < 1000) stop ! If the curvature is larger than this, we don't care about the solution much, so don't bother aborting.
   end if
 

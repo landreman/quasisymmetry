@@ -7,23 +7,23 @@ subroutine quasisymmetry_scan
   include 'mpif.h'
 
   integer :: j, k, j_eta_bar, j_sigma_initial
-  integer*16 :: j_scan_local, N_Fourier_scan, N_scan_local, j_scan, j_Fourier_scan, index
+  integer*8 :: j_scan_local, N_Fourier_scan, N_scan_local, j_scan, j_Fourier_scan, index
   integer, dimension(max_axis_nmax+1, 4) :: scan_state
   integer :: ierr, tag
-  integer*16 :: dummy_long(1), scan_index_min, scan_index_max
+  integer*8 :: dummy_long(1), scan_index_min, scan_index_max
   integer :: mpi_status(MPI_STATUS_SIZE)
   integer, parameter :: buffer_length = 100
   character(len=buffer_length) :: proc_assignments_string
   real(dp), dimension(:), allocatable :: iotas_local, max_elongations_local, rms_curvatures_local, max_curvatures_local, axis_lengths_local
   integer, dimension(:), allocatable :: axis_helicities_local, B_helicities_local, effective_nfps_local
   logical, dimension(:), allocatable :: iota_tolerance_achieveds_local, elongation_tolerance_achieveds_local, Newton_tolerance_achieveds_local
-  integer*16, dimension(:), allocatable :: N_solves_kept
+  integer*8, dimension(:), allocatable :: N_solves_kept
   real(dp), dimension(:), allocatable :: scan_eta_bar_local, scan_sigma_initial_local
   real(dp), dimension(:,:), allocatable :: scan_R0c_local, scan_R0s_local, scan_Z0c_local, scan_Z0s_local
   logical, dimension(:), allocatable :: nonzero_modes
   logical :: keep_going
   real(dp) :: thresh
-  integer*16, dimension(max_axis_nmax+1, 4) :: N_scan_array_long
+  integer*8, dimension(max_axis_nmax+1, 4) :: N_scan_array_long
 
   allocate(nonzero_modes(axis_nmax))
 
@@ -111,13 +111,13 @@ subroutine quasisymmetry_scan
   end if
   N_scan_local = scan_index_max - scan_index_min + 1
 
-  write (proc_assignments_string,fmt="(a,i5,a,i5,a,i20,a,i20)") "Proc ",mpi_rank," of",N_procs," will handle solves",scan_index_min," to",scan_index_max
+  write (proc_assignments_string,fmt="(a,i5,a,i5,a,i20,a,i20)") " Proc ",mpi_rank," of",N_procs," will handle solves",scan_index_min," to",scan_index_max
 
   ! Print the processor/radius assignments in a coordinated manner.
   !dummy = 0
   !tag = 0
   if (proc0) then
-     print *,trim(proc_assignments_string)
+     print "(a)",trim(proc_assignments_string)
      do j = 1,N_procs - 1
         ! To avoid a disordered flood of messages to the masterProc,
         ! ping each proc 1 at a time by sending a dummy value:
@@ -126,7 +126,7 @@ subroutine quasisymmetry_scan
         !call MPI_RECV(proc_assignments_string,buffer_length,MPI_CHAR,j,MPI_ANY_TAG,MPI_COMM_WORLD,mpi_status,ierr)
         tag = j
         call MPI_RECV(proc_assignments_string,buffer_length,MPI_CHAR,j,tag,MPI_COMM_WORLD,mpi_status,ierr)
-        print *,trim(proc_assignments_string)
+        print "(a)",trim(proc_assignments_string)
      end do
   else
      !! First, wait for the dummy message from proc 0:
@@ -195,7 +195,7 @@ subroutine quasisymmetry_scan
      if (any(nonzero_modes)) then
         effective_nfp = nfp
         do j=axis_nmax, 2, -1 ! Let's see if the effective nfp is nfp*j.
-           print *,"Trying effective_nfp=nfp*",j
+           !print *,"Trying effective_nfp=nfp*",j
            keep_going = .true.
            do k=1, axis_nmax
               if (mod(k,j).ne.0 .and. nonzero_modes(k)) then
@@ -247,8 +247,9 @@ subroutine quasisymmetry_scan
            end if
 
            call quasisymmetry_single_solve()
-           if (max_elongation > max_elongation_to_keep) cycle
            if (skipped_solve) cycle ! In case R0 <= 0 or some other reason caused quasisymmetry_single_solve to exit prematurely.
+           if (max_elongation > max_elongation_to_keep) cycle
+           if (abs(iota) < min_iota_to_keep) cycle
            !if (abs(iota) < 1e-3) cycle
            
            ! If we made it this far, then record the results
@@ -309,7 +310,7 @@ subroutine quasisymmetry_scan
      N_solves_kept(1) = j_scan_local
      do j = 1, N_procs-1
         ! Use mpi_rank as the tag
-        call mpi_recv(dummy_long,1,MPI_INTEGER16,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(dummy_long,1,MPI_INTEGER8,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         N_solves_kept(j+1) = dummy_long(1)
      end do
      print *,"# solves kept on each proc:",N_solves_kept
@@ -389,7 +390,7 @@ subroutine quasisymmetry_scan
      ! Send the number of runs this proc kept:
      dummy_long(1) = j_scan_local
      ! Use mpi_rank as the tag
-     call mpi_send(dummy_long,1,MPI_INTEGER16,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(dummy_long,1,MPI_INTEGER8,0,mpi_rank,MPI_COMM_WORLD,ierr)
 
      ! Send the other results:
      call mpi_send(iotas_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)

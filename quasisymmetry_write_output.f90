@@ -5,6 +5,7 @@ subroutine quasisymmetry_write_output
 
   implicit none
 
+  real :: start_time, end_time
   integer :: ierr, ncid
 
   ! Same convention as in VMEC:
@@ -26,7 +27,9 @@ subroutine quasisymmetry_write_output
        vn_eta_bar_scan_option = "eta_bar_scan_option", &
        vn_Fourier_scan_option = "Fourier_scan_option", &
        vn_max_precise_elongation = "max_precise_elongation", &
-       vn_max_elongation_to_keep = "max_elongation_to_keep"
+       vn_max_elongation_to_keep = "max_elongation_to_keep", &
+       vn_max_max_curvature_to_keep = "max_max_curvature_to_keep", &
+       vn_min_iota_to_keep = "min_iota_to_keep"
 !       vn_N_scan = "N_scan", &
 
   ! Arrays with dimension 1
@@ -99,6 +102,8 @@ subroutine quasisymmetry_write_output
   ! Only proc 0 writes.
   if (.not. proc0) return
 
+  call cpu_time(start_time)
+
   call cdf_open(ncid,output_filename,'w',ierr)
   IF (ierr .ne. 0) then
      print *,"Error opening output file ",output_filename
@@ -129,6 +134,8 @@ subroutine quasisymmetry_write_output
   !call cdf_define(ncid, vn_N_scan, N_scan)
   call cdf_define(ncid, vn_max_precise_elongation, max_precise_elongation)
   call cdf_define(ncid, vn_max_elongation_to_keep, max_elongation_to_keep)
+  call cdf_define(ncid, vn_max_max_curvature_to_keep, max_max_curvature_to_keep)
+  call cdf_define(ncid, vn_min_iota_to_keep, min_iota_to_keep)
 
   ! Arrays with dimension 1
 
@@ -195,6 +202,8 @@ subroutine quasisymmetry_write_output
   !call cdf_write(ncid, vn_N_scan, N_scan)
   call cdf_write(ncid, vn_max_precise_elongation, max_precise_elongation)
   call cdf_write(ncid, vn_max_elongation_to_keep, max_elongation_to_keep)
+  call cdf_write(ncid, vn_max_max_curvature_to_keep, max_max_curvature_to_keep)
+  call cdf_write(ncid, vn_min_iota_to_keep, min_iota_to_keep)
 
   ! Arrays with dimension 1
 
@@ -240,5 +249,8 @@ subroutine quasisymmetry_write_output
 
   ! Finish up:
   call cdf_close(ncid)
+
+  call cpu_time(end_time)
+  print *,"Time to write output file:",end_time-start_time," sec"
 
 end subroutine quasisymmetry_write_output
