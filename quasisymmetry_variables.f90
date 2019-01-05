@@ -36,6 +36,11 @@ module quasisymmetry_variables
        sigma_initial_scan_option_2_sided_log = "2_sided_log"
   character(len=50) :: sigma_initial_scan_option = sigma_initial_scan_option_linear
 
+  character(len=*), parameter :: &
+       Fourier_scan_option_linear = "linear", &
+       Fourier_scan_option_2_sided_log = "2_sided_log"
+  character(len=50) :: Fourier_scan_option = Fourier_scan_option_linear
+
   real(dp) :: sigma_initial = 0
 
   integer :: nfp = 3
@@ -104,7 +109,7 @@ module quasisymmetry_variables
 
   namelist / quasisymmetry / resolution_option, general_option, verbose_option, nfp, sign_G, sign_psi, I2_over_B0, vmec_template_filename, r, &
        N_iterations, N_line_search, Newton_tolerance, iota_tolerance, elongation_tolerance, max_precise_elongation, max_elongation_to_keep, N_phi, max_N_phi, &
-       R0s, R0c, Z0s, Z0c, eta_bar, sigma_initial, eta_bar_scan_option, sigma_initial_scan_option, consider_only_nfp, &
+       R0s, R0c, Z0s, Z0c, eta_bar, sigma_initial, eta_bar_scan_option, sigma_initial_scan_option, Fourier_scan_option, consider_only_nfp, &
        R0s_min, R0s_max, R0s_N_scan, R0c_min, R0c_max, R0c_N_scan, Z0s_min, Z0s_max, Z0s_N_scan, Z0c_min, Z0c_max, Z0c_N_scan, &
        eta_bar_min, eta_bar_max, eta_bar_N_scan, sigma_initial_min, sigma_initial_max, sigma_initial_N_scan
 

@@ -19,10 +19,12 @@ subroutine quasisymmetry_write_output
        vn_sigma_initial_min = "sigma_initial_min", &
        vn_sigma_initial_max = "sigma_initial_max", &
        vn_sigma_initial_N_scan = "sigma_initial_N_scan", &
+       vn_sigma_initial_scan_option = "sigma_initial_scan_option", &
        vn_eta_bar_min = "eta_bar_min", &
        vn_eta_bar_max = "eta_bar_max", &
        vn_eta_bar_N_scan = "eta_bar_N_scan", &
        vn_eta_bar_scan_option = "eta_bar_scan_option", &
+       vn_Fourier_scan_option = "Fourier_scan_option", &
        vn_N_scan = "N_scan", &
        vn_max_precise_elongation = "max_precise_elongation", &
        vn_max_elongation_to_keep = "max_elongation_to_keep"
@@ -118,10 +120,12 @@ subroutine quasisymmetry_write_output
   call cdf_define(ncid, vn_sigma_initial_min, sigma_initial_min)
   call cdf_define(ncid, vn_sigma_initial_max, sigma_initial_max)
   call cdf_define(ncid, vn_sigma_initial_N_scan, sigma_initial_N_scan)
+  call cdf_define(ncid, vn_sigma_initial_scan_option, sigma_initial_scan_option)
   call cdf_define(ncid, vn_eta_bar_min, eta_bar_min)
   call cdf_define(ncid, vn_eta_bar_max, eta_bar_max)
   call cdf_define(ncid, vn_eta_bar_N_scan, eta_bar_N_scan)
   call cdf_define(ncid, vn_eta_bar_scan_option, eta_bar_scan_option)
+  call cdf_define(ncid, vn_Fourier_scan_option, Fourier_scan_option)
   call cdf_define(ncid, vn_N_scan, N_scan)
   call cdf_define(ncid, vn_max_precise_elongation, max_precise_elongation)
   call cdf_define(ncid, vn_max_elongation_to_keep, max_elongation_to_keep)
@@ -186,6 +190,8 @@ subroutine quasisymmetry_write_output
   call cdf_write(ncid, vn_eta_bar_max, eta_bar_max)
   call cdf_write(ncid, vn_eta_bar_N_scan, eta_bar_N_scan)
   call cdf_write(ncid, vn_eta_bar_scan_option, eta_bar_scan_option)
+  call cdf_write(ncid, vn_Fourier_scan_option, Fourier_scan_option)
+  call cdf_write(ncid, vn_sigma_initial_scan_option, sigma_initial_scan_option)
   call cdf_write(ncid, vn_N_scan, N_scan)
   call cdf_write(ncid, vn_max_precise_elongation, max_precise_elongation)
   call cdf_write(ncid, vn_max_elongation_to_keep, max_elongation_to_keep)

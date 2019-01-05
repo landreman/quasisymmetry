@@ -174,7 +174,7 @@ Note that when \parlink{general\_option}={\ttfamily "scan"}, the code overwrites
 {integer array}
 {[0,0,...]}
 {Only when \parlink{general\_option}={\ttfamily "scan"}}
-{Number of values to consider for each Fourier mode amplitude in \parlink{R0c}. When an element of {\ttfamily R0c\_N\_scan} is $>1$, the corresponding element of \parlink{R0c} will be scanned over equally spaced values from the corresponding element of \parlink{R0c\_min} to the corresponding element of \parlink{R0c\_max}.  When an element of {\ttfamily R0c\_N\_scan} is $\le 1$, the corresponding element of \parlink{R0c} will be set to the corresponding element of \parlink{R0c\_min} and no scan will be performed in that Fourier amplitude.
+{Number of values to consider for each Fourier mode amplitude in \parlink{R0c}. When an element of {\ttfamily R0c\_N\_scan} is $>1$, the corresponding element of \parlink{R0c} will be scanned over  values from the corresponding element of \parlink{R0c\_min} to the corresponding element of \parlink{R0c\_max}; see \parlink{Fourier\_scan\_option} for details.  When an element of {\ttfamily R0c\_N\_scan} is $\le 1$, the corresponding element of \parlink{R0c} will be set to the corresponding element of \parlink{R0c\_min} and no scan will be performed in that Fourier amplitude.
 }
 
 \myhrule
@@ -201,7 +201,7 @@ Note that when \parlink{general\_option}={\ttfamily "scan"}, the code overwrites
 {integer array}
 {[0,0,...]}
 {Only when \parlink{general\_option}={\ttfamily "scan"}}
-{Number of values to consider for each Fourier mode amplitude in \parlink{R0s}. When an element of {\ttfamily R0s\_N\_scan} is $>1$, the corresponding element of \parlink{R0s} will be scanned over equally spaced values from the corresponding element of \parlink{R0s\_min} to the corresponding element of \parlink{R0s\_max}.  When an element of {\ttfamily R0s\_N\_scan} is $\le 1$, the corresponding element of \parlink{R0s} will be set to the corresponding element of \parlink{R0s\_min} and no scan will be performed in that Fourier amplitude.
+{Number of values to consider for each Fourier mode amplitude in \parlink{R0s}. When an element of {\ttfamily R0s\_N\_scan} is $>1$, the corresponding element of \parlink{R0s} will be scanned over  values from the corresponding element of \parlink{R0s\_min} to the corresponding element of \parlink{R0s\_max}; see \parlink{Fourier\_scan\_option} for details.  When an element of {\ttfamily R0s\_N\_scan} is $\le 1$, the corresponding element of \parlink{R0s} will be set to the corresponding element of \parlink{R0s\_min} and no scan will be performed in that Fourier amplitude.
 }
 
 \myhrule
@@ -228,7 +228,7 @@ Note that when \parlink{general\_option}={\ttfamily "scan"}, the code overwrites
 {integer array}
 {[0,0,...]}
 {Only when \parlink{general\_option}={\ttfamily "scan"}}
-{Number of values to consider for each Fourier mode amplitude in \parlink{Z0c}. When an element of {\ttfamily Z0c\_N\_scan} is $>1$, the corresponding element of \parlink{Z0c} will be scanned over equally spaced values from the corresponding element of \parlink{Z0c\_min} to the corresponding element of \parlink{Z0c\_max}.  When an element of {\ttfamily Z0c\_N\_scan} is $\le 1$, the corresponding element of \parlink{Z0c} will be set to the corresponding element of \parlink{Z0c\_min} and no scan will be performed in that Fourier amplitude.
+{Number of values to consider for each Fourier mode amplitude in \parlink{Z0c}. When an element of {\ttfamily Z0c\_N\_scan} is $>1$, the corresponding element of \parlink{Z0c} will be scanned over  values from the corresponding element of \parlink{Z0c\_min} to the corresponding element of \parlink{Z0c\_max}; see \parlink{Fourier\_scan\_option} for details.  When an element of {\ttfamily Z0c\_N\_scan} is $\le 1$, the corresponding element of \parlink{Z0c} will be set to the corresponding element of \parlink{Z0c\_min} and no scan will be performed in that Fourier amplitude.
 }
 
 \myhrule
@@ -255,7 +255,23 @@ Note that when \parlink{general\_option}={\ttfamily "scan"}, the code overwrites
 {integer array}
 {[0,0,...]}
 {Only when \parlink{general\_option}={\ttfamily "scan"}}
-{Number of values to consider for each Fourier mode amplitude in \parlink{Z0s}. When an element of {\ttfamily Z0s\_N\_scan} is $>1$, the corresponding element of \parlink{Z0s} will be scanned over equally spaced values from the corresponding element of \parlink{Z0s\_min} to the corresponding element of \parlink{Z0s\_max}.  When an element of {\ttfamily Z0s\_N\_scan} is $\le 1$, the corresponding element of \parlink{Z0s} will be set to the corresponding element of \parlink{Z0s\_min} and no scan will be performed in that Fourier amplitude.
+{Number of values to consider for each Fourier mode amplitude in \parlink{Z0s}. When an element of {\ttfamily Z0s\_N\_scan} is $>1$, the corresponding element of \parlink{Z0s} will be scanned over  values from the corresponding element of \parlink{Z0s\_min} to the corresponding element of \parlink{Z0s\_max}; see \parlink{Fourier\_scan\_option} for details.  When an element of {\ttfamily Z0s\_N\_scan} is $\le 1$, the corresponding element of \parlink{Z0s} will be set to the corresponding element of \parlink{Z0s\_min} and no scan will be performed in that Fourier amplitude.
+}
+
+\myhrule
+
+\param{Fourier\_scan\_option}
+{string}
+{{\ttfamily "linear"}}
+{Always}
+{Determines the spacing of values of \parlink{R0s}, \parlink{R0c}, \parlink{Z0s}, and \parlink{Z0c} in a scan.\\
+
+{\ttfamily Fourier\_scan\_option} = {\ttfamily "linear"}: Use uniform linear spacing.\\
+
+{\ttfamily Fourier\_scan\_option} = {\ttfamily "2\_sided\_log"}: Use logarithmic spacing, and also include $(-1)\times$ the values. A value at 0 will also be included. 
+For this option, all the entries in \parlink{R0s\_N\_scan}, \parlink{R0c\_N\_scan}, \parlink{Z0s\_N\_scan}, and \parlink{Z0c\_N\_scan} must be odd or 0. 
+For each entry corresponding to 0 or 1, only the `min' value will be used, not zero. This choice allows, for example, the major radius R0c(1) to be fixed at a nonzero constant.
+For each entry of *\_N\_scan that is 3, the values used for the scan will be (-*\_min, 0, *\_min).
 }
 
 \myhrule

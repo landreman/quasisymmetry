@@ -41,7 +41,7 @@ subroutine quasisymmetry_scan
 
   ! Set up eta_bar values for scan:
   allocate(eta_bar_values(eta_bar_N_scan))
-  if (trim(eta_bar_scan_option)==trim(eta_bar_scan_option_2_sided_log)) then
+  if (trim(eta_bar_scan_option)==eta_bar_scan_option_2_sided_log) then
      if (mod(eta_bar_N_scan,2)==1) stop "Error! When eta_bar_scan_type='2_sided_log', eta_bar_N_scan must be even."
      do j_eta_bar = 1, eta_bar_N_scan/2
         eta_bar_values(j_eta_bar + eta_bar_N_scan/2)   =  exp(log(eta_bar_min) + (log(eta_bar_max) - log(eta_bar_min)) * (j_eta_bar - 1) / max(eta_bar_N_scan/2 - 1, 1))
@@ -64,7 +64,7 @@ subroutine quasisymmetry_scan
 
   ! Set up sigma_initial values for scan:
   allocate(sigma_initial_values(sigma_initial_N_scan))
-  if (trim(sigma_initial_scan_option)==trim(sigma_initial_scan_option_2_sided_log)) then
+  if (trim(sigma_initial_scan_option)==sigma_initial_scan_option_2_sided_log) then
      if (mod(sigma_initial_N_scan,2)==0) stop "Error! When sigma_initial_scan_type='2_sided_log', sigma_initial_N_scan must be odd."
      sigma_initial_values = 0
      do j_sigma_initial = 1, sigma_initial_N_scan/2
@@ -160,12 +160,24 @@ subroutine quasisymmetry_scan
 !!$     end do
 
      ! Set Fourier amplitudes for axis:
-     do j = 1, max_axis_nmax+1
-        R0s(j) = R0s_min(j) + (R0s_max(j) - R0s_min(j)) * (scan_state(j,1) - 1) / max(N_scan_array(j,1) - 1, 1)
-        R0c(j) = R0c_min(j) + (R0c_max(j) - R0c_min(j)) * (scan_state(j,2) - 1) / max(N_scan_array(j,2) - 1, 1)
-        Z0s(j) = Z0s_min(j) + (Z0s_max(j) - Z0s_min(j)) * (scan_state(j,3) - 1) / max(N_scan_array(j,3) - 1, 1)
-        Z0c(j) = Z0c_min(j) + (Z0c_max(j) - Z0c_min(j)) * (scan_state(j,4) - 1) / max(N_scan_array(j,4) - 1, 1)
-     end do
+     select case (trim(Fourier_scan_option))
+     case (Fourier_scan_option_linear)
+        do j = 1, axis_nmax+1
+           R0s(j) = R0s_min(j) + (R0s_max(j) - R0s_min(j)) * (scan_state(j,1) - 1) / max(N_scan_array(j,1) - 1, 1)
+           R0c(j) = R0c_min(j) + (R0c_max(j) - R0c_min(j)) * (scan_state(j,2) - 1) / max(N_scan_array(j,2) - 1, 1)
+           Z0s(j) = Z0s_min(j) + (Z0s_max(j) - Z0s_min(j)) * (scan_state(j,3) - 1) / max(N_scan_array(j,3) - 1, 1)
+           Z0c(j) = Z0c_min(j) + (Z0c_max(j) - Z0c_min(j)) * (scan_state(j,4) - 1) / max(N_scan_array(j,4) - 1, 1)
+        end do
+     case (Fourier_scan_option_2_sided_log)
+        do j = 1, axis_nmax+1
+           R0s(j) = evaluate_2_sided_log(R0s_min(j), R0s_max(j), scan_state(j,1), N_scan_array(j,1))
+           R0c(j) = evaluate_2_sided_log(R0c_min(j), R0c_max(j), scan_state(j,2), N_scan_array(j,2))
+           Z0s(j) = evaluate_2_sided_log(Z0s_min(j), Z0s_max(j), scan_state(j,3), N_scan_array(j,3))
+           Z0c(j) = evaluate_2_sided_log(Z0c_min(j), Z0c_max(j), scan_state(j,4), N_scan_array(j,4))
+        end do
+     case default
+        stop "Error! Unrecognized Fourier_scan_option"
+     end select
 
      ! Compute the effective number of field periods
      thresh = 1.0d-12
@@ -421,4 +433,27 @@ subroutine quasisymmetry_scan
      end if
   end if
 
+contains
+
+  real(dp) function evaluate_2_sided_log(xmin,xmax,j,N)
+    real(dp), intent(in) :: xmin, xmax
+    integer, intent(in) :: j, N
+    
+    if (N<2) then
+       evaluate_2_sided_log = xmin ! Note this is not 0. This is so R0c(1) is not 0.
+       return
+    end if
+    if (mod(N,2)==0) stop "Error! When Fourier_scan_option='Fourier_scan_option_2_sided_log', all axis N_scan parameters must be odd or 0."
+
+    if (j == (N+1)/2) then
+       evaluate_2_sided_log = 0
+    elseif (j > (N+1)/2) then
+       evaluate_2_sided_log =  exp(log(xmin) + (log(xmax) - log(xmin)) * (j - (N+1)/2 - 1) / max((N-1)/2 - 1, 1))
+    else
+       evaluate_2_sided_log = -exp(log(xmin) + (log(xmax) - log(xmin)) * ((N+1)/2 - j - 1) / max((N-1)/2 - 1, 1))
+    end if
+
+  end function evaluate_2_sided_log
+
 end subroutine quasisymmetry_scan
+
