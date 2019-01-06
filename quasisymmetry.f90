@@ -2,7 +2,7 @@
 
 program quasisymmetry
 
-  use quasisymmetry_variables, only: total_time, general_option, general_option_single, general_option_scan, &
+  use quasisymmetry_variables, only: start_time, total_time, general_option, general_option_single, general_option_scan, &
        N_procs, mpi_rank, proc0
 
   implicit none
@@ -10,7 +10,7 @@ program quasisymmetry
   include 'mpif.h'
 
   integer :: tic, toc, countrate, ierr
-  real :: start_time, end_time
+  real :: end_time
 
 
   call mpi_init(ierr)

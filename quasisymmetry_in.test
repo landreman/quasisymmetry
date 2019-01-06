@@ -2,8 +2,8 @@
  !resolution_option = 'fixed'
  resolution_option = 'adaptive'
 
- !general_option = 'single'
- general_option = 'scan'
+ general_option = 'single'
+ !general_option = 'scan'
 
  verbose_option = 'all'
  !verbose_option = 'proc0'
@@ -30,11 +30,11 @@
  !eta_bar = -1.0
 
  ! QA example for paper
- nfp = 3
- R0c = 1 0.045
- Z0s = 0 -0.045
- eta_bar = -0.90
- sigma_initial = 0.0
+ !nfp = 3
+ !R0c = 1 0.045
+ !Z0s = 0 -0.045
+ !eta_bar = -0.90
+ !sigma_initial = 0.0
 
  ! QH example:
  !nfp = 4
@@ -50,13 +50,14 @@
  !eta_bar = -2.25
 
  ! QA without stellarator symmetry example for paper
- !nfp = 3
- !R0c = 1  0.042
- !Z0s = 0  -0.042
- !R0s = 0 0
- !Z0c = 0 -0.025
+ nfp = 3
+ R0c = 1  0.042
+ Z0s = 0  -0.042
+ R0s = 0 0
+ Z0c = 0 -0.025
  !eta_bar = -0.95
- !sigma_initial = 0
+ eta_bar = 0.95
+ sigma_initial = -6.327962586868797d-01
 
  ! Same QA without stellarator symmetry example for paper, but using constraint_option=2
  !nfp = 3

@@ -89,7 +89,7 @@ module quasisymmetry_variables
   character(len=200) :: vmec_template_filename = ''
   character(len=200) :: new_vmec_filename
 
-  real(dp) :: total_time
+  real(dp) :: start_time, total_time
 
   real(dp), dimension(max_axis_nmax+1) :: R0s_min, R0s_max, R0c_min, R0c_max, Z0s_min, Z0s_max, Z0c_min, Z0c_max
   real(dp) :: eta_bar_min = 1, eta_bar_max = 1, sigma_initial_min = 0, sigma_initial_max = 0

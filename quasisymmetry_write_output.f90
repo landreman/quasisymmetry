@@ -5,7 +5,7 @@ subroutine quasisymmetry_write_output
 
   implicit none
 
-  real :: start_time, end_time
+  real :: time1, end_time
   integer :: ierr, ncid
 
   ! Same convention as in VMEC:
@@ -102,7 +102,7 @@ subroutine quasisymmetry_write_output
   ! Only proc 0 writes.
   if (.not. proc0) return
 
-  call cpu_time(start_time)
+  call cpu_time(time1)
 
   call cdf_open(ncid,output_filename,'w',ierr)
   IF (ierr .ne. 0) then
@@ -251,6 +251,6 @@ subroutine quasisymmetry_write_output
   call cdf_close(ncid)
 
   call cpu_time(end_time)
-  print *,"Time to write output file:",end_time-start_time," sec"
+  print "(a,es10.3,a)"," Time to write output file:",end_time - time1," sec"
 
 end subroutine quasisymmetry_write_output

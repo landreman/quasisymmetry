@@ -10,7 +10,7 @@ subroutine quasisymmetry_scan
   integer*8 :: j_scan_local, N_Fourier_scan, N_scan_local, j_scan, j_Fourier_scan, index
   integer, dimension(max_axis_nmax+1, 4) :: scan_state
   integer :: ierr, tag
-  integer*8 :: dummy_long(1), scan_index_min, scan_index_max
+  integer*8 :: dummy_long(1), scan_index_min, scan_index_max, print_summary_stride
   integer :: mpi_status(MPI_STATUS_SIZE)
   integer, parameter :: buffer_length = 100
   character(len=buffer_length) :: proc_assignments_string
@@ -22,7 +22,7 @@ subroutine quasisymmetry_scan
   real(dp), dimension(:,:), allocatable :: scan_R0c_local, scan_R0s_local, scan_Z0c_local, scan_Z0s_local
   logical, dimension(:), allocatable :: nonzero_modes
   logical :: keep_going
-  real(dp) :: thresh
+  real(dp) :: thresh, time1, time2
   integer*8, dimension(max_axis_nmax+1, 4) :: N_scan_array_long
 
   allocate(nonzero_modes(axis_nmax))
@@ -110,6 +110,7 @@ subroutine quasisymmetry_scan
      end if
   end if
   N_scan_local = scan_index_max - scan_index_min + 1
+  print_summary_stride = max(N_scan/N_procs/20, 1000)
 
   write (proc_assignments_string,fmt="(a,i5,a,i5,a,i20,a,i20)") " Proc ",mpi_rank," of",N_procs," will handle solves",scan_index_min," to",scan_index_max
 
@@ -237,7 +238,7 @@ subroutine quasisymmetry_scan
               print *,"effective_nfp:",effective_nfp
            end if
            
-           if (trim(verbose_option)==verbose_option_summary .and. mod(j_scan - scan_index_min + 1,1000)==1) then
+           if (trim(verbose_option)==verbose_option_summary .and. mod(j_scan - scan_index_min + 1,print_summary_stride)==1) then
               print "(a,i4,a,i20,a,i20)", " Proc",mpi_rank,": solve",j_scan - scan_index_min + 1," of",N_scan_local
            end if
            
@@ -297,7 +298,12 @@ subroutine quasisymmetry_scan
      end do
   end do
 
+  call cpu_time(time2)
+  print "(a,i5,a,es10.3,a)"," Proc",mpi_rank," finished after",time2 - start_time," sec."
+
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! So proc0 does not start printing results until all procs have finished.
+
+  call cpu_time(time1)
 
   ! Finally, send all results to proc 0.
   if (proc0) then
@@ -417,6 +423,8 @@ subroutine quasisymmetry_scan
   end if
 
   if (proc0) then
+     call cpu_time(time2)
+     print "(a,es10.3,a)"," Time for communication:",time2 - time1," sec."
      print "(a)"," ###################################################################################"
      print *,"Scan complete."
      if (N_scan < 5000) then
