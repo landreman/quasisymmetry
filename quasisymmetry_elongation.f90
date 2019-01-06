@@ -69,8 +69,8 @@ subroutine quasisymmetry_elongation
      print *,"max elongation from fmin:",max_elongation
   end if
   if (maxval_elongation > max_elongation * (1 + 1.0d-10)) then
-     print *,"Error! Something went wrong with the max_elongation search."
-     if (maxval_elongation < max_precise_elongation) stop ! If the elongation is larger than this, we don't care about the solution much, so don't bother aborting.
+     print *,"Error! Something went wrong with the max_elongation search on proc",mpi_rank,". maxval_elongation=",maxval_elongation,", max_elongation=",max_elongation,", elongation=",elongation
+     !if (maxval_elongation < max_precise_elongation) stop ! If the elongation is larger than this, we don't care about the solution much, so don't bother aborting.
   end if
 
   deallocate(p,q)
