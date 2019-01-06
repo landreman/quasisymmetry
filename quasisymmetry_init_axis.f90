@@ -131,7 +131,7 @@ subroutine quasisymmetry_init_axis
   mean_of_Z = sum(Z0 * d_l_d_phi) * d_phi * nfp / axis_length
   standard_deviation_of_R = sqrt(sum((R0 - mean_of_R) ** 2 * d_l_d_phi) * d_phi * nfp / axis_length)
   standard_deviation_of_Z = sqrt(sum((Z0 - mean_of_Z) ** 2 * d_l_d_phi) * d_phi * nfp / axis_length)
-  print "(a,2(es10.3))"," Standard deviation of R, Z:",standard_deviation_of_R, standard_deviation_of_Z
+  if (verbose) print "(a,2(es10.3))"," Standard deviation of R, Z:",standard_deviation_of_R, standard_deviation_of_Z
 
   do j = 1,3
      normal_cylindrical(:,j) = d_tangent_d_l_cylindrical(:,j) / curvature
