@@ -97,6 +97,8 @@ module quasisymmetry_variables
   integer :: eta_bar_N_scan=0, sigma_initial_N_scan=0
   integer*8 :: N_scan
   real(dp), dimension(:), allocatable :: iotas, max_elongations, rms_curvatures, max_curvatures, axis_lengths, eta_bar_values, sigma_initial_values
+  real(dp), dimension(:), allocatable :: standard_deviations_of_R, standard_deviations_of_Z
+  real(dp) :: standard_deviation_of_R, standard_deviation_of_Z
   integer, dimension(:), allocatable :: axis_helicities, B_helicities, effective_nfps
   logical, dimension(:), allocatable :: iota_tolerance_achieveds, elongation_tolerance_achieveds, Newton_tolerance_achieveds
   logical :: iota_tolerance_achieved, elongation_tolerance_achieved, Newton_tolerance_achieved

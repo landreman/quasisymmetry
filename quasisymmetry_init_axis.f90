@@ -9,6 +9,7 @@ subroutine quasisymmetry_init_axis
   real(dp), dimension(:), allocatable :: d2_l_d_phi2, torsion_numerator, torsion_denominator
   real(dp), dimension(:,:), allocatable :: d_r_d_phi_cylindrical, d2_r_d_phi2_cylindrical, d3_r_d_phi3_cylindrical
   real(dp), dimension(:,:), allocatable :: d_tangent_d_l_cylindrical
+  real(dp) :: mean_of_R, mean_of_Z
 
   if (allocated(R0)) deallocate(R0)
   if (allocated(Z0)) deallocate(Z0)
@@ -93,7 +94,6 @@ subroutine quasisymmetry_init_axis
   end do
 
   d_l_d_phi = sqrt(R0 * R0 + R0p * R0p + Z0p * Z0p)
-  axis_length = sum(d_l_d_phi) * d_phi * nfp
   d2_l_d_phi2 = (R0 * R0p + R0p * R0pp + Z0p * Z0pp) / d_l_d_phi
   B0_over_abs_G0 = N_phi / sum(d_l_d_phi)
 
@@ -123,9 +123,15 @@ subroutine quasisymmetry_init_axis
        d_tangent_d_l_cylindrical(:,2) * d_tangent_d_l_cylindrical(:,2) + &
        d_tangent_d_l_cylindrical(:,3) * d_tangent_d_l_cylindrical(:,3))
 
-  rms_curvature = sqrt((sum(curvature * curvature) * d_phi * nfp) / axis_length)
+  axis_length = sum(d_l_d_phi) * d_phi * nfp
+  rms_curvature = sqrt((sum(curvature * curvature * d_l_d_phi) * d_phi * nfp) / axis_length)
   !max_curvature = maxval(curvature)
   if (.not. already_found_max_curvature) call quasisymmetry_max_curvature()
+  mean_of_R = sum(R0 * d_l_d_phi) * d_phi * nfp / axis_length
+  mean_of_Z = sum(Z0 * d_l_d_phi) * d_phi * nfp / axis_length
+  standard_deviation_of_R = sqrt(sum((R0 - mean_of_R) ** 2 * d_l_d_phi) * d_phi * nfp / axis_length)
+  standard_deviation_of_Z = sqrt(sum((Z0 - mean_of_Z) ** 2 * d_l_d_phi) * d_phi * nfp / axis_length)
+  print "(a,2(es10.3))"," Standard deviation of R, Z:",standard_deviation_of_R, standard_deviation_of_Z
 
   do j = 1,3
      normal_cylindrical(:,j) = d_tangent_d_l_cylindrical(:,j) / curvature

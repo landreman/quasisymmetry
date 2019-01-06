@@ -43,21 +43,21 @@
  !eta_bar = 3.0
 
  ! QH example for paper
- !nfp = 4
- !!R0c = 1  0.265
+ nfp = 4
+ R0c = 1  0.265
  !R0c = 1  0.27
- !Z0s = 0  -0.21
- !eta_bar = -2.25
+ Z0s = 0  -0.21
+ eta_bar = -2.25
 
  ! QA without stellarator symmetry example for paper
- nfp = 3
- R0c = 1  0.042
- Z0s = 0  -0.042
- R0s = 0 0
- Z0c = 0 -0.025
- !eta_bar = -0.95
- eta_bar = 0.95
- sigma_initial = -6.327962586868797d-01
+ !nfp = 3
+ !R0c = 1  0.042
+ !Z0s = 0  -0.042
+ !R0s = 0 0
+ !Z0c = 0 -0.025
+ !!eta_bar = -0.95
+ !eta_bar = 0.95
+ !sigma_initial = -6.327962586868797d-01
 
  ! Same QA without stellarator symmetry example for paper, but using constraint_option=2
  !nfp = 3

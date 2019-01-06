@@ -39,6 +39,8 @@ subroutine quasisymmetry_write_output
        vn_rms_curvatures = "rms_curvatures", &
        vn_max_curvatures = "max_curvatures", &
        vn_axis_lengths = "axis_lengths", &
+       vn_standard_deviations_of_R = "standard_deviations_of_R", &
+       vn_standard_deviations_of_Z = "standard_deviations_of_Z", &
        vn_axis_helicities = "axis_helicities", &
        vn_B_helicities = "B_helicities", &
        vn_effective_nfps = "effective_nfps", &
@@ -144,6 +146,8 @@ subroutine quasisymmetry_write_output
   call cdf_define(ncid, vn_rms_curvatures, rms_curvatures, dimname=N_scan_dim)
   call cdf_define(ncid, vn_max_curvatures, max_curvatures, dimname=N_scan_dim)
   call cdf_define(ncid, vn_axis_lengths, axis_lengths, dimname=N_scan_dim)
+  call cdf_define(ncid, vn_standard_deviations_of_R, standard_deviations_of_R, dimname=N_scan_dim)
+  call cdf_define(ncid, vn_standard_deviations_of_Z, standard_deviations_of_Z, dimname=N_scan_dim)
   call cdf_define(ncid, vn_axis_helicities, axis_helicities, dimname=N_scan_dim)
   call cdf_define(ncid, vn_B_helicities, B_helicities, dimname=N_scan_dim)
   call cdf_define(ncid, vn_effective_nfps, effective_nfps, dimname=N_scan_dim)
@@ -212,6 +216,8 @@ subroutine quasisymmetry_write_output
   call cdf_write(ncid, vn_rms_curvatures, rms_curvatures)
   call cdf_write(ncid, vn_max_curvatures, max_curvatures)
   call cdf_write(ncid, vn_axis_lengths, axis_lengths)
+  call cdf_write(ncid, vn_standard_deviations_of_R, standard_deviations_of_R)
+  call cdf_write(ncid, vn_standard_deviations_of_Z, standard_deviations_of_Z)
   call cdf_write(ncid, vn_axis_helicities, axis_helicities)
   call cdf_write(ncid, vn_B_helicities, B_helicities)
   call cdf_write(ncid, vn_effective_nfps, effective_nfps)

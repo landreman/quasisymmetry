@@ -17,7 +17,7 @@ print "Reading filename "+filename
 f = netcdf.netcdf_file(filename,mode='r',mmap=False)
 iotas = f.variables['iotas'][()]
 max_elongations = f.variables['max_elongations'][()]
-helicities = f.variables['helicities'][()]
+axis_helicities = f.variables['axis_helicities'][()]
 scan_eta_bar = f.variables['scan_eta_bar'][()]
 scan_sigma_initial = f.variables['scan_sigma_initial'][()]
 scan_R0c = f.variables['scan_R0c'][()]
@@ -30,7 +30,7 @@ mask = max_elongations < max_max_elongation
 iotas = iotas[mask]
 print "Number of filtered scan entries:",len(iotas)
 max_elongations = max_elongations[mask]
-helicities = helicities[mask]
+axis_helicities = axis_helicities[mask]
 scan_sigma_initial = scan_sigma_initial[mask]
 scan_eta_bar = scan_eta_bar[mask]
 scan_R0s = scan_R0s[:,mask]
@@ -62,7 +62,7 @@ iota_range = [0,0.7]
 
 ax = plt.subplot(numRows,numCols,plotNum)
 plotNum += 1
-plt.scatter(np.abs(iotas), max_elongations, c=helicities, s=4)
+plt.scatter(np.abs(iotas), max_elongations, c=axis_helicities, s=4)
 plt.ylim([1,max_max_elongation])
 plt.xlabel('|iota|')
 plt.ylabel('max elongation')
