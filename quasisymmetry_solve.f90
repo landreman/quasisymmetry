@@ -7,6 +7,7 @@ subroutine quasisymmetry_solve
   integer :: iteration, j_line_search
   real(dp) :: residual_norm, last_residual_norm, initial_residual_norm, step_scale
   real(dp), dimension(:), allocatable :: state, state0
+  real(dp), dimension(:), allocatable :: sinangle, cosangle
 
   ! Variables needed by LAPACK:                                                                                            
   integer :: INFO
@@ -80,11 +81,34 @@ subroutine quasisymmetry_solve
   !Y1c = sign_G * curvature * (-B1s_over_B0 + B1c_over_B0 * sigma) / (B1c_over_B0*B1c_over_B0 + B1s_over_B0*B1s_over_B0)
   Y1s = sign_G * sign_psi * curvature / eta_bar
   Y1c = sign_G * sign_psi * curvature * sigma / eta_bar
+
+  ! If helicity is nonzero, then the original X1s/X1c/Y1s/Y1c variables are defined with respect to a "poloidal" angle that
+  ! is actually helical, with the theta=0 curve wrapping around the magnetic axis as you follow phi around toroidally. Therefore
+  ! here we convert to an untwisted poloidal angle, such that the theta=0 curve does not wrap around the axis.
+  if (axis_helicity == 0) then
+     X1s_untwisted = 0
+     X1c_untwisted = X1c
+     Y1s_untwisted = Y1s
+     Y1c_untwisted = Y1c
+  else
+     allocate(sinangle(N_phi))
+     allocate(cosangle(N_phi))
+     ! Since dimension_Fourier >= (N_phi+1) / 2, whereas |helicity| is usually <= 1, the following error almost never occurs, but check just in case:
+     if (abs(axis_helicity)+1 > dimension_Fourier) stop "Error in quasisymmetry_solve.f90: dimension_Fourier is too small for untwisting."
+     cosangle = cos_n_phi(:,abs(axis_helicity)+1)
+     sinangle = sin_n_phi(:,abs(axis_helicity)+1)
+     if (axis_helicity > 0) sinangle = -sinangle
+     X1s_untwisted = X1s *   cosangle  + X1c * sinangle
+     X1c_untwisted = X1s * (-sinangle) + X1c * cosangle
+     Y1s_untwisted = Y1s *   cosangle  + Y1c * sinangle
+     Y1c_untwisted = Y1s * (-sinangle) + Y1c * cosangle
+     deallocate(sinangle,cosangle)
+  end if
     
-  R1c = (-binormal_cylindrical(:,3) * X1c + normal_cylindrical(:,3) * Y1c) * d_l_d_phi / R0
-  R1s = (-binormal_cylindrical(:,3) * X1s + normal_cylindrical(:,3) * Y1s) * d_l_d_phi / R0
-  Z1c = ( binormal_cylindrical(:,1) * X1c - normal_cylindrical(:,1) * Y1c) * d_l_d_phi / R0
-  Z1s = ( binormal_cylindrical(:,1) * X1s - normal_cylindrical(:,1) * Y1s) * d_l_d_phi / R0
+  R1c = (-binormal_cylindrical(:,3) * X1c_untwisted + normal_cylindrical(:,3) * Y1c_untwisted) * d_l_d_phi / R0
+  R1s = (-binormal_cylindrical(:,3) * X1s_untwisted + normal_cylindrical(:,3) * Y1s_untwisted) * d_l_d_phi / R0
+  Z1c = ( binormal_cylindrical(:,1) * X1c_untwisted - normal_cylindrical(:,1) * Y1c_untwisted) * d_l_d_phi / R0
+  Z1s = ( binormal_cylindrical(:,1) * X1s_untwisted - normal_cylindrical(:,1) * Y1s_untwisted) * d_l_d_phi / R0
 
   call quasisymmetry_elongation()
 

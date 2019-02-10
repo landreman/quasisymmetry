@@ -41,6 +41,11 @@ module quasisymmetry_variables
        Fourier_scan_option_2_sided_log = "2_sided_log"
   character(len=50) :: Fourier_scan_option = Fourier_scan_option_linear
 
+  character(len=*), parameter :: &
+       finite_r_option_linear = "linear", &
+       finite_r_option_nonlinear = "nonlinear"
+  character(len=50) :: finite_r_option = finite_r_option_linear
+
   real(dp) :: sigma_initial = 0
 
   integer :: nfp = 3
@@ -75,6 +80,7 @@ module quasisymmetry_variables
   real(dp), dimension(:,:), allocatable :: tangent_cylindrical, normal_cylindrical, binormal_cylindrical
   real(dp), dimension(:,:), allocatable :: tangent_Cartesian, normal_Cartesian, binormal_Cartesian
   real(dp), dimension(:), allocatable :: sigma, X1s, X1c, Y1s, Y1c, R1s, R1c, Z1s, Z1c, elongation
+  real(dp), dimension(:), allocatable :: X1s_untwisted, X1c_untwisted, Y1s_untwisted, Y1c_untwisted
   real(dp) :: B0_over_abs_G0, iota, max_elongation, rms_curvature, max_curvature, axis_length
   real(dp) :: max_precise_elongation = 10 ! Above this value, we won't do a precise solve, just take maxval over the phi grid.
   real(dp) :: max_elongation_to_keep = 10 ! Discard solutions with max(elongation) higher than this value. Set to e.g. 1.0e200 to keep all solutions.

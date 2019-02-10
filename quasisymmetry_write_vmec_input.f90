@@ -72,44 +72,54 @@ subroutine quasisymmetry_write_vmec_input
   ZBC = 0
   ZBS = 0
 
-  ! Handle the m=0 modes of the boundary, which are the same as the axis shape:
-  RBC(0:max_n,0) = raxis_cc(0:max_n)
-  RBS(0:max_n,0) = raxis_cs(0:max_n)
-  ZBC(0:max_n,0) = zaxis_cc(0:max_n)
-  ZBS(0:max_n,0) = zaxis_cs(0:max_n)
+  select case (trim(finite_r_option))
+  case (finite_r_option_nonlinear)
+     call quasisymmetry_Frenet_to_cylindrical()
 
-  ! Handle the n=0 m=1 modes:
-  RBC(0,1) = r * sum(R1c) / N_phi
-  RBS(0,1) = r * sum(R1s) / N_phi
-  ZBC(0,1) = r * sum(Z1c) / N_phi
-  ZBS(0,1) = r * sum(Z1s) / N_phi
+  case (finite_r_option_linear)
 
-  ! Handle the m=1 modes that have nonzero n:
-  do n = 1, ntor
-     ! RBC:
-     half_sum        =  r * sum(R1c * cos_n_phi(:,n+1)) / N_phi
-     half_difference =  r * sum(R1s * sin_n_phi(:,n+1)) / N_phi
-     RBC( n,1) = half_sum + half_difference
-     RBC(-n,1) = half_sum - half_difference
-
-     ! ZBC:
-     half_sum        =  r * sum(Z1c * cos_n_phi(:,n+1)) / N_phi
-     half_difference =  r * sum(Z1s * sin_n_phi(:,n+1)) / N_phi
-     ZBC( n,1) = half_sum + half_difference
-     ZBC(-n,1) = half_sum - half_difference
-
-     ! RBS:
-     half_sum        =  r * sum(R1s * cos_n_phi(:,n+1)) / N_phi
-     half_difference = -r * sum(R1c * sin_n_phi(:,n+1)) / N_phi
-     RBS( n,1) = half_sum + half_difference
-     RBS(-n,1) = half_sum - half_difference
-
-     ! ZBS:
-     half_sum        =  r * sum(Z1s * cos_n_phi(:,n+1)) / N_phi
-     half_difference = -r * sum(Z1c * sin_n_phi(:,n+1)) / N_phi
-     ZBS( n,1) = half_sum + half_difference
-     ZBS(-n,1) = half_sum - half_difference
-  end do
+     ! Handle the m=0 modes of the boundary, which are the same as the axis shape:
+     RBC(0:max_n,0) = raxis_cc(0:max_n)
+     RBS(0:max_n,0) = raxis_cs(0:max_n)
+     ZBC(0:max_n,0) = zaxis_cc(0:max_n)
+     ZBS(0:max_n,0) = zaxis_cs(0:max_n)
+     
+     ! Handle the n=0 m=1 modes:
+     RBC(0,1) = r * sum(R1c) / N_phi
+     RBS(0,1) = r * sum(R1s) / N_phi
+     ZBC(0,1) = r * sum(Z1c) / N_phi
+     ZBS(0,1) = r * sum(Z1s) / N_phi
+     
+     ! Handle the m=1 modes that have nonzero n:
+     do n = 1, ntor
+        ! RBC:
+        half_sum        =  r * sum(R1c * cos_n_phi(:,n+1)) / N_phi
+        half_difference =  r * sum(R1s * sin_n_phi(:,n+1)) / N_phi
+        RBC( n,1) = half_sum + half_difference
+        RBC(-n,1) = half_sum - half_difference
+        
+        ! ZBC:
+        half_sum        =  r * sum(Z1c * cos_n_phi(:,n+1)) / N_phi
+        half_difference =  r * sum(Z1s * sin_n_phi(:,n+1)) / N_phi
+        ZBC( n,1) = half_sum + half_difference
+        ZBC(-n,1) = half_sum - half_difference
+        
+        ! RBS:
+        half_sum        =  r * sum(R1s * cos_n_phi(:,n+1)) / N_phi
+        half_difference = -r * sum(R1c * sin_n_phi(:,n+1)) / N_phi
+        RBS( n,1) = half_sum + half_difference
+        RBS(-n,1) = half_sum - half_difference
+        
+        ! ZBS:
+        half_sum        =  r * sum(Z1s * cos_n_phi(:,n+1)) / N_phi
+        half_difference = -r * sum(Z1c * sin_n_phi(:,n+1)) / N_phi
+        ZBS( n,1) = half_sum + half_difference
+        ZBS(-n,1) = half_sum - half_difference
+     end do
+  case default
+     print *, "Invalid finite_r_option:",trim(finite_r_option)
+     stop
+  end select
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Write file
