@@ -93,11 +93,8 @@ subroutine quasisymmetry_solve
   else
      allocate(sinangle(N_phi))
      allocate(cosangle(N_phi))
-     ! Since dimension_Fourier >= (N_phi+1) / 2, whereas |helicity| is usually <= 1, the following error almost never occurs, but check just in case:
-     if (abs(axis_helicity)+1 > dimension_Fourier) stop "Error in quasisymmetry_solve.f90: dimension_Fourier is too small for untwisting."
-     cosangle = cos_n_phi(:,abs(axis_helicity)+1)
-     sinangle = sin_n_phi(:,abs(axis_helicity)+1)
-     if (axis_helicity > 0) sinangle = -sinangle
+     sinangle = sin(-axis_helicity * nfp * Boozer_toroidal_angle)
+     cosangle = cos(-axis_helicity * nfp * Boozer_toroidal_angle)
      X1s_untwisted = X1s *   cosangle  + X1c * sinangle
      X1c_untwisted = X1s * (-sinangle) + X1c * cosangle
      Y1s_untwisted = Y1s *   cosangle  + Y1c * sinangle

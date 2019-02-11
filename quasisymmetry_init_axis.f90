@@ -183,6 +183,16 @@ subroutine quasisymmetry_init_axis
 
   X1s = 0
   X1c = eta_bar / curvature
+  
+  ! Compute the Boozer toroidal angle along the axis, which is proportional (for QA or QH) to arclength along the axis.
+  if (allocated(Boozer_toroidal_angle)) deallocate(Boozer_toroidal_angle)
+  allocate(Boozer_toroidal_angle(N_phi))
+  Boozer_toroidal_angle(1) = 0
+  do j = 2, N_phi
+     ! To get toroidal angle on the full mesh, we need d_l_d_phi on the half mesh.
+     Boozer_toroidal_angle(j) = Boozer_toroidal_angle(j-1) + (d_l_d_phi(j-1) + d_l_d_phi(j))
+  end do
+  Boozer_toroidal_angle = Boozer_toroidal_angle * (0.5*d_phi*2*pi/(axis_length))
 
   deallocate(sinangle, cosangle)
   deallocate(d2_l_d_phi2, torsion_numerator, torsion_denominator)

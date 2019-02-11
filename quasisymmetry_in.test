@@ -9,7 +9,7 @@
  !verbose_option = 'proc0'
  !verbose_option = 'summary'
 
- N_phi = 15
+ N_phi = 31
 
  max_N_phi = 1000
 
@@ -49,10 +49,9 @@
 
  ! QH example for paper
  nfp = 4
- R0c = 1  0.265
- !R0c = 1  0.27
- Z0s = 0  -0.21
- eta_bar = -2.25
+ R0c = 1  0.265d+0
+ Z0s = 0  -0.21d+0
+ eta_bar = -2.25d+0
 
  ! QA without stellarator symmetry example for paper
  !nfp = 3

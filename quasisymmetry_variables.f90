@@ -75,7 +75,7 @@ module quasisymmetry_variables
   real(dp) :: last_iota, last_max_elongation, d_phi
   real(dp), dimension(:,:), allocatable :: d_d_phi, d_d_zeta
   real(dp), dimension(:), allocatable :: phi_extended, R0_extended, Z0_extended
-  real(dp), dimension(:), allocatable :: phi, R0, Z0, R0p, Z0p, R0pp, Z0pp, R0ppp, Z0ppp
+  real(dp), dimension(:), allocatable :: phi, R0, Z0, R0p, Z0p, R0pp, Z0pp, R0ppp, Z0ppp, Boozer_toroidal_angle
   real(dp), dimension(:), allocatable :: d_l_d_phi, curvature, torsion, B1Squared_over_curvatureSquared
   real(dp), dimension(:,:), allocatable :: tangent_cylindrical, normal_cylindrical, binormal_cylindrical
   real(dp), dimension(:,:), allocatable :: tangent_Cartesian, normal_Cartesian, binormal_Cartesian

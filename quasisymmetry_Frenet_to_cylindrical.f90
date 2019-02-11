@@ -1,5 +1,8 @@
 module quasisymmetry_Frenet_to_cylindrical_mod
 
+  ! The MATLAB version of this algorithm can be found in
+  ! m20180501_01_quasisymmetricEquilibria_Frenet_altTransformation.m
+
   implicit none
 
   private
@@ -22,12 +25,11 @@ contains
     real(dp), dimension(:,:), allocatable :: R_2D, z_2D, phi0_2D
     real(dp), dimension(:), allocatable :: theta, phi_conversion
     real(dp), dimension(:), allocatable :: X1, Y1
-    type(periodic_spline) :: normal_x_spline, normal_y_spline, normal_z_spline, binormal_x_spline, binormal_y_spline, binormal_z_spline
-    type(periodic_spline) :: X1_spline, Y1_spline, R0_spline, z0_spline, phi_spline
+    type(periodic_spline) :: normal_R_spline, normal_phi_spline, normal_z_spline, binormal_R_spline, binormal_phi_spline, binormal_z_spline
+    type(periodic_spline) :: X1_spline, Y1_spline, R0_spline, z0_spline
     real(dp) :: rootSolve_abserr, rootSolve_relerr, phi0_rootSolve_min, phi0_rootSolve_max
     real(dp) :: phi0_solution, phi_target
     integer :: fzeroFlag
-
 
     !----------------------------------------------
 
@@ -43,12 +45,12 @@ contains
 
     call new_periodic_spline(N_phi, phi, R0, 2*pi/nfp, R0_spline)
     call new_periodic_spline(N_phi, phi, z0, 2*pi/nfp, z0_spline)
-    call new_periodic_spline(N_phi, phi, normal_Cartesian(:,1), 2*pi/nfp, normal_x_spline)
-    call new_periodic_spline(N_phi, phi, normal_Cartesian(:,2), 2*pi/nfp, normal_y_spline)
-    call new_periodic_spline(N_phi, phi, normal_Cartesian(:,3), 2*pi/nfp, normal_z_spline)
-    call new_periodic_spline(N_phi, phi, binormal_Cartesian(:,1), 2*pi/nfp, binormal_x_spline)
-    call new_periodic_spline(N_phi, phi, binormal_Cartesian(:,2), 2*pi/nfp, binormal_y_spline)
-    call new_periodic_spline(N_phi, phi, binormal_Cartesian(:,3), 2*pi/nfp, binormal_z_spline)
+    call new_periodic_spline(N_phi, phi, normal_cylindrical(:,1), 2*pi/nfp, normal_R_spline)
+    call new_periodic_spline(N_phi, phi, normal_cylindrical(:,2), 2*pi/nfp, normal_phi_spline)
+    call new_periodic_spline(N_phi, phi, normal_cylindrical(:,3), 2*pi/nfp, normal_z_spline)
+    call new_periodic_spline(N_phi, phi, binormal_cylindrical(:,1), 2*pi/nfp, binormal_R_spline)
+    call new_periodic_spline(N_phi, phi, binormal_cylindrical(:,2), 2*pi/nfp, binormal_phi_spline)
+    call new_periodic_spline(N_phi, phi, binormal_cylindrical(:,3), 2*pi/nfp, binormal_z_spline)
 
     rootSolve_abserr = 1.0e-10_dp
     rootSolve_relerr = 1.0e-10_dp
@@ -86,27 +88,34 @@ contains
        call delete_periodic_spline(Y1_spline)
     end do
     
-    print *,"phi0_2D:"
-    do j_theta = 1,N_theta
-       print "(*(f7.3))",phi0_2D(j_theta,:)
-    end do
-    print *,"R_2D:"
-    do j_theta = 1,N_theta
-       print "(*(f7.3))",R_2D(j_theta,:)
-    end do
-    print *,"z_2D:"
-    do j_theta = 1,N_theta
-       print "(*(f7.3))",Z_2D(j_theta,:)
-    end do
+!!$    print *,"N_theta:"
+!!$    print *,N_theta
+!!$    print *,"N_zeta:"
+!!$    print *,N_phi_conversion
+!!$    print *,"phi0_2D:"
+!!$    do j_theta = 1,N_theta
+!!$       !print "(*(f7.3))",phi0_2D(j_theta,:)
+!!$       print "(*(f20.15))",phi0_2D(j_theta,:)
+!!$    end do
+!!$    print *,"R_2D:"
+!!$    do j_theta = 1,N_theta
+!!$       !print "(*(f7.3))",R_2D(j_theta,:)
+!!$       print "(*(f20.15))",R_2D(j_theta,:)
+!!$    end do
+!!$    print *,"z_2D:"
+!!$    do j_theta = 1,N_theta
+!!$       !print "(*(f7.3))",Z_2D(j_theta,:)
+!!$       print "(*(f20.15))",Z_2D(j_theta,:)
+!!$    end do
 
     deallocate(theta,phi_conversion,R_2D,z_2D)
     call delete_periodic_spline(R0_spline)
     call delete_periodic_spline(z0_spline)
-    call delete_periodic_spline(normal_x_spline)
-    call delete_periodic_spline(normal_y_spline)
+    call delete_periodic_spline(normal_R_spline)
+    call delete_periodic_spline(normal_phi_spline)
     call delete_periodic_spline(normal_z_spline)
-    call delete_periodic_spline(binormal_x_spline)
-    call delete_periodic_spline(binormal_y_spline)
+    call delete_periodic_spline(binormal_R_spline)
+    call delete_periodic_spline(binormal_phi_spline)
     call delete_periodic_spline(binormal_z_spline)
 
   contains
@@ -119,12 +128,27 @@ contains
 
       real(dp) :: Frenet_to_cylindrical_residual, phi0
       real(dp) :: total_x, total_y, R0_at_phi0, X1_at_phi0, Y1_at_phi0
+      real(dp) :: cosphi0, sinphi0
+      real(dp) :: normal_R, normal_phi, normal_x, normal_y
+      real(dp) :: binormal_R, binormal_phi, binormal_x, binormal_y
       
-      R0_at_phi0 = periodic_splint(phi0,R0_spline)
-      X1_at_phi0 = periodic_splint(phi0,X1_spline)
-      Y1_at_phi0 = periodic_splint(phi0,Y1_spline)
-      total_x = R0_at_phi0 * cos(phi0) + r * (X1_at_phi0 * periodic_splint(phi0,normal_x_spline) + Y1_at_phi0 * periodic_splint(phi0,binormal_x_spline))
-      total_y = R0_at_phi0 * sin(phi0) + r * (X1_at_phi0 * periodic_splint(phi0,normal_y_spline) + Y1_at_phi0 * periodic_splint(phi0,binormal_y_spline))
+      sinphi0 = sin(phi0)
+      cosphi0 = cos(phi0)
+      R0_at_phi0   = periodic_splint(phi0,R0_spline)
+      X1_at_phi0   = periodic_splint(phi0,X1_spline)
+      Y1_at_phi0   = periodic_splint(phi0,Y1_spline)
+      normal_R     = periodic_splint(phi0,normal_R_spline)
+      normal_phi   = periodic_splint(phi0,normal_phi_spline)
+      binormal_R   = periodic_splint(phi0,binormal_R_spline)
+      binormal_phi = periodic_splint(phi0,binormal_phi_spline)
+
+      normal_x   =   normal_R * cosphi0 -   normal_phi * sinphi0
+      normal_y   =   normal_R * sinphi0 +   normal_phi * cosphi0
+      binormal_x = binormal_R * cosphi0 - binormal_phi * sinphi0
+      binormal_y = binormal_R * sinphi0 + binormal_phi * cosphi0
+
+      total_x = R0_at_phi0 * cosphi0 + r * (X1_at_phi0 * normal_x + Y1_at_phi0 * binormal_x)
+      total_y = R0_at_phi0 * sinphi0 + r * (X1_at_phi0 * normal_y + Y1_at_phi0 * binormal_y)
       Frenet_to_cylindrical_residual = atan2(total_y, total_x) - phi_target
 
     end function Frenet_to_cylindrical_residual
@@ -139,14 +163,31 @@ contains
       real(dp), intent(in) :: phi0
       real(dp), intent(out) :: total_R, total_z
       real(dp) :: total_x, total_y, R0_at_phi0, z0_at_phi0, X1_at_phi0, Y1_at_phi0
+      real(dp) :: cosphi0, sinphi0
+      real(dp) :: normal_R, normal_phi, normal_x, normal_y, normal_z
+      real(dp) :: binormal_R, binormal_phi, binormal_x, binormal_y, binormal_z
       
-      R0_at_phi0 = periodic_splint(phi0,R0_spline)
-      z0_at_phi0 = periodic_splint(phi0,z0_spline)
-      X1_at_phi0 = periodic_splint(phi0,X1_spline)
-      Y1_at_phi0 = periodic_splint(phi0,Y1_spline)
-      total_x = R0_at_phi0 * cos(phi0) + r * (X1_at_phi0 * periodic_splint(phi0,normal_x_spline) + Y1_at_phi0 * periodic_splint(phi0,binormal_x_spline))
-      total_y = R0_at_phi0 * sin(phi0) + r * (X1_at_phi0 * periodic_splint(phi0,normal_y_spline) + Y1_at_phi0 * periodic_splint(phi0,binormal_y_spline))
-      total_z = z0_at_phi0             + r * (X1_at_phi0 * periodic_splint(phi0,normal_z_spline) + Y1_at_phi0 * periodic_splint(phi0,binormal_z_spline))
+      sinphi0 = sin(phi0)
+      cosphi0 = cos(phi0)
+      R0_at_phi0   = periodic_splint(phi0,R0_spline)
+      z0_at_phi0   = periodic_splint(phi0,z0_spline)
+      X1_at_phi0   = periodic_splint(phi0,X1_spline)
+      Y1_at_phi0   = periodic_splint(phi0,Y1_spline)
+      normal_R     = periodic_splint(phi0,normal_R_spline)
+      normal_phi   = periodic_splint(phi0,normal_phi_spline)
+      normal_z     = periodic_splint(phi0,normal_z_spline)
+      binormal_R   = periodic_splint(phi0,binormal_R_spline)
+      binormal_phi = periodic_splint(phi0,binormal_phi_spline)
+      binormal_z   = periodic_splint(phi0,binormal_z_spline)
+
+      normal_x   =   normal_R * cosphi0 -   normal_phi * sinphi0
+      normal_y   =   normal_R * sinphi0 +   normal_phi * cosphi0
+      binormal_x = binormal_R * cosphi0 - binormal_phi * sinphi0
+      binormal_y = binormal_R * sinphi0 + binormal_phi * cosphi0
+
+      total_x = R0_at_phi0 * cosphi0 + r * (X1_at_phi0 * normal_x + Y1_at_phi0 * binormal_x)
+      total_y = R0_at_phi0 * sinphi0 + r * (X1_at_phi0 * normal_y + Y1_at_phi0 * binormal_y)
+      total_z = z0_at_phi0           + r * (X1_at_phi0 * normal_z + Y1_at_phi0 * binormal_z)
       total_R = sqrt(total_x * total_x + total_y * total_y)
 
     end subroutine Frenet_to_cylindrical_1_point
