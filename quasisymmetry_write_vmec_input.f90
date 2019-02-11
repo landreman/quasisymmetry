@@ -5,6 +5,7 @@ subroutine quasisymmetry_write_vmec_input
   use vmec_input, only: vmec_nfp => nfp, lasym, ntor, raxis_cc, raxis_cs, zaxis_cc, zaxis_cs, &
        read_indata_namelist, write_indata_namelist, lfreeb, RBC, RBS, ZBC, ZBS
   use vparams, only: ntord
+  use quasisymmetry_Frenet_to_cylindrical_mod
 
   implicit none
 

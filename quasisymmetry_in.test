@@ -23,6 +23,11 @@
 
  vmec_template_filename = 'input.li383_1.4m'
 
+ r = 0.05
+
+ !finite_r_option = 'linear'
+ finite_r_option = 'nonlinear'
+
  ! QA example:
  !nfp = 3
  !R0c = 1 0.03
