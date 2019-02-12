@@ -21,12 +21,12 @@
 
  max_elongation_to_keep = 10
 
- vmec_template_filename = 'input.li383_1.4m'
+ vmec_template_filename = 'input.li383_vacuum'
 
- r = 0.05
+ r = 0.1
 
- !finite_r_option = 'linear'
- finite_r_option = 'nonlinear'
+ finite_r_option = 'linear'
+ !finite_r_option = 'nonlinear'
 
  ! QA example:
  !nfp = 3
@@ -35,11 +35,11 @@
  !eta_bar = -1.0
 
  ! QA example for paper
- !nfp = 3
- !R0c = 1 0.045
- !Z0s = 0 -0.045
- !eta_bar = -0.90
- !sigma_initial = 0.0
+ nfp = 3
+ R0c = 1 0.045
+ Z0s = 0 -0.045
+ eta_bar = -0.90
+ sigma_initial = 0.0
 
  ! QH example:
  !nfp = 4
@@ -48,10 +48,10 @@
  !eta_bar = 3.0
 
  ! QH example for paper
- nfp = 4
- R0c = 1  0.265d+0
- Z0s = 0  -0.21d+0
- eta_bar = -2.25d+0
+ !nfp = 4
+ !R0c = 1  0.265d+0
+ !Z0s = 0  -0.21d+0
+ !eta_bar = -2.25d+0
 
  ! QA without stellarator symmetry example for paper
  !nfp = 3

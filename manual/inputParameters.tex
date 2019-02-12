@@ -67,6 +67,22 @@ In this section we describe all the parameters which can be included in the inpu
 
 \myhrule
 
+\param{finite\_r\_option}
+{string}
+{{\ttfamily "linear"}}
+{Only when \parlink{general\_option}={\ttfamily "single"}}
+{Method used to generate a finite-minor-radius shape from the near-axis expansion.\\
+
+{\ttfamily finite\_r\_option} = {\ttfamily "linear"}: Use the method described in section 4.1 of \cite{PaperII}. The code that implements this method is uncomplicated and it should always work robustly. However, at least in the case of
+section 5.2 of \cite{PaperII} this method was found to give less accurate quasisymmetry than the nonlinear method.
+ \\
+
+{\ttfamily finite\_r\_option} = {\ttfamily "nonlinear"}: Use the method described in section 4.2 of \cite{PaperII}. 
+This method requires nonlinear root finding and spline interpolation, so the code to implement it is much more complicated. However at least in the case of section 5.2 of \cite{PaperII} this method was found to give more accurate quasisymmetry than the linearized method.
+}
+
+\myhrule
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 

@@ -1,5 +1,9 @@
 module quasisymmetry_Frenet_to_cylindrical_mod
 
+  ! This module is an implementation of the algorithm described in section 4.2 of
+  ! the Landreman-Sengupta-Plunk Journal of Plasma Physics (2019) paper, to
+  ! generate a finite-r surface from the near-axis expansion.
+
   ! The MATLAB version of this algorithm can be found in
   ! m20180501_01_quasisymmetricEquilibria_Frenet_altTransformation.m
 
@@ -14,13 +18,13 @@ contains
   subroutine quasisymmetry_Frenet_to_cylindrical
 
     use quasisymmetry_variables
-    use vmec_input, only: vmec_nfp => nfp, lasym, ntor, RBC, RBS, ZBC, ZBS
-    use vparams, only: ntord
+    use vmec_input, only: vmec_nfp => nfp, lasym, mpol, ntor, RBC, RBS, ZBC, ZBS
+    use vparams, only: ntord, mpol1d
     use quasisymmetry_splines
 
     implicit none
 
-    integer :: N_theta, j_theta, N_phi_conversion, j_phi, i
+    integer :: N_theta, j_theta, N_phi_conversion, j_phi, i, m, n, nmin
     real(dp) :: costheta, sintheta, final_R, final_z
     real(dp), dimension(:,:), allocatable :: R_2D, z_2D, phi0_2D
     real(dp), dimension(:), allocatable :: theta, phi_conversion
@@ -28,12 +32,12 @@ contains
     type(periodic_spline) :: normal_R_spline, normal_phi_spline, normal_z_spline, binormal_R_spline, binormal_phi_spline, binormal_z_spline
     type(periodic_spline) :: X1_spline, Y1_spline, R0_spline, z0_spline
     real(dp) :: rootSolve_abserr, rootSolve_relerr, phi0_rootSolve_min, phi0_rootSolve_max
-    real(dp) :: phi0_solution, phi_target
+    real(dp) :: phi0_solution, phi_target, factor, factor2, angle, cosangle, sinangle
     integer :: fzeroFlag
 
     !----------------------------------------------
 
-    N_theta = 28
+    N_theta = 20 ! Probably other values would work
     N_phi_conversion = N_phi
     allocate(theta(N_theta))
     allocate(phi_conversion(N_phi_conversion))
@@ -108,7 +112,6 @@ contains
 !!$       print "(*(f20.15))",Z_2D(j_theta,:)
 !!$    end do
 
-    deallocate(theta,phi_conversion,R_2D,z_2D)
     call delete_periodic_spline(R0_spline)
     call delete_periodic_spline(z0_spline)
     call delete_periodic_spline(normal_R_spline)
@@ -118,11 +121,54 @@ contains
     call delete_periodic_spline(binormal_phi_spline)
     call delete_periodic_spline(binormal_z_spline)
 
+
+
+
+    ! Fourier transform the result.
+    ! This is not a rate-limiting step, so for clarity of code, we don't bother with an FFT.
+    mpol = min(N_theta          / 2, mpol1d)
+    ntor = min(N_phi_conversion / 2, ntord)
+    RBC = 0
+    RBS = 0
+    ZBC = 0
+    ZBS = 0
+    factor = (2.0d+0) / (N_theta * N_phi_conversion)
+    do j_phi = 1, N_phi_conversion
+       do j_theta = 1, N_theta
+          do m = 0, mpol
+             nmin = -ntor
+             if (m==0) nmin = 1
+             do n = nmin, ntor
+                angle = m * theta(j_theta) - n * nfp * phi_conversion(j_phi)
+                sinangle = sin(angle)
+                cosangle = cos(angle)
+                factor2 = factor
+                ! The next 2 lines ensure inverse Fourier transform(Fourier transform) = identity
+                if (mod(N_theta,         2) == 0 .and.     m  == (N_theta/2))          factor2 = factor2 / 2
+                if (mod(N_phi_conversion,2) == 0 .and. abs(n) == (N_phi_conversion/2)) factor2 = factor2 / 2
+                RBC(n,m) = RBC(n,m) + R_2D(j_theta, j_phi) * cosangle * factor2
+                RBS(n,m) = RBS(n,m) + R_2D(j_theta, j_phi) * sinangle * factor2
+                ZBC(n,m) = ZBC(n,m) + Z_2D(j_theta, j_phi) * cosangle * factor2
+                ZBS(n,m) = ZBS(n,m) + Z_2D(j_theta, j_phi) * sinangle * factor2
+             end do
+          end do
+       end do
+    end do
+    RBC(0,0) = sum(R_2D) / (N_theta * N_phi_conversion)
+    ZBC(0,0) = sum(Z_2D) / (N_theta * N_phi_conversion)
+    
+    if (.not. lasym) then
+       RBS = 0
+       ZBC = 0
+    end if
+
+    deallocate(theta,phi_conversion,R_2D,z_2D)
+
   contains
 
     function Frenet_to_cylindrical_residual(phi0)
       ! Given a point on the axis with toroidal angle phi0, compute phi for the associated point at r>0,
-      ! and find the difference between this phi and the target.
+      ! and find the difference between this phi and the target value of phi.
 
       implicit none
 
