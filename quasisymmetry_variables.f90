@@ -79,7 +79,7 @@ module quasisymmetry_variables
   real(dp), dimension(:), allocatable :: d_l_d_phi, curvature, torsion, B1Squared_over_curvatureSquared
   real(dp), dimension(:,:), allocatable :: tangent_cylindrical, normal_cylindrical, binormal_cylindrical
   real(dp), dimension(:,:), allocatable :: tangent_Cartesian, normal_Cartesian, binormal_Cartesian
-  real(dp), dimension(:), allocatable :: sigma, X1s, X1c, Y1s, Y1c, R1s, R1c, Z1s, Z1c, elongation
+  real(dp), dimension(:), allocatable :: sigma, X1s, X1c, Y1s, Y1c, R1s, R1c, Z1s, Z1c, elongation, elongation_in_Rz_plane
   real(dp), dimension(:), allocatable :: X1s_untwisted, X1c_untwisted, Y1s_untwisted, Y1c_untwisted
   real(dp) :: B0_over_abs_G0, iota, max_elongation, rms_curvature, max_curvature, axis_length
   real(dp) :: max_precise_elongation = 10 ! Above this value, we won't do a precise solve, just take maxval over the phi grid.

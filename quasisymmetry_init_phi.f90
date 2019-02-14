@@ -26,6 +26,7 @@ subroutine quasisymmetry_init_phi
   if (allocated(Z1c)) deallocate(Z1c)
   if (allocated(sigma)) deallocate(sigma)
   if (allocated(elongation)) deallocate(elongation)
+  if (allocated(elongation_in_Rz_plane)) deallocate(elongation_in_Rz_plane)
 
   if (allocated(Jacobian)) deallocate(Jacobian)
   if (allocated(residual)) deallocate(residual)
@@ -50,6 +51,7 @@ subroutine quasisymmetry_init_phi
   allocate(Z1c(N_phi))
   allocate(sigma(N_phi))
   allocate(elongation(N_phi))
+  allocate(elongation_in_Rz_plane(N_phi))
 
   matrix_size = N_phi
   allocate(Jacobian(matrix_size, matrix_size))

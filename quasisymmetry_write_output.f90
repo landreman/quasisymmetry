@@ -112,6 +112,7 @@ subroutine quasisymmetry_write_output
        vn_Y1c_untwisted = "Y1c_untwisted", &
        vn_Y1s_untwisted = "Y1s_untwisted", &
        vn_elongation = "elongation", &
+       vn_elongation_in_Rz_plane = "elongation_in_Rz_plane", &
        vn_X20 = "X20", &
        vn_X2s = "X2s", &
        vn_X2c = "X2c", &
@@ -273,6 +274,7 @@ subroutine quasisymmetry_write_output
      call cdf_define(ncid, vn_Y1c_untwisted, Y1c_untwisted, dimname=N_phi_dim)
      call cdf_define(ncid, vn_Y1s_untwisted, Y1s_untwisted, dimname=N_phi_dim)
      call cdf_define(ncid, vn_elongation, elongation, dimname=N_phi_dim)
+     call cdf_define(ncid, vn_elongation_in_Rz_plane, elongation_in_Rz_plane, dimname=N_phi_dim)
      if (order_r_squared) then
         call cdf_define(ncid, vn_X20, X20, dimname=N_phi_dim)
         call cdf_define(ncid, vn_X2s, X2s, dimname=N_phi_dim)
@@ -430,6 +432,7 @@ subroutine quasisymmetry_write_output
      call cdf_write(ncid, vn_Y1c_untwisted, Y1c_untwisted)
      call cdf_write(ncid, vn_Y1s_untwisted, Y1s_untwisted)
      call cdf_write(ncid, vn_elongation, elongation)
+     call cdf_write(ncid, vn_elongation_in_Rz_plane, elongation_in_Rz_plane)
      if (order_r_squared) then
         call cdf_write(ncid, vn_X20, X20)
         call cdf_write(ncid, vn_X2s, X2s)

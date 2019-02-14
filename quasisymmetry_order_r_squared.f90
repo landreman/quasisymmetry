@@ -284,6 +284,10 @@ subroutine quasisymmetry_order_r_squared
   X20 = right_hand_side(1:N_phi)
   Y20 = right_hand_side((N_phi+1):(2*N_phi))
 
+  ! Now that we have X20 and Y20 explicitly, we can reconstruct Y2s, Y2c, and B20:
+  Y2s = Y2s_inhomogeneous + Y2s_from_X20 * X20
+  Y2c = Y2c_inhomogeneous + Y2c_from_X20 * X20 + Y20
+
   B20 = B0 * (curvature * X20 - B0_over_abs_G0 * matmul(d_d_zeta,Z20) + (0.5d+0) * eta_bar * eta_bar - mu0 * p2 / (B0 * B0) &
        - (0.25d+0) * B0_over_abs_G0 * B0_over_abs_G0 * (qc * qc + qs * qs + rc * rc + rs * rs))
 
@@ -291,6 +295,10 @@ subroutine quasisymmetry_order_r_squared
   print *,X20
   print *,"Here comes Y20:"
   print *,Y20
+  print *,"Here comes Y2s:"
+  print *,Y2s
+  print *,"Here comes Y2c:"
+  print *,Y2c
   print *,"Here comes B20:"
   print *,B20
 

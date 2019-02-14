@@ -3,7 +3,8 @@ subroutine quasisymmetry_write_vmec_input
   use quasisymmetry_variables
   use safe_open_mod
   use vmec_input, only: vmec_nfp => nfp, lasym, ntor, raxis_cc, raxis_cs, zaxis_cc, zaxis_cs, &
-       read_indata_namelist, write_indata_namelist, lfreeb, RBC, RBS, ZBC, ZBS, phiedge
+       read_indata_namelist, write_indata_namelist, lfreeb, RBC, RBS, ZBC, ZBS, phiedge, AM, PMASS_TYPE, PRES_SCALE, &
+       CURTOR, NCURR, PCURR_TYPE, AC
   use vparams, only: ntord
   use quasisymmetry_Frenet_to_cylindrical_mod
 
@@ -11,7 +12,7 @@ subroutine quasisymmetry_write_vmec_input
 
   integer :: iunit = 40, istat
   integer :: max_n, n
-  real(dp) :: half_sum, half_difference
+  real(dp) :: half_sum, half_difference, temp
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Read in the VMEC template namelist:
@@ -39,6 +40,21 @@ subroutine quasisymmetry_write_vmec_input
   vmec_nfp = nfp
   lfreeb = .false.
   phiedge = pi * r * r * sign_psi * B0
+
+  ! Set pressure profile:
+  temp = - p2 * r * r
+  AM = 0
+  AM(0) = temp  ! Note: AM uses 0-based indicies!
+  AM(1) = -temp
+  PMASS_TYPE='power_series'
+  PRES_SCALE=1
+
+  ! Set current profile:
+  NCURR = 1
+  PCURR_TYPE = 'power_series'
+  AC = 0
+  AC(0) = 1 ! Note: AC uses 0-based indicies!
+  CURTOR = 2 * pi / mu0 * I2_over_B0 * B0 * r * r
 
   ! The output is not stellarator-symmetric if (1) R0s is nonzero, (2) Z0c is nonzero, or (3) sigma_initial is nonzero:
   lasym = (maxval(abs(R0s))>0 .or. maxval(abs(Z0c)) > 0 .or. abs(sigma_initial) > 0)

@@ -148,7 +148,6 @@ contains
     end if
     deallocate(X_at_this_theta, Y_at_this_theta, Z_at_this_theta)
 
-
     ! Fourier transform the result.
     ! This is not a rate-limiting step, so for clarity of code, we don't bother with an FFT.
     mpol = min(N_theta          / 2, mpol1d)
@@ -236,6 +235,9 @@ contains
       end if
 
       Frenet_to_cylindrical_residual = atan2(total_y, total_x) - phi_target
+      ! We expect the residual to be less than pi in absolute value, so if it is not, the reason must be the branch cut:
+      if (Frenet_to_cylindrical_residual >  pi) Frenet_to_cylindrical_residual = Frenet_to_cylindrical_residual - 2*pi
+      if (Frenet_to_cylindrical_residual < -pi) Frenet_to_cylindrical_residual = Frenet_to_cylindrical_residual + 2*pi
 
     end function Frenet_to_cylindrical_residual
 

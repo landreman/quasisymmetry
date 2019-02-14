@@ -39,6 +39,7 @@ sigma = f.variables['sigma'][()]
 curvature = f.variables['curvature'][()]
 torsion = f.variables['torsion'][()]
 elongation = f.variables['elongation'][()]
+elongation_in_Rz_plane = f.variables['elongation_in_Rz_plane'][()]
 
 order_r_squared_int = f.variables["order_r_squared__logical__"][()]
 order_r_squared = (order_r_squared_int == 1)
@@ -93,10 +94,10 @@ fig.patch.set_facecolor('white')
 
 if order_r_squared:
     numRows = 4
-    numCols = 4
+    numCols = 5
 else:
     numRows = 2
-    numCols = 3
+    numCols = 4
 plotNum = 1
 
 plt.subplot(numRows,numCols,plotNum)
@@ -138,6 +139,15 @@ plt.subplot(numRows,numCols,plotNum)
 plotNum += 1
 plt.plot(phi,sigma)
 plt.title('sigma')
+plt.xlabel('$\phi$')
+plt.xlim(my_xlim)
+
+plt.subplot(numRows,numCols,plotNum)
+plotNum += 1
+plt.plot(phi,elongation,label='XY plane')
+plt.plot(phi,elongation_in_Rz_plane,label='Rz plane')
+plt.title('elongation')
+plt.legend(loc=0,fontsize=6)
 plt.xlabel('$\phi$')
 plt.xlim(my_xlim)
 
@@ -257,7 +267,10 @@ from numpy.matlib import repmat
 
 fig = plt.figure(figsize=(16,7))
 fig.patch.set_facecolor('white')
-fig.subplots_adjust(bottom=-0.15,top=1.2)
+
+# Zoom in:
+factor = 1
+fig.subplots_adjust(bottom=-factor+0.05,top=1+factor)
 
 N_theta = 40
 N_phi = 150
@@ -286,8 +299,8 @@ B = B0 * (1 + r * eta_bar * np.cos(theta2D))
 if order_r_squared:
     #B20_2D = repmat(B20,N_theta,1)
     B20_interpolated = np.interp(phi1D,phi,B20,period=2*np.pi/nfp)
-    print "B20:",B20
-    print "B20_interpolated:",B20_interpolated
+    #print "B20:",B20
+    #print "B20_interpolated:",B20_interpolated
     B20_2D = repmat(B20_interpolated,N_theta,1)
     B += r * r * (B2s * np.sin(2*theta2D) + B2c * np.cos(2*theta2D) + B20_2D)
 # Rescale to lie in [0,1]:
@@ -295,11 +308,8 @@ B_rescaled = (B - B.min()) / (B.max() - B.min())
 
 ax = fig.gca(projection='3d')
 ax.set_aspect('equal')
-#ax.plot_surface(x, y, z, facecolors = cm.jet(B_rescaled), rstride=1, cstride=1, antialiased=False)
 ax.plot_surface(x, y, z, facecolors = cm.viridis(B_rescaled), rstride=1, cstride=1, antialiased=False)
-#ax.plot_surface(x, y, z, rstride=1, cstride=1, antialiased=False)
 
-#ax.auto_scale_xyz([X.min(), X.max()], [X.min(), X.max()], [X.min(), X.max()])
 max_range = np.array([x.max()-x.min(), y.max()-y.min(), z.max()-z.min()]).max() / 2.0
 
 mid_x = (x.max()+x.min()) * 0.5
