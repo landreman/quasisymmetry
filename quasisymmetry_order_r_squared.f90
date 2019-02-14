@@ -296,7 +296,7 @@ subroutine quasisymmetry_order_r_squared
 
   normalizer = 1 / sum(d_l_d_phi)
   B20_mean = sum(B20 * d_l_d_phi) * normalizer
-  B20_residual = sqrt(sum((B20 - B20_mean) * (B20 - B20_mean) * d_l_d_phi) * normalizer)
+  B20_residual = sqrt(sum((B20 - B20_mean) * (B20 - B20_mean) * d_l_d_phi) * normalizer) / B0
 
   deallocate(V1, V2, V3, qs, qc, rs, rc)
   deallocate(matrix, right_hand_side)
