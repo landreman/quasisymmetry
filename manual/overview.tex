@@ -47,9 +47,10 @@ Any time after you have cloned the repository in this way, you can download futu
 
 The code has two basic modes of operation, {\ttfamily general\_option = "single"} vs {\ttfamily "scan"}. 
 When {\ttfamily general\_option = "single"}, a single set of input parameters (magnetic axis shape etc) is
-considered, and a VMEC input file is generated. No NetCDF file is generated. When {\ttfamily general\_option = "scan"},
-the input parameters are scanned, and no VMEC input file is generated. The results of the scan
-are saved in a NetCDF file.
+considered, and a VMEC input file is generated. When {\ttfamily general\_option = "scan"},
+the input parameters are scanned, and no VMEC input file is generated. For either option, results
+are saved in a NetCDF file. The variables that are saved in the NetCDF file are different depending on
+{\ttfamily general\_option}.
 
 \section{Parallelization}
 

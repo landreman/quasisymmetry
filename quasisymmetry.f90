@@ -34,7 +34,6 @@ program quasisymmetry
      call quasisymmetry_write_vmec_input()
   case (general_option_scan)
      call quasisymmetry_scan()
-     call quasisymmetry_write_output()
   case default
      print *,"Invalid general_option:",general_option
      stop
@@ -45,7 +44,7 @@ program quasisymmetry
   call cpu_time(end_time)
   total_time = end_time - start_time
 
-  !call write_output()
+  call quasisymmetry_write_output()
 
   if (proc0) then
      print "(a)"," -------------------------------------------------------------"
