@@ -21,8 +21,10 @@ This latter paper is available in the Git repository for this program.
 Most of these libraries will be available on any high-performace computing system. {\ttfamily LAPACK}
 is available on Apple Mac computers (as part of the Accelerate framework) if you install Xcode through the App store.
 
-The plotting script {\ttfamily quasisymmetryPlot} uses \python,
-{\ttfamily numpy}, {\ttfamily scipy}, and {\ttfamily matplotlib}.
+The {\ttfamily make test} scripts use \python~(version 2.7),
+{\ttfamily numpy}, and {\ttfamily scipy}.
+The plotting script {\ttfamily quasisymmetryPlotScan} uses the same \python~libraries
+as well as {\ttfamily matplotlib}.
 
 \section{Cloning the repository}
 
@@ -47,9 +49,10 @@ Any time after you have cloned the repository in this way, you can download futu
 
 The code has two basic modes of operation, {\ttfamily general\_option = "single"} vs {\ttfamily "scan"}. 
 When {\ttfamily general\_option = "single"}, a single set of input parameters (magnetic axis shape etc) is
-considered, and a VMEC input file is generated. No NetCDF file is generated. When {\ttfamily general\_option = "scan"},
-the input parameters are scanned, and no VMEC input file is generated. The results of the scan
-are saved in a NetCDF file.
+considered, and a VMEC input file is generated. When {\ttfamily general\_option = "scan"},
+the input parameters are scanned, and no VMEC input file is generated. For either option, results
+are saved in a NetCDF file. The variables that are saved in the NetCDF file are different depending on
+{\ttfamily general\_option}.
 
 \section{Parallelization}
 
@@ -58,20 +61,20 @@ that parallelization is unnecessary. However parallelization is useful when doin
 in which case the calculation is `embarassingly parallel'. MPI is used for this latter case.
 
 
-%\section{\ttfamily make test}
-%
-%To test that your \quasisymmetry~executable is working, you can run {\ttfamily make test}.  Doing so will run
-%\quasisymmetry~for some or all of the examples in the {\ttfamily examples/} directories.
-%After each example completes, several of the output quantities
-%will be checked, using the
-%{\ttfamily tests.py} script in the example's directory.
-%The {\ttfamily make test} feature is very useful when making changes to the code, since it allows you to check
-%that your code modifications have not broken anything and that previous results
-%can be recovered.
-%
-%If you run {\ttfamily make retest},
-%no new runs of \quasisymmetry~will be performed, but the {\ttfamily tests.py} script
-%will be run on any existing output files in the \path{/examples/} directories.
+\section{\ttfamily make test}
+
+To test that your \quasisymmetry~executable is working, you can run {\ttfamily make test}.  Doing so will run
+\quasisymmetry~for some or all of the examples in the {\ttfamily examples/} directories.
+After each example completes, several of the output quantities
+will be checked, using the
+{\ttfamily tests.py} script in the example's directory.
+The {\ttfamily make test} feature is very useful when making changes to the code, since it allows you to check
+that your code modifications have not broken anything and that previous results
+can be recovered.
+
+If you run {\ttfamily make retest},
+no new runs of \quasisymmetry~will be performed, but the {\ttfamily tests.py} script
+will be run on any existing output files in the \path{/examples/} directories.
 
 \section{Units}
 
@@ -79,7 +82,7 @@ As in \vmec, all of \quasisymmetry's input and output parameters use SI units: m
 
 \section{Plotting results}
 
-The python program \quasisymmetryPlot~will display some of the results from a \quasisymmetry~parameter scan.
+The python program \quasisymmetryPlotScan~will display some of the results from a \quasisymmetry~parameter scan.
 
 \section{Output quantities}
 

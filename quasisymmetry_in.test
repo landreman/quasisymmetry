@@ -1,6 +1,6 @@
 &quasisymmetry
- sign_G=-1
- sign_psi=-1
+ sign_G=1
+ sign_psi=1
 
  resolution_option = 'fixed'
  !resolution_option = 'adaptive'
@@ -32,6 +32,9 @@
  finite_r_option = 'nonlinear'
 
  order_r_squared = .true.
+
+ !finite_r_option = 'linear'
+ finite_r_option = 'nonlinear'
 
  ! QA example:
  !nfp = 3

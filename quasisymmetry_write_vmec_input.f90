@@ -78,6 +78,7 @@ subroutine quasisymmetry_write_vmec_input
      call quasisymmetry_Frenet_to_cylindrical()
 
   case (finite_r_option_linear)
+     mpol_nonzero = 1
 
      ! Handle the m=0 modes of the boundary, which are the same as the axis shape:
      RBC(0:max_n,0) = raxis_cc(0:max_n)

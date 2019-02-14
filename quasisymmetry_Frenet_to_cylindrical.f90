@@ -153,6 +153,7 @@ contains
     ! This is not a rate-limiting step, so for clarity of code, we don't bother with an FFT.
     mpol = min(N_theta          / 2, mpol1d)
     ntor = min(N_phi_conversion / 2, ntord)
+    mpol_nonzero = mpol
     RBC = 0
     RBS = 0
     ZBC = 0

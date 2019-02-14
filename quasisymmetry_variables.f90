@@ -113,6 +113,7 @@ module quasisymmetry_variables
   real(dp), dimension(:), allocatable :: scan_eta_bar, scan_sigma_initial
   real(dp), dimension(:,:), allocatable :: scan_R0c, scan_R0s, scan_Z0c, scan_Z0s
   real(dp) :: r = 0.1d+0
+  integer :: mpol_nonzero
 
   logical :: order_r_squared = .false.
   real(dp), dimension(:), allocatable :: X20, X2s, X2c, Y20, Y2s, Y2c, Z20, Z2s, Z2c, B20
