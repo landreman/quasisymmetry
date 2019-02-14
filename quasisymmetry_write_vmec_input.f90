@@ -3,7 +3,7 @@ subroutine quasisymmetry_write_vmec_input
   use quasisymmetry_variables
   use safe_open_mod
   use vmec_input, only: vmec_nfp => nfp, lasym, ntor, raxis_cc, raxis_cs, zaxis_cc, zaxis_cs, &
-       read_indata_namelist, write_indata_namelist, lfreeb, RBC, RBS, ZBC, ZBS
+       read_indata_namelist, write_indata_namelist, lfreeb, RBC, RBS, ZBC, ZBS, phiedge
   use vparams, only: ntord
   use quasisymmetry_Frenet_to_cylindrical_mod
 
@@ -38,6 +38,7 @@ subroutine quasisymmetry_write_vmec_input
 
   vmec_nfp = nfp
   lfreeb = .false.
+  phiedge = pi * r * r * sign_psi * B0
 
   ! The output is not stellarator-symmetric if (1) R0s is nonzero, (2) Z0c is nonzero, or (3) sigma_initial is nonzero:
   lasym = (maxval(abs(R0s))>0 .or. maxval(abs(Z0c)) > 0 .or. abs(sigma_initial) > 0)

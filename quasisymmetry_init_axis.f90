@@ -142,9 +142,9 @@ subroutine quasisymmetry_init_axis
   binormal_cylindrical(:,2) = tangent_cylindrical(:,3) * normal_cylindrical(:,1) - tangent_cylindrical(:,1) * normal_cylindrical(:,3)
   binormal_cylindrical(:,3) = tangent_cylindrical(:,1) * normal_cylindrical(:,2) - tangent_cylindrical(:,2) * normal_cylindrical(:,1)
 
-  ! The minus sign in the next line is absent in wikipedia and mathworld.wolfram.com/Torsion.html but
-  ! present in Garren & Boozer's sign convention.
-  torsion_numerator = -(0 &
+  ! We use the same sign convention for torsion as the Landreman-Sengupta-Plunk paper, wikipedia, and mathworld.wolfram.com/Torsion.html.
+  ! This sign convention is opposite to Garren & Boozer's sign convention!
+  torsion_numerator = (0 &
        + d_r_d_phi_cylindrical(:,1) * (d2_r_d_phi2_cylindrical(:,2) * d3_r_d_phi3_cylindrical(:,3) - d2_r_d_phi2_cylindrical(:,3) * d3_r_d_phi3_cylindrical(:,2)) &
        + d_r_d_phi_cylindrical(:,2) * (d2_r_d_phi2_cylindrical(:,3) * d3_r_d_phi3_cylindrical(:,1) - d2_r_d_phi2_cylindrical(:,1) * d3_r_d_phi3_cylindrical(:,3)) &
        + d_r_d_phi_cylindrical(:,3) * (d2_r_d_phi2_cylindrical(:,1) * d3_r_d_phi3_cylindrical(:,2) - d2_r_d_phi2_cylindrical(:,2) * d3_r_d_phi3_cylindrical(:,1)))

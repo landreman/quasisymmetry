@@ -23,7 +23,7 @@ is available on Apple Mac computers (as part of the Accelerate framework) if you
 
 The {\ttfamily make test} scripts use \python~(version 2.7),
 {\ttfamily numpy}, and {\ttfamily scipy}.
-The plotting script {\ttfamily quasisymmetryPlotScan} uses the same \python~libraries
+The plotting scripts {\ttfamily quasisymmetryPlotSingle}, {\ttfamily quasisymmetryPlotCompare}, and {\ttfamily quasisymmetryPlotScan} uses the same \python~libraries
 as well as {\ttfamily matplotlib}.
 
 \section{Cloning the repository}
@@ -82,6 +82,8 @@ As in \vmec, all of \quasisymmetry's input and output parameters use SI units: m
 
 \section{Plotting results}
 
+The python program \quasisymmetryPlotSingle~will display some of the results from a \quasisymmetry~calculation with {\ttfamily general\_option="single"}.
+Multiple such runs can be compared on a single figure using the script {\ttfamily quasisymmetryPlotCompare}.
 The python program \quasisymmetryPlotScan~will display some of the results from a \quasisymmetry~parameter scan.
 
 \section{Output quantities}
