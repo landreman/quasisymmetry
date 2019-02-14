@@ -12,7 +12,7 @@ subroutine quasisymmetry_order_r_squared
   real(dp), dimension(:), allocatable :: fY0_from_X20, fY0_from_Y20, fY0_inhomogeneous
   real(dp), dimension(:), allocatable :: fYs_from_X20, fYs_from_Y20, fYs_inhomogeneous
   real(dp), dimension(:), allocatable :: fYc_from_X20, fYc_from_Y20, fYc_inhomogeneous
-  real(dp) :: factor, iota_N, abs_G0_over_B0, beta_1s
+  real(dp) :: factor, iota_N, abs_G0_over_B0, beta_1s, normalizer
   real(dp), dimension(:,:), allocatable :: matrix
   real(dp), dimension(:), allocatable :: right_hand_side
   integer :: j, iunit=20
@@ -241,6 +241,26 @@ subroutine quasisymmetry_order_r_squared
 
   print *,"Here comes X2c:"
   print *,X2c
+  print *,"Here comes X2s:"
+  print *,X2s
+  print *,"Here comes Y2c_inhomogeneous:"
+  print *,Y2c_inhomogeneous
+  print *,"Here comes Y2s_inhomogeneous:"
+  print *,Y2s_inhomogeneous
+  print *," "
+  print *,"Here comes fX0_inhomogeneous:"
+  print *,fX0_inhomogeneous
+  print *,"Here comes fXs_inhomogeneous:"
+  print *,fXs_inhomogeneous
+  print *,"Here comes fXc_inhomogeneous:"
+  print *,fXc_inhomogeneous
+  print *,"Here comes fY0_inhomogeneous:"
+  print *,fY0_inhomogeneous
+  print *,"Here comes fYs_inhomogeneous:"
+  print *,fYs_inhomogeneous
+  print *,"Here comes fYc_inhomogeneous:"
+  print *,fYc_inhomogeneous
+
   print *,"Here comes right_hand_side:"
   print *,right_hand_side
 
@@ -273,6 +293,10 @@ subroutine quasisymmetry_order_r_squared
   print *,Y20
   print *,"Here comes B20:"
   print *,B20
+
+  normalizer = 1 / sum(d_l_d_phi)
+  B20_mean = sum(B20 * d_l_d_phi) * normalizer
+  B20_residual = sqrt(sum((B20 - B20_mean) * (B20 - B20_mean) * d_l_d_phi) * normalizer)
 
   deallocate(V1, V2, V3, qs, qc, rs, rc)
   deallocate(matrix, right_hand_side)

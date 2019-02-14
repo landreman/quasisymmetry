@@ -83,6 +83,14 @@ This method requires nonlinear root finding and spline interpolation, so the cod
 
 \myhrule
 
+\param{order\_r\_squared}
+{logical}
+{{\ttfamily .false.}}
+{Always}
+{If true, the surface shapes will be computed to $O(r^2)$ rather than merely $O(r)$.}
+
+\myhrule
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 
@@ -428,6 +436,14 @@ in $(R,\phi,z)$ cylindrical coordinates, or $-1$ otherwise.}
 {0.0}
 {Always}
 {Toroidal current density on the magnetic axis. This variable should usually be zero in a stellarator.  (Even in a stellarator with substantial plasma pressure, the diamagnetic and bootstrap currents vanish on the axis because the pressure gradient vanishes there.)}
+
+\myhrule
+
+\param{B0}
+{double}
+{1.0}
+{Only when \parlink{general\_option}{\ttfamily = "single"} or \parlink{order\_r\_squared}{\ttfamily = .true.}}
+{Magnitude of the magnetic field on the magnetic axis, which is a constant for quasi-axisymmetry and quasi-helical symmetry. This quantity only matters for the generated VMEC input file and for the $O(r^2)$ equations.}
 
 \myhrule
 

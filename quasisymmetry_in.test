@@ -1,6 +1,9 @@
 &quasisymmetry
- !resolution_option = 'fixed'
- resolution_option = 'adaptive'
+ sign_G=-1
+ sign_psi=-1
+
+ resolution_option = 'fixed'
+ !resolution_option = 'adaptive'
 
  general_option = 'single'
  !general_option = 'scan'
@@ -9,7 +12,7 @@
  !verbose_option = 'proc0'
  !verbose_option = 'summary'
 
- N_phi = 31
+ N_phi = 15
 
  max_N_phi = 1000
 
@@ -23,10 +26,12 @@
 
  vmec_template_filename = 'input.li383_vacuum'
 
- r = 0.1
+ r = 0.05d+0
 
- finite_r_option = 'linear'
- !finite_r_option = 'nonlinear'
+ !finite_r_option = 'linear'
+ finite_r_option = 'nonlinear'
+
+ order_r_squared = .true.
 
  ! QA example:
  !nfp = 3
@@ -36,10 +41,10 @@
 
  ! QA example for paper
  nfp = 3
- R0c = 1 0.045
- Z0s = 0 -0.045
- eta_bar = -0.90
- sigma_initial = 0.0
+ R0c = 1 0.045d+0
+ Z0s = 0 -0.045d+0
+ eta_bar = -0.9d+0
+ sigma_initial = 1.0d+0
 
  ! QH example:
  !nfp = 4
