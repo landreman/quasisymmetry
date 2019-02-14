@@ -52,6 +52,7 @@ subroutine quasisymmetry_read_input
 
   verbose = (trim(verbose_option)==verbose_option_all .or. (proc0 .and. trim(verbose_option)==verbose_option_proc0))
 
+  if (proc0) print *,"Number of field periods (nfp):",nfp
 
 !!$  ! Count the number of nonzero entries at the beginning of N_phis:
 !!$  N_N_phis = 0
