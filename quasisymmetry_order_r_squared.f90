@@ -12,10 +12,11 @@ subroutine quasisymmetry_order_r_squared
   real(dp), dimension(:), allocatable :: fY0_from_X20, fY0_from_Y20, fY0_inhomogeneous
   real(dp), dimension(:), allocatable :: fYs_from_X20, fYs_from_Y20, fYs_inhomogeneous
   real(dp), dimension(:), allocatable :: fYc_from_X20, fYc_from_Y20, fYc_inhomogeneous
-  real(dp) :: factor, iota_N, abs_G0_over_B0, beta_1s, normalizer
+  real(dp) :: factor, iota_N, abs_G0_over_B0, beta_1s, normalizer, max_eq1residual, max_eq2residual
   real(dp), dimension(:,:), allocatable :: matrix
   real(dp), dimension(:), allocatable :: right_hand_side
   integer :: j, iunit=20
+  real(dp), dimension(:), allocatable :: fX0, fXs, fXc, fY0, fYs, fYc, eq1residual, eq2residual
   ! Variables needed by LAPACK:
   integer :: INFO
   integer, dimension(:), allocatable :: IPIV
@@ -301,6 +302,55 @@ subroutine quasisymmetry_order_r_squared
   print *,Y2c
   print *,"Here comes B20:"
   print *,B20
+
+  if (.true.) then
+     ! For a sanity test, compute the residuals of two equations in a more direct way (now that X20 and Y20 are available explicitly) to make sure we get 0.
+     allocate(fX0(N_phi))
+     allocate(fXs(N_phi))
+     allocate(fXc(N_phi))
+     allocate(fY0(N_phi))
+     allocate(fYs(N_phi))
+     allocate(fYc(N_phi))
+     allocate(eq1residual(N_phi))
+     allocate(eq2residual(N_phi))
+
+     fX0 = matmul(d_d_zeta,X20) - torsion * abs_G0_over_B0 * Y20 + curvature * abs_G0_over_B0 * Z20 &
+          -4*sign_G*sign_psi*abs_G0_over_B0*(Y2c * Z2s - Y2s * Z2c) &
+          - sign_psi * I2_over_B0 * (curvature/2 * X1c * Y1c - 2 * Y20) * abs_G0_over_B0 + abs_G0_over_B0 * beta_1s * Y1c / 2
+
+     fXs = matmul(d_d_zeta,X2s) - 2 * iota_N * X2c - torsion * abs_G0_over_B0 * Y2s + curvature * abs_G0_over_B0 * Z2s &
+          -4*sign_G*sign_psi*abs_G0_over_B0*(-Y20 * Z2c + Y2c * Z20) &
+          -sign_psi * I2_over_B0 * (curvature/2 * X1c * Y1s - 2 * Y2s) * abs_G0_over_B0 - abs_G0_over_B0 * beta_1s * Y1s / 2
+
+     fXc = matmul(d_d_zeta,X2c) + 2 * iota_N * X2s - torsion * abs_G0_over_B0 * Y2c + curvature * abs_G0_over_B0 * Z2c &
+          -4*sign_G*sign_psi*abs_G0_over_B0*(Y20 * Z2s - Y2s * Z20) &
+          -sign_psi * I2_over_B0 * (curvature/2 * X1c * Y1c - 2 * Y2c) * abs_G0_over_B0 - abs_G0_over_B0 * beta_1s * Y1c / 2
+
+     fY0 = matmul(d_d_zeta,Y20) + torsion * abs_G0_over_B0 * X20 - 4*sign_G*sign_psi*abs_G0_over_B0*(X2s * Z2c - X2c * Z2s) &
+          -sign_psi * I2_over_B0 * (-curvature/2*X1c*X1c + 2*X20) * abs_G0_over_B0 - abs_G0_over_B0 * beta_1s * X1c / 2
+
+     fYs = matmul(d_d_zeta,Y2s) - 2 * iota_N * Y2c + torsion * abs_G0_over_B0 * X2s &
+          -4*sign_G*sign_psi*abs_G0_over_B0*(X20 * Z2c - X2c * Z20) - 2*sign_psi* I2_over_B0 * X2s * abs_G0_over_B0
+
+     fYc = matmul(d_d_zeta,Y2c) + 2 * iota_N * Y2s + torsion * abs_G0_over_B0 * X2c &
+          -4*sign_G*sign_psi*abs_G0_over_B0*(X2s * Z20 - X20 * Z2s) &
+          -sign_psi * I2_over_B0 * (-curvature/2 * X1c * X1c + 2 * X2c) * abs_G0_over_B0 + abs_G0_over_B0 * beta_1s * X1c / 2
+
+
+     eq1residual = X1c * fXs - Y1s * fY0 + Y1c * fYs - Y1s * fYc
+
+     eq2residual = -X1c * fX0 + X1c * fXc - Y1c * fY0 + Y1s * fYs + Y1c * fYc
+
+     max_eq1residual = maxval(abs(eq1residual))
+     max_eq2residual = maxval(abs(eq2residual))
+     print *,"max(abs(eq1residual)):",max_eq1residual
+     print *,"max(abs(eq2residual)):",max_eq2residual
+
+     if (max_eq1residual > 1e-8) stop "Equation 1 residual is large !!!"
+     if (max_eq2residual > 1e-8) stop "Equation 2 residual is large !!!"
+
+     deallocate(fX0, fXs, fXc, fY0, fYs, fYc, eq1residual, eq2residual)
+  end if
 
   normalizer = 1 / sum(d_l_d_phi)
   B20_mean = sum(B20 * d_l_d_phi) * normalizer
