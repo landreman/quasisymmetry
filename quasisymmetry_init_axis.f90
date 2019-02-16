@@ -96,6 +96,7 @@ subroutine quasisymmetry_init_axis
   d_l_d_phi = sqrt(R0 * R0 + R0p * R0p + Z0p * Z0p)
   d2_l_d_phi2 = (R0 * R0p + R0p * R0pp + Z0p * Z0pp) / d_l_d_phi
   B0_over_abs_G0 = N_phi / sum(d_l_d_phi)
+  abs_G0_over_B0 = 1 / B0_over_abs_G0
 
   d_r_d_phi_cylindrical(:,1) = R0p
   d_r_d_phi_cylindrical(:,2) = R0
@@ -197,6 +198,21 @@ subroutine quasisymmetry_init_axis
   deallocate(sinangle, cosangle)
   deallocate(d2_l_d_phi2, torsion_numerator, torsion_denominator)
   deallocate(d_r_d_phi_cylindrical, d2_r_d_phi2_cylindrical, d3_r_d_phi3_cylindrical)
+
+!!$  print *,"tangent_cylindrical:"
+!!$  do j=1,3
+!!$     print *,tangent_cylindrical(:,j)
+!!$  end do
+!!$
+!!$  print *,"normal_cylindrical:"
+!!$  do j=1,3
+!!$     print *,normal_cylindrical(:,j)
+!!$  end do
+!!$
+!!$  print *,"binormal_cylindrical:"
+!!$  do j=1,3
+!!$     print *,binormal_cylindrical(:,j)
+!!$  end do
 
   call quasisymmetry_determine_axis_helicity()
 

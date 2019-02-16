@@ -81,7 +81,7 @@ module quasisymmetry_variables
   real(dp), dimension(:,:), allocatable :: tangent_Cartesian, normal_Cartesian, binormal_Cartesian
   real(dp), dimension(:), allocatable :: sigma, X1s, X1c, Y1s, Y1c, R1s, R1c, Z1s, Z1c, elongation, elongation_in_Rz_plane
   real(dp), dimension(:), allocatable :: X1s_untwisted, X1c_untwisted, Y1s_untwisted, Y1c_untwisted
-  real(dp) :: B0_over_abs_G0, iota, max_elongation, rms_curvature, max_curvature, axis_length
+  real(dp) :: B0_over_abs_G0, abs_G0_over_B0, iota, max_elongation, rms_curvature, max_curvature, axis_length
   real(dp) :: max_precise_elongation = 10 ! Above this value, we won't do a precise solve, just take maxval over the phi grid.
   real(dp) :: max_elongation_to_keep = 10 ! Discard solutions with max(elongation) higher than this value. Set to e.g. 1.0e200 to keep all solutions.
   real(dp), dimension(:,:), allocatable :: Jacobian
@@ -119,6 +119,7 @@ module quasisymmetry_variables
   real(dp), dimension(:), allocatable :: X20, X2s, X2c, Y20, Y2s, Y2c, Z20, Z2s, Z2c, B20
   real(dp), dimension(:), allocatable :: X20_untwisted, X2s_untwisted, X2c_untwisted
   real(dp), dimension(:), allocatable :: Y20_untwisted, Y2s_untwisted, Y2c_untwisted, Z20_untwisted, Z2s_untwisted, Z2c_untwisted
+  real(dp), dimension(:), allocatable :: R20, R2s, R2c, z20_cylindrical, z2s_cylindrical, z2c_cylindrical
   real(dp) :: B2s = 0.0d+0
   real(dp) :: B2c = 0.0d+0
   real(dp) :: B0 = 1.0d+0

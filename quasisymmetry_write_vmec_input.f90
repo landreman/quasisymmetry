@@ -96,8 +96,9 @@ subroutine quasisymmetry_write_vmec_input
 
   case (finite_r_option_linear)
      mpol_nonzero = 1
+     if (order_r_squared) mpol_nonzero = 2
 
-     ! Handle the m=0 modes of the boundary, which are the same as the axis shape:
+     ! Handle the m=0 modes of the boundary, which are the same as the axis shape through O(r), but different to O(r^2):
      RBC(0:max_n,0) = raxis_cc(0:max_n)
      RBS(0:max_n,0) = raxis_cs(0:max_n)
      ZBC(0:max_n,0) = zaxis_cc(0:max_n)
@@ -135,6 +136,65 @@ subroutine quasisymmetry_write_vmec_input
         ZBS( n,1) = half_sum + half_difference
         ZBS(-n,1) = half_sum - half_difference
      end do
+     
+     if (order_r_squared) then
+        ! Handle the n=0 m=0 modes:
+        RBC(0,0) = RBC(0,0) + r * r * sum(R20) / N_phi
+        ZBC(0,0) = ZBC(0,0) + r * r * sum(z20_cylindrical) / N_phi
+        
+        ! Handle the m=0 modes that have nonzero n:
+        ! Note the sin terms have a minus sign, for the reason explained above.
+        do n = 1, ntor
+           RBC(n,0) = RBC(n,0) + 2 * r * r * sum(R20             * cos_n_phi(:,n+1)) / N_phi
+           RBS(n,0) = RBS(n,0) - 2 * r * r * sum(R20             * sin_n_phi(:,n+1)) / N_phi
+           ZBC(n,0) = ZBC(n,0) + 2 * r * r * sum(z20_cylindrical * cos_n_phi(:,n+1)) / N_phi
+           ZBS(n,0) = ZBS(n,0) - 2 * r * r * sum(z20_cylindrical * sin_n_phi(:,n+1)) / N_phi
+        end do
+
+        ! Handle the n=0 m=2 modes:
+        RBC(0,2) = r * r * sum(R2c) / N_phi
+        RBS(0,2) = r * r * sum(R2s) / N_phi
+        ZBC(0,2) = r * r * sum(z2c_cylindrical) / N_phi
+        ZBS(0,2) = r * r * sum(z2s_cylindrical) / N_phi
+        
+        ! Handle the m=2 modes that have nonzero n:
+        do n = 1, ntor
+           ! RBC:
+           half_sum        =  r * r * sum(R2c * cos_n_phi(:,n+1)) / N_phi
+           half_difference =  r * r * sum(R2s * sin_n_phi(:,n+1)) / N_phi
+           RBC( n,2) = half_sum + half_difference
+           RBC(-n,2) = half_sum - half_difference
+           
+           ! ZBC:
+           half_sum        =  r * r * sum(z2c_cylindrical * cos_n_phi(:,n+1)) / N_phi
+           half_difference =  r * r * sum(z2s_cylindrical * sin_n_phi(:,n+1)) / N_phi
+           ZBC( n,2) = half_sum + half_difference
+           ZBC(-n,2) = half_sum - half_difference
+           
+           ! RBS:
+           half_sum        =  r * r * sum(R2s * cos_n_phi(:,n+1)) / N_phi
+           half_difference = -r * r * sum(R2c * sin_n_phi(:,n+1)) / N_phi
+           RBS( n,2) = half_sum + half_difference
+           RBS(-n,2) = half_sum - half_difference
+           
+           ! ZBS:
+           half_sum        =  r * r * sum(z2s_cylindrical * cos_n_phi(:,n+1)) / N_phi
+           half_difference = -r * r * sum(z2c_cylindrical * sin_n_phi(:,n+1)) / N_phi
+           ZBS( n,2) = half_sum + half_difference
+           ZBS(-n,2) = half_sum - half_difference
+        end do
+     end if
+
+!!$     if (.true.) then
+!!$        ! Transform back from Fourier to real space in (n,zeta) as a test.
+!!$
+!!$        ! Check m=2
+!!$        temp = 0
+!!$        do n = -ntor, ntor
+!!$           temp = temp + RBC(n,2)*cos(
+!!$        
+!!$     end if
+
   case default
      print *, "Invalid finite_r_option:",trim(finite_r_option)
      stop

@@ -46,9 +46,9 @@ subroutine quasisymmetry_validate_input
      print *,"Error! Invalid finite_r_option:",finite_r_option
   end select
 
-  if (order_r_squared .and. trim(finite_r_option)==finite_r_option_linear) then
-     print "(a)"," NOTE: Since order_r_squared==.true., finite_r_option is being set to 'nonlinear'."
-     finite_r_option = finite_r_option_nonlinear
-  end if
+!!$  if (order_r_squared .and. trim(finite_r_option)==finite_r_option_linear) then
+!!$     print "(a)"," NOTE: Since order_r_squared==.true., finite_r_option is being set to 'nonlinear'."
+!!$     finite_r_option = finite_r_option_nonlinear
+!!$  end if
 
 end subroutine quasisymmetry_validate_input
