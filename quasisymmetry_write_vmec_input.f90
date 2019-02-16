@@ -92,7 +92,7 @@ subroutine quasisymmetry_write_vmec_input
 
   select case (trim(finite_r_option))
   case (finite_r_option_nonlinear)
-     call quasisymmetry_Frenet_to_cylindrical()
+     call quasisymmetry_Frenet_to_cylindrical_nonlinear()
 
   case (finite_r_option_linear)
      mpol_nonzero = 1

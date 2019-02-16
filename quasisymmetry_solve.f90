@@ -131,12 +131,9 @@ subroutine quasisymmetry_solve
      end if
      deallocate(sinangle,cosangle,angle)
   end if
-    
-  R1c = (-binormal_cylindrical(:,3) * X1c_untwisted + normal_cylindrical(:,3) * Y1c_untwisted) * d_l_d_phi / R0
-  R1s = (-binormal_cylindrical(:,3) * X1s_untwisted + normal_cylindrical(:,3) * Y1s_untwisted) * d_l_d_phi / R0
-  Z1c = ( binormal_cylindrical(:,1) * X1c_untwisted - normal_cylindrical(:,1) * Y1c_untwisted) * d_l_d_phi / R0
-  Z1s = ( binormal_cylindrical(:,1) * X1s_untwisted - normal_cylindrical(:,1) * Y1s_untwisted) * d_l_d_phi / R0
 
+  call quasisymmetry_Frenet_to_cylindrical_linear()
+    
   call quasisymmetry_elongation()
 
   call quasisymmetry_determine_B_helicity()

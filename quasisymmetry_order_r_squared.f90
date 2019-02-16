@@ -17,8 +17,6 @@ subroutine quasisymmetry_order_r_squared
   real(dp), dimension(:), allocatable :: right_hand_side
   integer :: j, iunit=20
   real(dp), dimension(:), allocatable :: fX0, fXs, fXc, fY0, fYs, fYc, eq1residual, eq2residual
-  real(dp), dimension(:), allocatable :: nu_1s, nu_1c, r2_source_1, r2_source_2
-  real(dp), dimension(:), allocatable :: d_X1c_d_zeta, d_Y1c_d_zeta, d_Y1s_d_zeta
   ! Variables needed by LAPACK:
   integer :: INFO
   integer, dimension(:), allocatable :: IPIV
@@ -381,56 +379,5 @@ subroutine quasisymmetry_order_r_squared
   deallocate(fY0_from_X20, fY0_from_Y20, fY0_inhomogeneous)
   deallocate(fYs_from_X20, fYs_from_Y20, fYs_inhomogeneous)
   deallocate(fYc_from_X20, fYc_from_Y20, fYc_inhomogeneous)
-
-  ! See the note "20190215-02 Frenet to cylindrical transformation to next order.docx" for derivation of the equations that follow:
-  allocate(nu_1s(N_phi))
-  allocate(nu_1c(N_phi))
-  allocate(r2_source_1(N_phi))
-  allocate(r2_source_2(N_phi))
-  allocate(d_X1c_d_zeta(N_phi))
-  allocate(d_Y1c_d_zeta(N_phi))
-  allocate(d_Y1s_d_zeta(N_phi))
-  nu_1s = B0_over_abs_G0 / d_l_d_phi * (R1s * R0p + z1s * z0p)
-  nu_1c = B0_over_abs_G0 / d_l_d_phi * (R1c * R0p + z1c * z0p)
-  d_X1c_d_zeta = matmul(d_d_zeta,X1c)
-  d_Y1c_d_zeta = matmul(d_d_zeta,Y1c)
-  d_Y1s_d_zeta = matmul(d_d_zeta,Y1s)
-
-  ! r^2 terms that are independent of theta
-  r2_source_1 = (0.25d+0) * (nu_1s * nu_1s + nu_1c * nu_1c) * abs_G0_over_B0 * abs_G0_over_B0 * curvature + (0.5d+0) * d_X1c_d_zeta * nu_1c &
-       - (0.5d+0) * (Y1s * nu_1s + Y1c * nu_1c) * abs_G0_over_B0 * torsion + X20
-  r2_source_2 = (0.5d+0) * abs_G0_over_B0 * torsion * X1c * nu_1c + (0.5d+0) * (d_Y1s_d_zeta * nu_1s + d_Y1c_d_zeta * nu_1c) + Y20
-  R20             = (-binormal_cylindrical(:,3) * r2_source_1 + normal_cylindrical(:,3) * r2_source_2) * d_l_d_phi / R0
-  z20_cylindrical = ( binormal_cylindrical(:,1) * r2_source_1 - normal_cylindrical(:,1) * r2_source_2) * d_l_d_phi / R0
-
-  ! r^2 terms proportional to sin(2 theta)
-  r2_source_1 = (0.25d+0) * (nu_1s * nu_1c + nu_1c * nu_1s) * abs_G0_over_B0 * abs_G0_over_B0 * curvature + (0.5d+0) * d_X1c_d_zeta * nu_1s &
-       - (0.5d+0) * (Y1s * nu_1c + Y1c * nu_1s) * abs_G0_over_B0 * torsion + X2s
-  r2_source_2 = (0.5d+0) * abs_G0_over_B0 * torsion * X1c * nu_1s + (0.5d+0) * (d_Y1s_d_zeta * nu_1c + d_Y1c_d_zeta * nu_1s) + Y2s
-  R2s             = (-binormal_cylindrical(:,3) * r2_source_1 + normal_cylindrical(:,3) * r2_source_2) * d_l_d_phi / R0
-  z2s_cylindrical = ( binormal_cylindrical(:,1) * r2_source_1 - normal_cylindrical(:,1) * r2_source_2) * d_l_d_phi / R0
-
-  ! r^2 terms proportional to cos(2 theta)
-  r2_source_1 = (0.25d+0) * (-nu_1s * nu_1s + nu_1c * nu_1c) * abs_G0_over_B0 * abs_G0_over_B0 * curvature + (0.5d+0) * d_X1c_d_zeta * nu_1c &
-       - (0.5d+0) * (-Y1s * nu_1s + Y1c * nu_1c) * abs_G0_over_B0 * torsion + X2c
-  r2_source_2 = (0.5d+0) * abs_G0_over_B0 * torsion * X1c * nu_1c + (0.5d+0) * (-d_Y1s_d_zeta * nu_1s + d_Y1c_d_zeta * nu_1c) + Y2c
-  R2c             = (-binormal_cylindrical(:,3) * r2_source_1 + normal_cylindrical(:,3) * r2_source_2) * d_l_d_phi / R0
-  z2c_cylindrical = ( binormal_cylindrical(:,1) * r2_source_1 - normal_cylindrical(:,1) * r2_source_2) * d_l_d_phi / R0
-
-
-  print *,"nu_1s:",nu_1s
-  print *,"nu_1c:",nu_1c
-  print *,"r2_source_1:",r2_source_1
-  print *,"r2_source_2:",r2_source_2
-  print *,"d_X1c_d_zeta",d_X1c_d_zeta
-  print *,"d_Y1c_d_zeta",d_Y1c_d_zeta
-  print *,"d_Y1s_d_zeta",d_Y1s_d_zeta
-  print *,"R20:",R20
-  print *,"R2s:",R2s
-  print *,"R2c:",R2c
-  print *,"z20_cylindrical:",z20_cylindrical
-
-  deallocate(nu_1s, nu_1c, r2_source_1, r2_source_2, d_X1c_d_zeta, d_Y1c_d_zeta, d_Y1s_d_zeta)
-
 
 end subroutine quasisymmetry_order_r_squared
