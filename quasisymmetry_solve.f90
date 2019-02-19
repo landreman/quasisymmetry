@@ -89,7 +89,7 @@ subroutine quasisymmetry_solve
   ! If helicity is nonzero, then the original X1s/X1c/Y1s/Y1c variables are defined with respect to a "poloidal" angle that
   ! is actually helical, with the theta=0 curve wrapping around the magnetic axis as you follow phi around toroidally. Therefore
   ! here we convert to an untwisted poloidal angle, such that the theta=0 curve does not wrap around the axis.
-  if (axis_helicity == 0) then
+  if (axis_helicity == 0 .or. (.not. untwist)) then
      X1s_untwisted = 0
      X1c_untwisted = X1c
      Y1s_untwisted = Y1s

@@ -163,6 +163,16 @@ Note that when \parlink{general\_option}={\ttfamily "scan"}, the code overwrites
 
 \myhrule
 
+\param{untwist}
+{logical}
+{{\ttfamily "true"}}
+{Only when \parlink{general\_option}={\ttfamily "single"}}
+{If true, the RBC/RBS/ZBC/ZBS boundary coefficients are defined with respect to a poloidal angle $\theta$ such that the $\theta=0$ curve does not encircle the magnetic axis poloidally.
+If false, the RBC/RBS/ZBC/ZBS coefficients are defined with respect to the original helical angle in the calculation, which may encircle the magnetic axis poloidally (with the number of times given by {\ttfamily axis\_helicity}.)
+}
+
+\myhrule
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 

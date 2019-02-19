@@ -56,8 +56,8 @@ subroutine quasisymmetry_write_vmec_input
   AC(0) = 1 ! Note: AC uses 0-based indicies!
   CURTOR = 2 * pi / mu0 * I2_over_B0 * B0 * r * r
 
-  ! The output is not stellarator-symmetric if (1) R0s is nonzero, (2) Z0c is nonzero, or (3) sigma_initial is nonzero:
-  lasym = (maxval(abs(R0s))>0 .or. maxval(abs(Z0c)) > 0 .or. abs(sigma_initial) > 0)
+  ! The output is not stellarator-symmetric if (1) R0s is nonzero, (2) Z0c is nonzero, or (3) sigma_initial is nonzero, or (4) B2s is nonzero:
+  lasym = (maxval(abs(R0s))>0 .or. maxval(abs(Z0c)) > 0 .or. abs(sigma_initial) > 0 .or. (order_r_squared .and. abs(B2s)>0))
 
   ! We should be able to resolve (N_phi-1)/2 modes (note integer division!), but in case N_phi is very large, don't attempt more than the vmec arrays can handle.
   ntor = min((N_phi - 1) / 2, ntord)
@@ -138,6 +138,9 @@ subroutine quasisymmetry_write_vmec_input
      end do
      
      if (order_r_squared) then
+        ! The transformation below can be verified using
+        ! m20190215_03_checkFourierTransformInQuasisymmetryCode.m
+
         ! Handle the n=0 m=0 modes:
         RBC(0,0) = RBC(0,0) + r * r * sum(R20) / N_phi
         ZBC(0,0) = ZBC(0,0) + r * r * sum(z20_cylindrical) / N_phi
@@ -184,16 +187,6 @@ subroutine quasisymmetry_write_vmec_input
            ZBS(-n,2) = half_sum - half_difference
         end do
      end if
-
-!!$     if (.true.) then
-!!$        ! Transform back from Fourier to real space in (n,zeta) as a test.
-!!$
-!!$        ! Check m=2
-!!$        temp = 0
-!!$        do n = -ntor, ntor
-!!$           temp = temp + RBC(n,2)*cos(
-!!$        
-!!$     end if
 
   case default
      print *, "Invalid finite_r_option:",trim(finite_r_option)

@@ -363,6 +363,20 @@ subroutine quasisymmetry_order_r_squared
      if (max_eq1residual > 1e-8) stop "Equation 1 residual is large !!!"
      if (max_eq2residual > 1e-8) stop "Equation 2 residual is large !!!"
 
+     ! Now check the two equations that were used to determine Y2s and Y2c:
+
+     eq1residual = -X1c * Y2c + X1c * Y20 + X2s * Y1s + X2c * Y1c - X20 * Y1c
+
+     eq2residual = X1c * Y2s + X2c * Y1s - X2s * Y1c + X20 * Y1s + sign_G * sign_psi * X1c * curvature / 2
+
+     max_eq1residual = maxval(abs(eq1residual))
+     max_eq2residual = maxval(abs(eq2residual))
+     print *,"max(abs(Y2c eq residual)):",max_eq1residual
+     print *,"max(abs(Y2s eq residual)):",max_eq2residual
+
+     if (max_eq1residual > 1e-8) stop "Y2c equation residual is large !!!"
+     if (max_eq2residual > 1e-8) stop "Y2s equation residual is large !!!"
+
      deallocate(fX0, fXs, fXc, fY0, fYs, fYc, eq1residual, eq2residual)
   end if
 

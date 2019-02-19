@@ -55,6 +55,7 @@ subroutine quasisymmetry_write_output
        vn_mpol = "mpol", &
        vn_ntor = "ntor", &
        vn_lasym = "lasym", &
+       vn_untwist = "untwist", &
        vn_order_r_squared = "order_r_squared", &
        vn_B2s = "B2s", &
        vn_B2c = "B2c", &
@@ -239,6 +240,7 @@ subroutine quasisymmetry_write_output
      call cdf_define(ncid, vn_mpol, mpol_nonzero)
      call cdf_define(ncid, vn_ntor, ntor)
      call cdf_define(ncid, vn_lasym, lasym)
+     call cdf_define(ncid, vn_untwist, untwist)
      if (order_r_squared) then
         call cdf_define(ncid, vn_B2s, B2s)
         call cdf_define(ncid, vn_B2c, B2c)
@@ -407,6 +409,7 @@ subroutine quasisymmetry_write_output
      call cdf_write(ncid, vn_mpol, mpol_nonzero)
      call cdf_write(ncid, vn_ntor, ntor)
      call cdf_write(ncid, vn_lasym, lasym)
+     call cdf_write(ncid, vn_untwist, untwist)
      if (order_r_squared) then
         call cdf_write(ncid, vn_B2s, B2s)
         call cdf_write(ncid, vn_B2c, B2c)

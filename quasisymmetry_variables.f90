@@ -109,6 +109,7 @@ module quasisymmetry_variables
   logical, dimension(:), allocatable :: iota_tolerance_achieveds, elongation_tolerance_achieveds, Newton_tolerance_achieveds
   logical :: iota_tolerance_achieved, elongation_tolerance_achieved, Newton_tolerance_achieved
   integer, dimension(max_axis_nmax+1, 4) :: N_scan_array
+  logical :: untwist = .true.
 
   real(dp), dimension(:), allocatable :: scan_eta_bar, scan_sigma_initial
   real(dp), dimension(:,:), allocatable :: scan_R0c, scan_R0s, scan_Z0c, scan_Z0s
@@ -135,7 +136,7 @@ module quasisymmetry_variables
        R0s, R0c, Z0s, Z0c, eta_bar, sigma_initial, eta_bar_scan_option, sigma_initial_scan_option, Fourier_scan_option, consider_only_nfp, &
        R0s_min, R0s_max, R0s_N_scan, R0c_min, R0c_max, R0c_N_scan, Z0s_min, Z0s_max, Z0s_N_scan, Z0c_min, Z0c_max, Z0c_N_scan, &
        eta_bar_min, eta_bar_max, eta_bar_N_scan, sigma_initial_min, sigma_initial_max, sigma_initial_N_scan, max_max_curvature_to_keep, min_iota_to_keep, &
-       finite_r_option, order_r_squared, B0, B2s, B2c, p2
+       finite_r_option, order_r_squared, B0, B2s, B2c, p2, untwist
 
 end module quasisymmetry_variables
 
