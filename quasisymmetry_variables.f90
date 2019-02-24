@@ -103,6 +103,7 @@ module quasisymmetry_variables
   integer :: eta_bar_N_scan=0, sigma_initial_N_scan=0
   integer*8 :: N_scan
   real(dp), dimension(:), allocatable :: iotas, max_elongations, rms_curvatures, max_curvatures, axis_lengths, eta_bar_values, sigma_initial_values
+  real(dp), dimension(:), allocatable :: max_modBinv_sqrt_half_grad_B_colon_grad_Bs
   real(dp), dimension(:), allocatable :: standard_deviations_of_R, standard_deviations_of_Z
   real(dp) :: standard_deviation_of_R, standard_deviation_of_Z
   integer, dimension(:), allocatable :: axis_helicities, B_helicities, effective_nfps
@@ -110,6 +111,8 @@ module quasisymmetry_variables
   logical :: iota_tolerance_achieved, elongation_tolerance_achieved, Newton_tolerance_achieved
   integer, dimension(max_axis_nmax+1, 4) :: N_scan_array
   logical :: untwist = .true.
+  real(dp), dimension(:), allocatable :: modBinv_sqrt_half_grad_B_colon_grad_B
+  real(dp) :: max_modBinv_sqrt_half_grad_B_colon_grad_B
 
   real(dp), dimension(:), allocatable :: scan_eta_bar, scan_sigma_initial
   real(dp), dimension(:,:), allocatable :: scan_R0c, scan_R0s, scan_Z0c, scan_Z0s

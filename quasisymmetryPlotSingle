@@ -40,6 +40,7 @@ curvature = f.variables['curvature'][()]
 torsion = f.variables['torsion'][()]
 elongation = f.variables['elongation'][()]
 elongation_in_Rz_plane = f.variables['elongation_in_Rz_plane'][()]
+modBinv_sqrt_half_grad_B_colon_grad_B = f.variables['modBinv_sqrt_half_grad_B_colon_grad_B'][()]
 
 order_r_squared_int = f.variables["order_r_squared__logical__"][()]
 order_r_squared = (order_r_squared_int == 1)
@@ -148,6 +149,13 @@ plt.plot(phi,elongation,label='XY plane')
 plt.plot(phi,elongation_in_Rz_plane,label='Rz plane')
 plt.title('elongation')
 plt.legend(loc=0,fontsize=6)
+plt.xlabel('$\phi$')
+plt.xlim(my_xlim)
+
+plt.subplot(numRows,numCols,plotNum)
+plotNum += 1
+plt.plot(phi,modBinv_sqrt_half_grad_B_colon_grad_B)
+plt.title('modBinv_sqrt_half_grad_B_colon_grad_B')
 plt.xlabel('$\phi$')
 plt.xlim(my_xlim)
 

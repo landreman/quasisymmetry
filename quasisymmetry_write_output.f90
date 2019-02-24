@@ -39,6 +39,7 @@ subroutine quasisymmetry_write_output
        vn_max_elongation = "max_elongation", &
        vn_rms_curvature = "rms_curvature", &
        vn_max_curvature = "max_curvature", &
+       vn_max_modBinv_sqrt_half_grad_B_colon_grad_B = "max_modBinv_sqrt_half_grad_B_colon_grad_B", &
        vn_axis_length = "axis_length", &
        vn_standard_deviation_of_R = "standard_deviation_of_R", &
        vn_standard_deviation_of_Z = "standard_deviation_of_Z", &
@@ -69,6 +70,7 @@ subroutine quasisymmetry_write_output
        vn_max_elongations = "max_elongations", &
        vn_rms_curvatures = "rms_curvatures", &
        vn_max_curvatures = "max_curvatures", &
+       vn_max_modBinv_sqrt_half_grad_B_colon_grad_Bs = "max_modBinv_sqrt_half_grad_B_colon_grad_Bs", &
        vn_axis_lengths = "axis_lengths", &
        vn_standard_deviations_of_R = "standard_deviations_of_R", &
        vn_standard_deviations_of_Z = "standard_deviations_of_Z", &
@@ -118,6 +120,8 @@ subroutine quasisymmetry_write_output
        vn_z1s = "z1s", &
        vn_elongation = "elongation", &
        vn_elongation_in_Rz_plane = "elongation_in_Rz_plane", &
+       vn_d_l_d_phi = "d_l_d_phi", &
+       vn_modBinv_sqrt_half_grad_B_colon_grad_B = "modBinv_sqrt_half_grad_B_colon_grad_B", &
        vn_X20 = "X20", &
        vn_X2s = "X2s", &
        vn_X2c = "X2c", &
@@ -224,6 +228,7 @@ subroutine quasisymmetry_write_output
      call cdf_define(ncid, vn_max_elongation, max_elongation)
      call cdf_define(ncid, vn_rms_curvature, rms_curvature)
      call cdf_define(ncid, vn_max_curvature, max_curvature)
+     call cdf_define(ncid, vn_max_modBinv_sqrt_half_grad_B_colon_grad_B, max_modBinv_sqrt_half_grad_B_colon_grad_B)
      call cdf_define(ncid, vn_axis_length, axis_length)
      call cdf_define(ncid, vn_standard_deviation_of_R, standard_deviation_of_R)
      call cdf_define(ncid, vn_standard_deviation_of_Z, standard_deviation_of_Z)
@@ -291,6 +296,8 @@ subroutine quasisymmetry_write_output
      call cdf_define(ncid, vn_z1s, z1s, dimname=N_phi_dim)
      call cdf_define(ncid, vn_elongation, elongation, dimname=N_phi_dim)
      call cdf_define(ncid, vn_elongation_in_Rz_plane, elongation_in_Rz_plane, dimname=N_phi_dim)
+     call cdf_define(ncid, vn_d_l_d_phi, d_l_d_phi, dimname=N_phi_dim)
+     call cdf_define(ncid, vn_modBinv_sqrt_half_grad_B_colon_grad_B, modBinv_sqrt_half_grad_B_colon_grad_B, dimname=N_phi_dim)
      if (order_r_squared) then
         call cdf_define(ncid, vn_X20, X20, dimname=N_phi_dim)
         call cdf_define(ncid, vn_X2s, X2s, dimname=N_phi_dim)
@@ -323,6 +330,7 @@ subroutine quasisymmetry_write_output
      call cdf_define(ncid, vn_max_elongations, max_elongations, dimname=N_scan_dim)
      call cdf_define(ncid, vn_rms_curvatures, rms_curvatures, dimname=N_scan_dim)
      call cdf_define(ncid, vn_max_curvatures, max_curvatures, dimname=N_scan_dim)
+     call cdf_define(ncid, vn_max_modBinv_sqrt_half_grad_B_colon_grad_Bs, max_modBinv_sqrt_half_grad_B_colon_grad_Bs, dimname=N_scan_dim)
      call cdf_define(ncid, vn_axis_lengths, axis_lengths, dimname=N_scan_dim)
      call cdf_define(ncid, vn_standard_deviations_of_R, standard_deviations_of_R, dimname=N_scan_dim)
      call cdf_define(ncid, vn_standard_deviations_of_Z, standard_deviations_of_Z, dimname=N_scan_dim)
@@ -393,6 +401,7 @@ subroutine quasisymmetry_write_output
      call cdf_write(ncid, vn_max_elongation, max_elongation)
      call cdf_write(ncid, vn_rms_curvature, rms_curvature)
      call cdf_write(ncid, vn_max_curvature, max_curvature)
+     call cdf_write(ncid, vn_max_modBinv_sqrt_half_grad_B_colon_grad_B, max_modBinv_sqrt_half_grad_B_colon_grad_B)
      call cdf_write(ncid, vn_axis_length, axis_length)
      call cdf_write(ncid, vn_standard_deviation_of_R, standard_deviation_of_R)
      call cdf_write(ncid, vn_standard_deviation_of_Z, standard_deviation_of_Z)
@@ -460,6 +469,8 @@ subroutine quasisymmetry_write_output
      call cdf_write(ncid, vn_z1s, z1s)
      call cdf_write(ncid, vn_elongation, elongation)
      call cdf_write(ncid, vn_elongation_in_Rz_plane, elongation_in_Rz_plane)
+     call cdf_write(ncid, vn_d_l_d_phi, d_l_d_phi)
+     call cdf_write(ncid, vn_modBinv_sqrt_half_grad_B_colon_grad_B, modBinv_sqrt_half_grad_B_colon_grad_B)
      if (order_r_squared) then
         call cdf_write(ncid, vn_X20, X20)
         call cdf_write(ncid, vn_X2s, X2s)
@@ -492,6 +503,7 @@ subroutine quasisymmetry_write_output
      call cdf_write(ncid, vn_max_elongations, max_elongations)
      call cdf_write(ncid, vn_rms_curvatures, rms_curvatures)
      call cdf_write(ncid, vn_max_curvatures, max_curvatures)
+     call cdf_write(ncid, vn_max_modBinv_sqrt_half_grad_B_colon_grad_Bs, max_modBinv_sqrt_half_grad_B_colon_grad_Bs)
      call cdf_write(ncid, vn_axis_lengths, axis_lengths)
      call cdf_write(ncid, vn_standard_deviations_of_R, standard_deviations_of_R)
      call cdf_write(ncid, vn_standard_deviations_of_Z, standard_deviations_of_Z)

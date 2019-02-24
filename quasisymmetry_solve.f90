@@ -138,6 +138,8 @@ subroutine quasisymmetry_solve
 
   call quasisymmetry_determine_B_helicity()
 
+  call quasisymmetry_grad_B_tensor()
+
   !print *,"elongation:"
   !print *,elongation
   if (verbose) then
