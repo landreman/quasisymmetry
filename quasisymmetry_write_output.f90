@@ -31,6 +31,7 @@ subroutine quasisymmetry_write_output
        vn_Fourier_scan_option = "Fourier_scan_option", &
        vn_max_elongation_to_keep = "max_elongation_to_keep", &
        vn_max_max_curvature_to_keep = "max_max_curvature_to_keep", &
+       vn_max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep = "max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep", &
        vn_min_iota_to_keep = "min_iota_to_keep", &
        vn_eta_bar = "eta_bar", &
        vn_sigma_initial = "sigma_initial", &
@@ -265,6 +266,7 @@ subroutine quasisymmetry_write_output
      call cdf_define(ncid, vn_Fourier_scan_option, Fourier_scan_option)
      call cdf_define(ncid, vn_max_elongation_to_keep, max_elongation_to_keep)
      call cdf_define(ncid, vn_max_max_curvature_to_keep, max_max_curvature_to_keep)
+     call cdf_define(ncid, vn_max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep, max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep)
      call cdf_define(ncid, vn_min_iota_to_keep, min_iota_to_keep)
   end select
 
@@ -438,6 +440,7 @@ subroutine quasisymmetry_write_output
      call cdf_write(ncid, vn_sigma_initial_scan_option, sigma_initial_scan_option)
      call cdf_write(ncid, vn_max_elongation_to_keep, max_elongation_to_keep)
      call cdf_write(ncid, vn_max_max_curvature_to_keep, max_max_curvature_to_keep)
+     call cdf_write(ncid, vn_max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep, max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep)
      call cdf_write(ncid, vn_min_iota_to_keep, min_iota_to_keep)
   end select
 

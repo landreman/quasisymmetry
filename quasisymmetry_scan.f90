@@ -255,7 +255,7 @@ subroutine quasisymmetry_scan
            if (skipped_solve) cycle ! In case R0 <= 0 or some other reason caused quasisymmetry_single_solve to exit prematurely.
            if (max_elongation > max_elongation_to_keep) cycle
            if (abs(iota) < min_iota_to_keep) cycle
-           !if (abs(iota) < 1e-3) cycle
+           if (max_modBinv_sqrt_half_grad_B_colon_grad_B > max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep) cycle
            
            ! If we made it this far, then record the results
            j_scan_local = j_scan_local + 1

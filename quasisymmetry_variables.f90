@@ -70,6 +70,7 @@ module quasisymmetry_variables
   real(dp) :: eta_bar
   real(dp) :: max_max_curvature_to_keep = 5.0d+0
   real(dp) :: min_iota_to_keep = 0.05d+0
+  real(dp) :: max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep = 5.0d+0
 
   integer :: matrix_size, axis_helicity, B_helicity, effective_nfp
   real(dp) :: last_iota, last_max_elongation, d_phi
@@ -139,7 +140,7 @@ module quasisymmetry_variables
        R0s, R0c, Z0s, Z0c, eta_bar, sigma_initial, eta_bar_scan_option, sigma_initial_scan_option, Fourier_scan_option, consider_only_nfp, &
        R0s_min, R0s_max, R0s_N_scan, R0c_min, R0c_max, R0c_N_scan, Z0s_min, Z0s_max, Z0s_N_scan, Z0c_min, Z0c_max, Z0c_N_scan, &
        eta_bar_min, eta_bar_max, eta_bar_N_scan, sigma_initial_min, sigma_initial_max, sigma_initial_N_scan, max_max_curvature_to_keep, min_iota_to_keep, &
-       finite_r_option, order_r_squared, B0, B2s, B2c, p2, untwist
+       finite_r_option, order_r_squared, B0, B2s, B2c, p2, untwist, max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep
 
 end module quasisymmetry_variables
 

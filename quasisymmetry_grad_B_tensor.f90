@@ -48,11 +48,12 @@ subroutine quasisymmetry_grad_B_tensor
   end do
 
   modBinv_sqrt_half_grad_B_colon_grad_B = sqrt((0.5d+0) * modBinv_sqrt_half_grad_B_colon_grad_B) / B0
-  !print *,"modBinv_sqrt_half_grad_B_colon_grad_B:",modBinv_sqrt_half_grad_B_colon_grad_B
 
   !if (.true.) then
   if (.false.) then
      ! Sanity tests
+
+     print *,"modBinv_sqrt_half_grad_B_colon_grad_B:",modBinv_sqrt_half_grad_B_colon_grad_B
 
      allocate(div_B(N_phi))
      allocate(should_be_curvature(N_phi))

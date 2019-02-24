@@ -20,6 +20,7 @@
  max_precise_elongation = 15
 
  max_elongation_to_keep = 10
+ max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep = 20
 
  N_iterations = 10
  N_line_search = 10
