@@ -38,7 +38,8 @@ module quasisymmetry_variables
 
   character(len=*), parameter :: &
        Fourier_scan_option_linear = "linear", &
-       Fourier_scan_option_2_sided_log = "2_sided_log"
+       Fourier_scan_option_2_sided_log = "2_sided_log", &
+       Fourier_scan_option_2_sided_log_except_Z0s1 = "2_sided_log_except_Z0s1"
   character(len=50) :: Fourier_scan_option = Fourier_scan_option_linear
 
   character(len=*), parameter :: &

@@ -297,7 +297,12 @@ If false, the RBC/RBS/ZBC/ZBS coefficients are defined with respect to the origi
 {\ttfamily Fourier\_scan\_option} = {\ttfamily "2\_sided\_log"}: Use logarithmic spacing, and also include $(-1)\times$ the values. A value at 0 will also be included. 
 For this option, all the entries in \parlink{R0s\_N\_scan}, \parlink{R0c\_N\_scan}, \parlink{Z0s\_N\_scan}, and \parlink{Z0c\_N\_scan} must be odd or 0. 
 For each entry corresponding to 0 or 1, only the `min' value will be used, not zero. This choice allows, for example, the major radius R0c(1) to be fixed at a nonzero constant.
-For each entry of *\_N\_scan that is 3, the values used for the scan will be (-*\_min, 0, *\_min).
+For each entry of *\_N\_scan that is 3, the values used for the scan will be (-*\_min, 0, *\_min).\\
+
+{\ttfamily Fourier\_scan\_option} = {\ttfamily "2\_sided\_log\_except\_Z0s1"}: Same as  {\ttfamily "2\_sided\_log"}, except that only non-negative
+values will be used for the $n=n_{fp}$ mode of Z0s. This option is useful because it avoids generating pairs of configurations that are merely mirror-images
+of each other, reducing the number of configurations in the scan by nearly a factor of 2.
+
 }
 
 \myhrule

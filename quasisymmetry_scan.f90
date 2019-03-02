@@ -187,6 +187,20 @@ subroutine quasisymmetry_scan
            Z0s(j) = evaluate_2_sided_log(Z0s_min(j), Z0s_max(j), scan_state(j,3), N_scan_array(j,3))
            Z0c(j) = evaluate_2_sided_log(Z0c_min(j), Z0c_max(j), scan_state(j,4), N_scan_array(j,4))
         end do
+     case (Fourier_scan_option_2_sided_log_except_Z0s1)
+        do j = 1, axis_nmax+1
+           R0s(j) = evaluate_2_sided_log(R0s_min(j), R0s_max(j), scan_state(j,1), N_scan_array(j,1))
+           R0c(j) = evaluate_2_sided_log(R0c_min(j), R0c_max(j), scan_state(j,2), N_scan_array(j,2))
+           Z0s(j) = evaluate_2_sided_log(Z0s_min(j), Z0s_max(j), scan_state(j,3), N_scan_array(j,3))
+           Z0c(j) = evaluate_2_sided_log(Z0c_min(j), Z0c_max(j), scan_state(j,4), N_scan_array(j,4))
+        end do
+        ! Correct Z0s(2) (i.e. n=1)
+        if (scan_state(2,3)==1) then
+           Z0s(2) = 0
+        else
+           !Z0s(2) = Z0s_min(2) + (Z0s_max(2) - Z0s_min(2)) * (scan_state(2,3) - 1) / max(N_scan_array(2,3) - 1, 1)
+           Z0s(2) = exp(log(Z0s_min(2)) + (log(Z0s_max(2)) - log(Z0s_min(2))) * (scan_state(2,3) - 2) / max(N_scan_array(2,3) - 2, 1))
+        end if
      case default
         stop "Error! Unrecognized Fourier_scan_option"
      end select

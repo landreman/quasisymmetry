@@ -5,12 +5,12 @@
  resolution_option = 'fixed'
  !resolution_option = 'adaptive'
 
- general_option = 'single'
- !general_option = 'scan'
+ !general_option = 'single'
+ general_option = 'scan'
 
- verbose_option = 'all'
+ !verbose_option = 'all'
  !verbose_option = 'proc0'
- !verbose_option = 'summary'
+ verbose_option = 'summary'
 
  N_phi = 101
 
@@ -22,7 +22,9 @@
 
  max_precise_elongation = 15
 
- max_elongation_to_keep = 10
+ max_elongation_to_keep = 1e100
+ min_iota_to_keep =  -1
+ max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep = 1e100
 
  vmec_template_filename = 'input.li383_vacuum'
 
@@ -31,7 +33,7 @@
  !finite_r_option = 'linear'
  finite_r_option = 'nonlinear'
 
- order_r_squared = .true.
+ !order_r_squared = .true.
 
  !finite_r_option = 'linear'
  finite_r_option = 'nonlinear'
@@ -107,22 +109,23 @@
 
 ! R0c_min    = 1 0.042
 ! R0c_max    = 1 0.042
- R0c_min    = 1 0.01
- R0c_max    = 1 0.05
- R0c_N_scan = 0 5
+ R0c_min    = 1 0.01 0.001
+ R0c_max    = 1 0.05 0.002
+ R0c_N_scan = 0 5 5
 
 ! Z0s_min    = 0 0.042
 ! Z0s_max    = 0 0.042
- Z0s_min    = 0 0.001
- Z0s_max    = 0 0.06
- Z0s_N_scan = 0 7
+ Z0s_min    = 0 0.001 
+ Z0s_max    = 0 0.06 
+ Z0s_N_scan = 0 7     
 
  Z0c_min    = 0 0
  Z0c_max    = 0 0
  Z0c_N_scan = 0 0
 
  !Fourier_scan_option = "linear"
- Fourier_scan_option = "2_sided_log"
+! Fourier_scan_option = "2_sided_log"
+ Fourier_scan_option = "2_sided_log_except_Z0s1"
 
  eta_bar_min    = 0.5
  eta_bar_max    = 2

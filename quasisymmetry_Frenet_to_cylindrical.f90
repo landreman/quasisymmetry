@@ -179,9 +179,7 @@ contains
        end do
        call delete_periodic_spline(X_spline)
        call delete_periodic_spline(Y_spline)
-       if (order_r_squared) then
-          call delete_periodic_spline(Z_spline)
-       end if
+       if (order_r_squared) call delete_periodic_spline(Z_spline)
     end do
     
 !!$    print *,"N_theta:"
