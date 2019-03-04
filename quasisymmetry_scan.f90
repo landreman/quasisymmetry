@@ -7,10 +7,14 @@ subroutine quasisymmetry_scan
   include 'mpif.h'
 
   integer :: j, k, j_eta_bar, j_sigma_initial
+  integer :: average_chunks_per_proc = 100
+  integer :: proc0_steps_between_communicate = 1000
   integer*8 :: j_scan_local, N_Fourier_scan, N_scan_local, j_scan, j_Fourier_scan, index
+  integer*8 :: chunk_size, N_chunks
   integer, dimension(max_axis_nmax+1, 4) :: scan_state
   integer :: ierr, tag
-  integer*8 :: dummy_long(1), scan_index_min, scan_index_max, print_summary_stride
+  !integer*8 :: scan_index_min, scan_index_max
+  integer*8 :: dummy_long(1), print_summary_stride, my_chunk, next_chunk
   integer :: mpi_status(MPI_STATUS_SIZE)
   integer, parameter :: buffer_length = 100
   character(len=buffer_length) :: proc_assignments_string
@@ -22,11 +26,14 @@ subroutine quasisymmetry_scan
   real(dp), dimension(:), allocatable :: scan_eta_bar_local, scan_sigma_initial_local
   real(dp), dimension(:,:), allocatable :: scan_R0c_local, scan_R0s_local, scan_Z0c_local, scan_Z0s_local
   logical, dimension(:), allocatable :: nonzero_modes
-  logical :: keep_going
+  logical :: keep_going, print_chunk
   real(dp) :: thresh, time1, time2
   integer*8, dimension(max_axis_nmax+1, 4) :: N_scan_array_long
+  logical, dimension(:), allocatable :: procs_finished
 
   allocate(nonzero_modes(axis_nmax))
+  allocate(procs_finished(N_procs-1)) ! There is no element for proc0.
+  procs_finished = .false.
 
   ! Clean up scan arrays
   do j = 1,max_axis_nmax+1
@@ -90,55 +97,69 @@ subroutine quasisymmetry_scan
   end if
   if (proc0) print *,"sigma_initial_values:",sigma_initial_values
 
-  !N_scan = product(R0s_N_scan)*product(R0c_N_scan)*product(Z0s_N_scan)*product(Z0c_N_scan)*product(eta_bar_N_scan)
+  ! Set up numbers related to scan indexing:
   N_scan_array_long = N_scan_array ! Cast to long int
   N_Fourier_scan = product(N_scan_array_long)
   N_scan = N_Fourier_scan * eta_bar_N_scan * sigma_initial_N_scan
   if (proc0) print *,"N_Fourier_scan:",N_Fourier_scan,"N_scan:",N_scan
+  if (proc0) print *,"# of MPI processes:",N_procs
+
+  chunk_size = ceiling(((N_scan+1)*1.0_dp)/(N_procs * average_chunks_per_proc))
+  N_scan_local = min(chunk_size * average_chunks_per_proc, N_scan) ! Estimate for how many scans will be saved on each proc
+  N_chunks = N_scan / chunk_size ! May be too small due to integer division. We correct on the next line.
+  if (N_chunks * chunk_size < N_scan) N_chunks = ceiling((N_scan * 1.0_dp) / chunk_size)
+  if (proc0) print *,"chunk_size:",chunk_size," N_chunks:",N_chunks
 
   !print *,"N_procs=",N_procs, "  my_rank=",my_rank
 
-  if (N_scan >= N_procs) then
-     scan_index_min = 1 + (mpi_rank * N_scan) / N_procs
-     scan_index_max = ((mpi_rank+1) * N_scan) / N_procs
-  else
-     ! An uncommon case: There are more procs than solves to do
-     scan_index_min = min(mpi_rank+1, N_scan)
-     if (mpi_rank < N_scan) then
-        scan_index_max = scan_index_min
-     else
-        scan_index_max = scan_index_min - 1
-     end if
-  end if
-  N_scan_local = scan_index_max - scan_index_min + 1
-  print_summary_stride = max(N_scan/N_procs/20, 1000)
+!!$  if (N_scan >= N_procs) then
+!!$     scan_index_min = 1 + (mpi_rank * N_scan) / N_procs
+!!$     scan_index_max = ((mpi_rank+1) * N_scan) / N_procs
+!!$  else
+!!$     ! An uncommon case: There are more procs than solves to do
+!!$     scan_index_min = min(mpi_rank+1, N_scan)
+!!$     if (mpi_rank < N_scan) then
+!!$        scan_index_max = scan_index_min
+!!$     else
+!!$        scan_index_max = scan_index_min - 1
+!!$     end if
+!!$  end if
+!!$  N_scan_local = scan_index_max - scan_index_min + 1
+!!$  print_summary_stride = max(N_scan/N_procs/20, 1000)
+!!$
+!!$  write (proc_assignments_string,fmt="(a,i5,a,i5,a,i20,a,i20)") " Proc ",mpi_rank," of",N_procs," will handle solves",scan_index_min," to",scan_index_max
+!!$
+!!$  ! Print the processor/radius assignments in a coordinated manner.
+!!$  !dummy = 0
+!!$  !tag = 0
+!!$  if (proc0) then
+!!$     print "(a)",trim(proc_assignments_string)
+!!$     do j = 1,N_procs - 1
+!!$        ! To avoid a disordered flood of messages to the masterProc,
+!!$        ! ping each proc 1 at a time by sending a dummy value:
+!!$        !call MPI_SEND(dummy,1,MPI_INT,j,tag,MPI_COMM_WORLD,ierr)
+!!$        ! Now receive the message from proc i:
+!!$        !call MPI_RECV(proc_assignments_string,buffer_length,MPI_CHAR,j,MPI_ANY_TAG,MPI_COMM_WORLD,mpi_status,ierr)
+!!$        tag = j
+!!$        call MPI_RECV(proc_assignments_string,buffer_length,MPI_CHAR,j,tag,MPI_COMM_WORLD,mpi_status,ierr)
+!!$        print "(a)",trim(proc_assignments_string)
+!!$     end do
+!!$  else
+!!$     !! First, wait for the dummy message from proc 0:
+!!$     !call MPI_RECV(dummy,1,MPI_INT,0,MPI_ANY_TAG,MPI_COMM_WORLD,mpi_status,ierr)
+!!$     ! Now send the message to proc 0:
+!!$     tag = mpi_rank 
+!!$     call MPI_SEND(proc_assignments_string,buffer_length,MPI_CHAR,0,tag,MPI_COMM_WORLD,ierr)
+!!$  end if
+!!$
+!!$  call mpi_barrier(MPI_COMM_WORLD, ierr)
 
-  write (proc_assignments_string,fmt="(a,i5,a,i5,a,i20,a,i20)") " Proc ",mpi_rank," of",N_procs," will handle solves",scan_index_min," to",scan_index_max
-
-  ! Print the processor/radius assignments in a coordinated manner.
-  !dummy = 0
-  !tag = 0
-  if (proc0) then
-     print "(a)",trim(proc_assignments_string)
-     do j = 1,N_procs - 1
-        ! To avoid a disordered flood of messages to the masterProc,
-        ! ping each proc 1 at a time by sending a dummy value:
-        !call MPI_SEND(dummy,1,MPI_INT,j,tag,MPI_COMM_WORLD,ierr)
-        ! Now receive the message from proc i:
-        !call MPI_RECV(proc_assignments_string,buffer_length,MPI_CHAR,j,MPI_ANY_TAG,MPI_COMM_WORLD,mpi_status,ierr)
-        tag = j
-        call MPI_RECV(proc_assignments_string,buffer_length,MPI_CHAR,j,tag,MPI_COMM_WORLD,mpi_status,ierr)
-        print "(a)",trim(proc_assignments_string)
-     end do
-  else
-     !! First, wait for the dummy message from proc 0:
-     !call MPI_RECV(dummy,1,MPI_INT,0,MPI_ANY_TAG,MPI_COMM_WORLD,mpi_status,ierr)
-     ! Now send the message to proc 0:
-     tag = mpi_rank 
-     call MPI_SEND(proc_assignments_string,buffer_length,MPI_CHAR,0,tag,MPI_COMM_WORLD,ierr)
-  end if
-
-  call mpi_barrier(MPI_COMM_WORLD, ierr)
+  ! To start, each proc gets a chunk with index given by their proc number. Note that chunk numbers are 0-based, not 1-based!
+  my_chunk = mpi_rank
+  !scan_index_min = my_chunk * chunk_size + 1
+  !scan_index_max = (my_chunk + 1) * chunk_size
+  next_chunk = N_procs 
+  print_chunk = .true.
 
   allocate(iotas_local(N_scan_local))
   allocate(max_elongations_local(N_scan_local))
@@ -238,11 +259,51 @@ subroutine quasisymmetry_scan
            eta_bar = eta_bar_values(j_eta_bar)
            
            j_scan = j_scan + 1
+
+           if (print_chunk) then
+              print "(a,i5,a,i7,a,i7)"," Proc",mpi_rank," is handling chunk",my_chunk," of",N_chunks
+              print_chunk = .false.
+           end if
            
            ! Only proceed on the appropriate proc
-           if (j_scan < scan_index_min) cycle
-           if (j_scan > scan_index_max) cycle  ! Could replace with goto?
-           
+           !scan_index_min = my_chunk * chunk_size + 1
+           if (j_scan < my_chunk * chunk_size + 1) cycle
+
+           !scan_index_max = (my_chunk + 1) * chunk_size
+           !if (j_scan == scan_index_max + 1) then
+           if (j_scan == (my_chunk + 1) * chunk_size + 1) then
+              ! We just finished a chunk. Check to see if there are more chunks that need doing
+              if (proc0) then
+                 print "(a,i5,a,i7,a,i7)","Proc ",0," finished chunk",my_chunk," and is moving on to chunk",next_chunk
+                 my_chunk = next_chunk
+                 !scan_index_min = my_chunk * chunk_size + 1
+                 !scan_index_max = (my_chunk + 1) * chunk_size
+                 next_chunk = next_chunk + 1
+                 print_chunk = .true.
+                 call proc0_check_other_procs()
+              else
+                 print "(a,i5,a,i7,a)","Proc",mpi_rank," finished chunk",my_chunk," and is asking proc0 for a new assignment."
+                 ! Tell proc0 we are ready for another chunk
+                 call MPI_SEND(dummy_long,1,MPI_INTEGER8,0,mpi_rank,MPI_COMM_WORLD,ierr)
+                 ! Find out our next chunk assignment
+                 call MPI_RECV(dummy_long,1,MPI_INTEGER8,0,mpi_rank,MPI_COMM_WORLD,mpi_status,ierr)
+                 my_chunk = dummy_long(1)
+                 !scan_index_min = my_chunk * chunk_size + 1
+                 !scan_index_max = (my_chunk + 1) * chunk_size
+                 print_chunk = .true.
+              end if
+           end if
+
+           ! Now that my_chunk may have changed, check again whether this proc should handle this element of the scan
+           if (j_scan < my_chunk * chunk_size + 1) cycle
+           if (j_scan > (my_chunk+1) * chunk_size) cycle
+
+           if (proc0 .and. mod(j_scan,proc0_steps_between_communicate)==0) then
+              print *,"Proc0 is checking for other procs that need a chunk."
+              ! Check if any procs need a new chunk assignment
+              call proc0_check_other_procs()
+           end if
+
            if (verbose) then
               print "(a)"," ###################################################################################"
               print "(a,i20,a,i20)"," Scan case",j_scan," of",N_scan
@@ -256,8 +317,10 @@ subroutine quasisymmetry_scan
               print *,"effective_nfp:",effective_nfp
            end if
            
-           if (trim(verbose_option)==verbose_option_summary .and. mod(j_scan - scan_index_min + 1,print_summary_stride)==1) then
-              print "(a,i4,a,i20,a,i20)", " Proc",mpi_rank,": solve",j_scan - scan_index_min + 1," of",N_scan_local
+           !if (trim(verbose_option)==verbose_option_summary .and. mod(j_scan - scan_index_min + 1,print_summary_stride)==1) then
+           if (trim(verbose_option)==verbose_option_summary .and. mod(j_scan + 1,print_summary_stride)==1) then
+              !print "(a,i4,a,i20,a,i20)", " Proc",mpi_rank,": solve",j_scan - scan_index_min + 1," of",N_scan_local
+              print "(a,i4,a,i20,a,i20)", " Proc",mpi_rank,": solve",j_scan + 1," of",N_scan_local
            end if
            
            if (consider_only_nfp .and. (nfp .ne. effective_nfp)) then
@@ -273,7 +336,12 @@ subroutine quasisymmetry_scan
            
            ! If we made it this far, then record the results
            j_scan_local = j_scan_local + 1
-           
+         
+           if (j_scan_local > N_scan_local) then
+              print "(a,i5)","ERROR! j_scan_local > N_scan_local on proc",mpi_rank
+              cycle
+           end if
+  
            scan_eta_bar_local(j_scan_local) = eta_bar
            scan_sigma_initial_local(j_scan_local) = sigma_initial
            scan_R0c_local(j_scan_local,:) = R0c(1:axis_nmax+1)
@@ -321,6 +389,12 @@ subroutine quasisymmetry_scan
 
   call cpu_time(time2)
   print "(a,i5,a,es10.3,a)"," Proc",mpi_rank," finished after",time2 - start_time," sec."
+
+  if (proc0) then
+     do while (.not. all(procs_finished))
+        call proc0_check_other_procs()
+     end do
+  end if
 
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! So proc0 does not start printing results until all procs have finished.
 
@@ -484,6 +558,8 @@ subroutine quasisymmetry_scan
      end if
   end if
 
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+
 contains
 
   real(dp) function evaluate_2_sided_log(xmin,xmax,j,N)
@@ -505,6 +581,34 @@ contains
     end if
 
   end function evaluate_2_sided_log
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+
+  subroutine proc0_check_other_procs()
+
+    implicit none
+
+    logical :: flag
+
+    do j = 1, N_procs-1
+       call MPI_IPROBE(j,j,MPI_COMM_WORLD,flag,mpi_status,ierr)
+       if (flag) then
+          ! Receive the message. We don't actually care about the content of the message.
+          print "(a,i5,a,i5)","proc0 is telling proc",j," to handle chunk",next_chunk
+          call MPI_RECV(dummy_long,1,MPI_INTEGER8,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+          !print *,"AAA"
+          ! Tell the proc which chunk to handle
+          dummy_long(1) = next_chunk
+          !print *,"BBB"
+          procs_finished(j) = (next_chunk >= N_chunks-1) ! If we give this proc the last chunk or a later one, then that proc will finish.
+          !print *,"CCC"
+          next_chunk = next_chunk + 1
+          !print *,"DDD"
+          call MPI_SEND(dummy_long,1,MPI_INTEGER8,j,j,MPI_COMM_WORLD,ierr)
+          !print *,"EEE"
+       end if
+    end do
+  end subroutine proc0_check_other_procs
 
 end subroutine quasisymmetry_scan
 
