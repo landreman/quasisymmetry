@@ -99,6 +99,8 @@ contains
     real(dp) :: costheta, sintheta, cos2theta, sin2theta, final_R, final_z
     real(dp), dimension(:,:), allocatable :: R_2D, z_2D, phi0_2D
     real(dp), dimension(:), allocatable :: theta, phi_conversion
+    real(dp), dimension(:), allocatable :: d_X1c_d_zeta, d_Y1c_d_zeta, r_local, d_Y1s_d_zeta
+    real(dp), dimension(:), allocatable :: d_Z20_d_zeta, d_Z2c_d_zeta, d_Z2s_d_zeta, X3c, Y3c, Y3s
     real(dp), dimension(:), allocatable :: X_at_this_theta, Y_at_this_theta, Z_at_this_theta
     type(periodic_spline) :: normal_R_spline, normal_phi_spline, normal_z_spline, binormal_R_spline, binormal_phi_spline, binormal_z_spline
     type(periodic_spline) :: tangent_R_spline, tangent_phi_spline, tangent_z_spline
@@ -106,6 +108,8 @@ contains
     real(dp) :: rootSolve_abserr, rootSolve_relerr, phi0_rootSolve_min, phi0_rootSolve_max
     real(dp) :: phi0_solution, phi_target, factor, factor2, angle, cosangle, sinangle
     integer :: fzeroFlag
+    integer :: N_helicity
+    real(dp) :: I2, G0
 
     !----------------------------------------------
 
@@ -122,6 +126,10 @@ contains
     allocate(X_at_this_theta(N_phi))
     allocate(Y_at_this_theta(N_phi))
     allocate(Z_at_this_theta(N_phi))
+    allocate(r_local(N_phi))
+    allocate(X3c(N_phi))
+    allocate(Y3c(N_phi))
+    allocate(Y3s(N_phi))
 
     call new_periodic_spline(N_phi, phi, R0, 2*pi/nfp, R0_spline)
     call new_periodic_spline(N_phi, phi, z0, 2*pi/nfp, z0_spline)
@@ -137,19 +145,80 @@ contains
        call new_periodic_spline(N_phi, phi, tangent_cylindrical(:,3), 2*pi/nfp, tangent_z_spline)
     end if
 
+    r_local = r
+    if (order_r_squared) then
+       allocate(d_Y1c_d_zeta(N_phi))
+       allocate(d_Y1s_d_zeta(N_phi))
+       allocate(d_X1c_d_zeta(N_phi))
+       allocate(d_Z20_d_zeta(N_phi))
+       allocate(d_Z2c_d_zeta(N_phi))
+       allocate(d_Z2s_d_zeta(N_phi))
+       d_Y1c_d_zeta = matmul(d_d_zeta,Y1c)
+       d_Y1s_d_zeta = matmul(d_d_zeta,Y1s)
+       d_X1c_d_zeta = matmul(d_d_zeta,X1c)
+       d_Z20_d_zeta = matmul(d_d_zeta,Z20)
+       d_Z2c_d_zeta = matmul(d_d_zeta,Z2c)
+       d_Z2s_d_zeta = matmul(d_d_zeta,Z2s)
+
+!!$       r_local = r * (1 - r*r/8*(&
+!!$            4 * X2s**2 * Y1c**2 - 8 * eta_bar * X1c * X2s * Y1c * Y1s - 16 * X20 * X2s * Y1c * Y1s + 4 * (B20/B0) * X1c**2 * Y1s**2 + eta_bar**2 * X1c**2 * Y1s**2 + &
+!!$            8 * eta_bar * X1c * X20 * Y1s**2 + 8 * eta_bar * X1c * X2c * Y1s**2 + 4 * X2s**2 * Y1s**2 - 8 * X20 * X2c * (Y1c**2 - Y1s**2) + 4 * X20**2 * (Y1c**2 + Y1s**2) + &
+!!$            4 * X2c**2 * (Y1c**2 + Y1s**2) + 8 * X1c * X2s * Y1s * Y20 + 4 * X1c**2 * Y20**2 - 24 * X1c * X2s * Y1s * Y2c - 8 * X1c**2 * Y20 * Y2c + 4 * X1c**2 * Y2c**2 - &
+!!$            8 * X1c * X2s * Y1c * Y2s + 8 * eta_bar * X1c**2 * Y1s * Y2s + 4 * X1c**2 * Y2s**2 + 8 * X1c * X20 * (Y1c * (-Y20 + Y2c) + Y1s * Y2s) &
+!!$            + 8 * X1c * X2c * (Y1c * (Y20 - Y2c) + 3 * Y1s * Y2s) + 4 * X1c**2 * Z20**2 + 4 * Y1c**2 * Z20**2 + 4 * Y1s**2 * Z20**2 - 8 * X1c**2 * Z20 * Z2c - 8 * Y1c**2 * Z20 * Z2c + &
+!!$            8 * Y1s**2 * Z20 * Z2c + 4 * X1c**2 * Z2c**2 + 4 * Y1c**2 * Z2c**2 + 4 * Y1s**2 * Z2c**2 - 16 * Y1c * Y1s * Z20 * Z2s + 4 * X1c**2 * Z2s**2 + 4 * Y1c**2 * Z2s**2 + &
+!!$            4 * Y1s**2 * Z2s**2 &
+!!$            + I2_over_B0 / abs_G0_over_B0 * sign_G * ( &
+!!$            -2 * iota * X1c**2 * Y1s**2 + 4 * abs_G0_over_B0 * Y1c * Y1s * Z2c - 2 * abs_G0_over_B0 * X1c**2 * Z2s - 2 * abs_G0_over_B0 * Y1c**2 * Z2s + 2 * abs_G0_over_B0 * Y1s**2 * Z2s - & 
+!!$            abs_G0_over_B0 * X1c**3 * Y1s * torsion - abs_G0_over_B0 * X1c * Y1c**2 * Y1s * torsion - abs_G0_over_B0 * X1c * Y1s**3 * torsion &
+!!$            + X1c * Y1c * Y1s * d_X1c_d_zeta - X1c**2 * Y1s * d_Y1c_d_zeta)))
+
+       N_helicity = - axis_helicity*nfp
+       I2 = I2_over_B0 * B0
+       G0 = sign_G * abs_G0_over_B0 * B0
+
+       X3c = -(1/(8 * G0 * Y1s)) * (2 * I2 * N_helicity * X1c * Y1s + 2 * (-I2 * iota - (G0 * p2 * mu0)/ (B0*B0)) * X1c * Y1s - &
+            16 * G0 * X2s * Y20 - 8 * G0 * X2s * Y2c + 16 * G0 * X20 * Y2s + 8 * G0 * X2c * Y2s - 8 * B0 * sign_psi * (iota - N_helicity) * Z2s + &
+            2 * B0 * abs_G0_over_B0 * sign_psi * X20 * curvature + 4 * B0 * abs_G0_over_B0 * sign_psi * X2c * curvature - 3 * abs_G0_over_B0 * I2 * X1c**2 * torsion - &
+            3 * abs_G0_over_B0 * I2 * Y1c**2 * torsion + abs_G0_over_B0 * I2 * Y1s**2 * torsion + 3 * I2 * Y1c * d_X1c_d_zeta - 3 * I2 * X1c * d_Y1c_d_zeta - &
+            2 * B0 * sign_psi * d_Z20_d_zeta - 4 * B0 * sign_psi * d_Z2c_d_zeta)
+       
+
+       Y3c =-(1/(8 * G0 * X1c * Y1s)) * (2 * I2 * N_helicity * X1c * Y1c * Y1s + 2 * (-I2 * iota - (G0 * p2 * mu0)/(B0**2)) * X1c * Y1c * Y1s - &
+            16 * G0 * X2s * Y1c * Y20 + 32 * G0 * X2c * Y1s * Y20 - 8 * G0 * X2s * Y1c * Y2c - 32 * G0 * X20 * Y1s * Y2c + 16 * G0 * X20 * Y1c * Y2s + &
+            8 * G0 * X2c * Y1c * Y2s + 16 * B0 * sign_psi * (iota - N_helicity) * Y1s * Z2c - 8 * B0 * sign_psi * (iota - N_helicity) * Y1c * Z2s + &
+            2 * B0 * abs_G0_over_B0 * sign_psi * X20 * Y1c * curvature + 4 * B0 * abs_G0_over_B0 * sign_psi * X2c * Y1c * curvature + &
+            8 * B0 * abs_G0_over_B0 * sign_psi * X2s * Y1s * curvature - 3 * abs_G0_over_B0 * I2 * X1c**2 * Y1c * torsion - 3 * abs_G0_over_B0 * I2 * Y1c**3 * torsion - &
+            7 * abs_G0_over_B0 * I2 * Y1c * Y1s**2 * torsion + 3 * I2 * Y1c**2 * d_X1c_d_zeta + 4 * I2 * Y1s**2 * d_X1c_d_zeta - 3 * I2 * X1c * Y1c * d_Y1c_d_zeta - &
+            4 * I2 * X1c * Y1s * d_Y1s_d_zeta - 2 * B0 * sign_psi * Y1c * d_Z20_d_zeta - 4 * B0 * sign_psi * Y1c * d_Z2c_d_zeta - 8 * B0 * sign_psi * Y1s * d_Z2s_d_zeta)
+
+
+       Y3s = -(1/(8 * G0 * X1c)) * (2 * I2 * N_helicity * X1c * Y1s + 2 * (-I2 * iota - (G0 * p2 * mu0)/(B0**2)) * X1c * Y1s + 16 * G0 * X2s * Y20 - &
+            8 * G0 * X2s * Y2c - 16 * G0 * X20 * Y2s + 8 * G0 * X2c * Y2s + 8 * B0 * sign_psi * (iota - N_helicity) * Z2s + 2 * B0 * abs_G0_over_B0 * sign_psi * X20 * curvature &
+            - 4 * B0 * abs_G0_over_B0 * sign_psi * X2c * curvature + abs_G0_over_B0 * I2 * X1c**2 * torsion + abs_G0_over_B0 * I2 * Y1c**2 * torsion - &
+            3 * abs_G0_over_B0 * I2 * Y1s**2 * torsion - I2 * Y1c * d_X1c_d_zeta + I2 * X1c * d_Y1c_d_zeta - 2 * B0 * sign_psi * d_Z20_d_zeta + 4 * B0 * sign_psi * d_Z2c_d_zeta)
+
+       deallocate(d_X1c_d_zeta, d_Y1c_d_zeta, d_Y1s_d_zeta)
+       deallocate(d_Z20_d_zeta, d_Z2c_d_zeta, d_Z2s_d_zeta)
+    end if
+
     rootSolve_abserr = 1.0e-10_dp
     rootSolve_relerr = 1.0e-10_dp
 
     do j_theta = 1, N_theta
        costheta = cos(theta(j_theta))
        sintheta = sin(theta(j_theta))
+       !X_at_this_theta = r_local * (X1c_untwisted * costheta + X1s_untwisted * sintheta)
+       !Y_at_this_theta = r_local * (Y1c_untwisted * costheta + Y1s_untwisted * sintheta)
        X_at_this_theta = r * (X1c_untwisted * costheta + X1s_untwisted * sintheta)
        Y_at_this_theta = r * (Y1c_untwisted * costheta + Y1s_untwisted * sintheta)
        if (order_r_squared) then
           cos2theta = cos(2*theta(j_theta))
           sin2theta = sin(2*theta(j_theta))
-          X_at_this_theta = X_at_this_theta + r*r*(X20_untwisted + X2c_untwisted * cos2theta + X2s_untwisted * sin2theta)
-          Y_at_this_theta = Y_at_this_theta + r*r*(Y20_untwisted + Y2c_untwisted * cos2theta + Y2s_untwisted * sin2theta)
+          !X_at_this_theta = X_at_this_theta + r*r*(X20_untwisted + X2c_untwisted * cos2theta + X2s_untwisted * sin2theta)
+          !Y_at_this_theta = Y_at_this_theta + r*r*(Y20_untwisted + Y2c_untwisted * cos2theta + Y2s_untwisted * sin2theta)
+          X_at_this_theta = X_at_this_theta + r*r*(X20_untwisted + X2c_untwisted * cos2theta + X2s_untwisted * sin2theta) + r*r*r*X3c*costheta
+          Y_at_this_theta = Y_at_this_theta + r*r*(Y20_untwisted + Y2c_untwisted * cos2theta + Y2s_untwisted * sin2theta) + r*r*r*(Y3c*costheta + Y3s*sintheta)
           Z_at_this_theta =                   r*r*(Z20_untwisted + Z2c_untwisted * cos2theta + Z2s_untwisted * sin2theta)
           call new_periodic_spline(N_phi, phi, Z_at_this_theta, 2*pi/nfp, Z_spline)
        end if
@@ -216,6 +285,8 @@ contains
        call delete_periodic_spline(tangent_z_spline)
     end if
     deallocate(X_at_this_theta, Y_at_this_theta, Z_at_this_theta)
+    deallocate(r_local)
+    deallocate(X3c,Y3c,Y3s)
 
     ! Fourier transform the result.
     ! This is not a rate-limiting step, so for clarity of code, we don't bother with an FFT.
