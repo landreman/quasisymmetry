@@ -1,0 +1,50 @@
+&quasisymmetry
+ resolution_option = 'fixed'
+ !resolution_option = 'adaptive'
+
+ general_option = 'single'
+ !general_option = 'scan'
+
+ ! The splines used in Frenet_to_cylindrical fail when N_phi=1, so use the next available value, 3:
+ N_phi = 3
+
+ max_N_phi = 1000
+
+ iota_tolerance =  0.001
+ elongation_tolerance = 0.001
+ Newton_tolerance = 1e-12
+
+ vmec_template_filename = 'input.template'
+
+ r = 0.01d+0
+
+ !finite_r_option = 'linear'
+ finite_r_option = 'nonlinear'
+
+ order_r_option = 'r3_simplified'
+
+ nfp = 1
+
+ ! See the document 20190214-01 Setting up Shafranov shift benchmark.docx
+ ! and 20190214-01 Setting up Shafranov shift benchmark.nb to see how to set the constants below.
+ ! We can pick R0c, B0, and I2_over_B0 freely. p2 is free, but we want it close in magnitude
+ ! to the term in the Shafranov shift that is independent of pressure. Then eta_bar
+ ! and B2c are fixed.
+
+ R0c = 1.7
+ B0 = 0.8
+ eta_bar = -0.588235294117647d+0  ! = (+/-) 1 / R0 so elongation = 1.
+ sigma_initial = 0.0
+ I2_over_B0 = 1.3d+0
+
+ ! For the p2 and p-independent terms in Shafranov shift to be comparable, we should choose
+ ! p2 ~ -B0^2 * I2_over_B0^2 / (4 mu0)
+ p2 = -3.0d+5
+
+ B2s = 0
+
+ ! For the O(r^2) surfaces to be circular, we should have
+ B2c = -0.0828442 ! for p2 = -3d+5
+
+ ! iota = I2_over_B0 * R0
+/
