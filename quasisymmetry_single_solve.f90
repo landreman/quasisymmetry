@@ -6,6 +6,7 @@ subroutine quasisymmetry_single_solve
 
   real(dp) :: x
   integer :: iteration, new_N_phi
+  real(dp), dimension(:), allocatable :: angle, sinangle, cosangle
 
   iota_tolerance_achieved = .false.
   elongation_tolerance_achieved = .false.
@@ -107,7 +108,7 @@ subroutine quasisymmetry_single_solve
   allocate(Z1s(N_phi))
   allocate(Z1c(N_phi))
 
-  ! Derivatives of Y1c, Y1s, and X1c are needed for computing the grad B tensor, R2, and z2_cylindrical
+  ! Derivatives of Y1c, Y1s, and X1c (without untwisting) are needed for computing the grad B tensor, and possibly for the higher-order-in-r terms.
   if (allocated(d_Y1c_d_zeta)) deallocate(d_Y1c_d_zeta)
   if (allocated(d_Y1s_d_zeta)) deallocate(d_Y1s_d_zeta)
   if (allocated(d_X1c_d_zeta)) deallocate(d_X1c_d_zeta)

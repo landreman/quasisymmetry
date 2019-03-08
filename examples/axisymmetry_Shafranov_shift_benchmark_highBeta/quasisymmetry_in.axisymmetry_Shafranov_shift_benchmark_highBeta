@@ -21,7 +21,7 @@
  !finite_r_option = 'linear'
  finite_r_option = 'nonlinear'
 
- order_r_squared = .true.
+ order_r_option = 'r2'
 
  nfp = 1
 

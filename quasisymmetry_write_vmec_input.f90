@@ -57,7 +57,8 @@ subroutine quasisymmetry_write_vmec_input
   CURTOR = 2 * pi / mu0 * I2_over_B0 * B0 * r * r
 
   ! The output is not stellarator-symmetric if (1) R0s is nonzero, (2) Z0c is nonzero, or (3) sigma_initial is nonzero, or (4) B2s is nonzero:
-  lasym = (maxval(abs(R0s))>0 .or. maxval(abs(Z0c)) > 0 .or. abs(sigma_initial) > 0 .or. (order_r_squared .and. abs(B2s)>0))
+  !lasym = (maxval(abs(R0s))>0 .or. maxval(abs(Z0c)) > 0 .or. abs(sigma_initial) > 0 .or. (order_r_squared .and. abs(B2s)>0))
+  lasym = (maxval(abs(R0s))>0 .or. maxval(abs(Z0c)) > 0 .or. abs(sigma_initial) > 0 .or. ((trim(order_r_option).ne.order_r_option_r1) .and. abs(B2s)>0))
 
   ! We should be able to resolve (N_phi-1)/2 modes (note integer division!), but in case N_phi is very large, don't attempt more than the vmec arrays can handle.
   ntor = min((N_phi - 1) / 2, ntord)
@@ -95,8 +96,13 @@ subroutine quasisymmetry_write_vmec_input
      call quasisymmetry_Frenet_to_cylindrical_nonlinear()
 
   case (finite_r_option_linear)
-     mpol_nonzero = 1
-     if (order_r_squared) mpol_nonzero = 2
+     if (trim(order_r_option)==order_r_option_r1) then
+        mpol_nonzero = 1
+     elseif (trim(order_r_option)==order_r_option_r2) then
+        mpol_nonzero = 2
+     else
+        mpol_nonzero = 3
+     end if
 
      ! Handle the m=0 modes of the boundary, which are the same as the axis shape through O(r), but different to O(r^2):
      RBC(0:max_n,0) = raxis_cc(0:max_n)
@@ -137,7 +143,8 @@ subroutine quasisymmetry_write_vmec_input
         ZBS(-n,1) = half_sum - half_difference
      end do
      
-     if (order_r_squared) then
+     if (trim(order_r_option) .ne. order_r_option_r1) then
+        ! Add O(r^2) terms.
         ! The transformation below can be verified using
         ! m20190215_03_checkFourierTransformInQuasisymmetryCode.m
 
@@ -185,6 +192,76 @@ subroutine quasisymmetry_write_vmec_input
            half_difference = -r * r * sum(z2c_cylindrical * sin_n_phi(:,n+1)) / N_phi
            ZBS( n,2) = half_sum + half_difference
            ZBS(-n,2) = half_sum - half_difference
+        end do
+     end if
+
+     if (trim(order_r_option)==order_r_option_r3_simplified .or. trim(order_r_option)==order_r_option_r3_full) then
+        ! Add O(r^3) terms.
+ 
+        ! Handle the n=0 m=1 modes:
+        RBC(0,1) = RBC(0,1) + r * r * r * sum(R3c1) / N_phi
+        RBS(0,1) = RBS(0,1) + r * r * r * sum(R3s1) / N_phi
+        ZBC(0,1) = ZBC(0,1) + r * r * r * sum(z3c1_cylindrical) / N_phi
+        ZBS(0,1) = ZBS(0,1) + r * r * r * sum(z3s1_cylindrical) / N_phi
+        
+        ! Handle the m=1 modes that have nonzero n:
+        do n = 1, ntor
+           ! RBC:
+           half_sum        =  r * r * r * sum(R3c1 * cos_n_phi(:,n+1)) / N_phi
+           half_difference =  r * r * r * sum(R3s1 * sin_n_phi(:,n+1)) / N_phi
+           RBC( n,1) = RBC( n,1) + half_sum + half_difference
+           RBC(-n,1) = RBC(-n,1) + half_sum - half_difference
+           
+           ! ZBC:
+           half_sum        =  r * r * r * sum(z3c1_cylindrical * cos_n_phi(:,n+1)) / N_phi
+           half_difference =  r * r * r * sum(z3s1_cylindrical * sin_n_phi(:,n+1)) / N_phi
+           ZBC( n,1) = ZBC( n,1) + half_sum + half_difference
+           ZBC(-n,1) = ZBC(-n,1) + half_sum - half_difference
+           
+           ! RBS:
+           half_sum        =  r * r * r * sum(R3s1 * cos_n_phi(:,n+1)) / N_phi
+           half_difference = -r * r * r * sum(R3c1 * sin_n_phi(:,n+1)) / N_phi
+           RBS( n,1) = RBS( n,1) + half_sum + half_difference
+           RBS(-n,1) = RBS(-n,1) + half_sum - half_difference
+           
+           ! ZBS:
+           half_sum        =  r * r * r * sum(z3s1_cylindrical * cos_n_phi(:,n+1)) / N_phi
+           half_difference = -r * r * r * sum(z3c1_cylindrical * sin_n_phi(:,n+1)) / N_phi
+           ZBS( n,1) = ZBS( n,1) + half_sum + half_difference
+           ZBS(-n,1) = ZBS(-n,1) + half_sum - half_difference
+        end do
+
+        ! Handle the n=0 m=3 modes:
+        RBC(0,3) = r * r * r * sum(R3c3) / N_phi
+        RBS(0,3) = r * r * r * sum(R3s3) / N_phi
+        ZBC(0,3) = r * r * r * sum(z3c3_cylindrical) / N_phi
+        ZBS(0,3) = r * r * r * sum(z3s3_cylindrical) / N_phi
+        
+        ! Handle the m=3 modes that have nonzero n:
+        do n = 1, ntor
+           ! RBC:
+           half_sum        =  r * r * r * sum(R3c3 * cos_n_phi(:,n+1)) / N_phi
+           half_difference =  r * r * r * sum(R3s3 * sin_n_phi(:,n+1)) / N_phi
+           RBC( n,3) = half_sum + half_difference
+           RBC(-n,3) = half_sum - half_difference
+           
+           ! ZBC:
+           half_sum        =  r * r * r * sum(z3c3_cylindrical * cos_n_phi(:,n+1)) / N_phi
+           half_difference =  r * r * r * sum(z3s3_cylindrical * sin_n_phi(:,n+1)) / N_phi
+           ZBC( n,3) = half_sum + half_difference
+           ZBC(-n,3) = half_sum - half_difference
+           
+           ! RBS:
+           half_sum        =  r * r * r * sum(R3s3 * cos_n_phi(:,n+1)) / N_phi
+           half_difference = -r * r * r * sum(R3c3 * sin_n_phi(:,n+1)) / N_phi
+           RBS( n,3) = half_sum + half_difference
+           RBS(-n,3) = half_sum - half_difference
+           
+           ! ZBS:
+           half_sum        =  r * r * r * sum(z3s3_cylindrical * cos_n_phi(:,n+1)) / N_phi
+           half_difference = -r * r * r * sum(z3c3_cylindrical * sin_n_phi(:,n+1)) / N_phi
+           ZBS( n,3) = half_sum + half_difference
+           ZBS(-n,3) = half_sum - half_difference
         end do
      end if
 

@@ -7,7 +7,6 @@ subroutine quasisymmetry_solve
   integer :: iteration, j_line_search
   real(dp) :: residual_norm, last_residual_norm, initial_residual_norm, step_scale
   real(dp), dimension(:), allocatable :: state, state0
-  real(dp), dimension(:), allocatable :: angle, sinangle, cosangle
 
   ! Variables needed by LAPACK:                                                                                            
   integer :: INFO

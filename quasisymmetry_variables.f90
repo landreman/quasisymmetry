@@ -51,7 +51,7 @@ module quasisymmetry_variables
        order_r_option_r1 = "r1", &
        order_r_option_r2 = "r2", &
        order_r_option_r3_simplified = "r3_simplified", &
-       order_r_option_r4_full = "r3_full"
+       order_r_option_r3_full = "r3_full"
   character(len=50) :: order_r_option = order_r_option_r1
 
   real(dp) :: sigma_initial = 0
@@ -141,6 +141,7 @@ module quasisymmetry_variables
 
   real(dp), dimension(:), allocatable :: d_X1c_d_zeta, d_Y1c_d_zeta, d_Y1s_d_zeta, d_Z20_d_zeta, d_Z2c_d_zeta, d_Z2s_d_zeta
   real(dp), dimension(:), allocatable :: X3s1, X3s3, X3c1, X3c3, Y3s1, Y3s3, Y3c1, Y3c3, Z3s1, Z3s3, Z3c1, Z3c3
+  real(dp), dimension(:), allocatable :: R3s1, R3s3, R3c1, R3c3, z3s1_cylindrical, z3s3_cylindrical, z3c1_cylindrical, z3c3_cylindrical
   real(dp), dimension(:), allocatable :: X3s1_untwisted, X3s3_untwisted, X3c1_untwisted, X3c3_untwisted
   real(dp), dimension(:), allocatable :: Y3s1_untwisted, Y3s3_untwisted, Y3c1_untwisted, Y3c3_untwisted
   real(dp), dimension(:), allocatable :: Z3s1_untwisted, Z3s3_untwisted, Z3c1_untwisted, Z3c3_untwisted
