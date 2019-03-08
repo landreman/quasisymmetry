@@ -42,8 +42,12 @@ elongation = f.variables['elongation'][()]
 elongation_in_Rz_plane = f.variables['elongation_in_Rz_plane'][()]
 modBinv_sqrt_half_grad_B_colon_grad_B = f.variables['modBinv_sqrt_half_grad_B_colon_grad_B'][()]
 
-order_r_squared_int = f.variables["order_r_squared__logical__"][()]
-order_r_squared = (order_r_squared_int == 1)
+order_r_option = ''.join(str(f.variables["order_r_option"][()]))
+print "order_r_option:",order_r_option
+order_r_option = order_r_option.strip()
+print "order_r_option:",order_r_option
+order_r_squared = (order_r_option=='r2' or order_r_option=='r3_simplified' or order_r_option=='r3_full')
+print "order_r_squared:",order_r_squared
 
 if order_r_squared:
     B2s = f.variables['B2s'][()]

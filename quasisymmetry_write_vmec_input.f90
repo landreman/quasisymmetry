@@ -196,6 +196,7 @@ subroutine quasisymmetry_write_vmec_input
      end if
 
      if (trim(order_r_option)==order_r_option_r3_simplified .or. trim(order_r_option)==order_r_option_r3_full) then
+        print *,"Hello world!!"
         ! Add O(r^3) terms.
  
         ! Handle the n=0 m=1 modes:

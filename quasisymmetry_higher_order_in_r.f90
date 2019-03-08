@@ -436,32 +436,38 @@ subroutine quasisymmetry_higher_order_in_r
   if (allocated(Z3c1_untwisted)) deallocate(Z3c1_untwisted)
   if (allocated(Z3c3_untwisted)) deallocate(Z3c3_untwisted)
 
-  allocate(X20(N_phi))
-  allocate(X2s(N_phi))
-  allocate(X2c(N_phi))
-  allocate(Y20(N_phi))
-  allocate(Y2s(N_phi))
-  allocate(Y2c(N_phi))
-  allocate(Z20(N_phi))
-  allocate(Z2s(N_phi))
-  allocate(Z2c(N_phi))
-
-  allocate(X20_untwisted(N_phi))
-  allocate(X2s_untwisted(N_phi))
-  allocate(X2c_untwisted(N_phi))
-  allocate(Y20_untwisted(N_phi))
-  allocate(Y2s_untwisted(N_phi))
-  allocate(Y2c_untwisted(N_phi))
-  allocate(Z20_untwisted(N_phi))
-  allocate(Z2s_untwisted(N_phi))
-  allocate(Z2c_untwisted(N_phi))
-
-  allocate(R20(N_phi))
-  allocate(R2s(N_phi))
-  allocate(R2c(N_phi))
-  allocate(z20_cylindrical(N_phi))
-  allocate(z2s_cylindrical(N_phi))
-  allocate(z2c_cylindrical(N_phi))
+  allocate(X3s1(N_phi))
+  allocate(X3s3(N_phi))
+  allocate(X3c1(N_phi))
+  allocate(X3c3(N_phi))
+  allocate(Y3s1(N_phi))
+  allocate(Y3s3(N_phi))
+  allocate(Y3c1(N_phi))
+  allocate(Y3c3(N_phi))
+  allocate(Z3s1(N_phi))
+  allocate(Z3s3(N_phi))
+  allocate(Z3c1(N_phi))
+  allocate(Z3c3(N_phi))
+  allocate(R3s1(N_phi))
+  allocate(R3s3(N_phi))
+  allocate(R3c1(N_phi))
+  allocate(R3c3(N_phi))
+  allocate(z3s1_cylindrical(N_phi))
+  allocate(z3s3_cylindrical(N_phi))
+  allocate(z3c1_cylindrical(N_phi))
+  allocate(z3c3_cylindrical(N_phi))
+  allocate(X3s1_untwisted(N_phi))
+  allocate(X3s3_untwisted(N_phi))
+  allocate(X3c1_untwisted(N_phi))
+  allocate(X3c3_untwisted(N_phi))
+  allocate(Y3s1_untwisted(N_phi))
+  allocate(Y3s3_untwisted(N_phi))
+  allocate(Y3c1_untwisted(N_phi))
+  allocate(Y3c3_untwisted(N_phi))
+  allocate(Z3s1_untwisted(N_phi))
+  allocate(Z3s3_untwisted(N_phi))
+  allocate(Z3c1_untwisted(N_phi))
+  allocate(Z3c3_untwisted(N_phi))
 
   ! Derivatives of Z20, Z2c, and Z2s are needed to compute (X3,Y3).
   if (allocated(d_Z20_d_zeta)) deallocate(d_Z20_d_zeta)
@@ -514,6 +520,7 @@ subroutine quasisymmetry_higher_order_in_r
   else
      ! Full O(r^3) calculation
 
+     stop "r3_full has not yet been implemented !!"
 
   end if
 
