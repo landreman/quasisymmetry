@@ -5,7 +5,6 @@ subroutine quasisymmetry_grad_B_tensor
   implicit none
 
   real(dp), dimension(:,:,:), allocatable :: grad_B_tensor
-  real(dp), dimension(:), allocatable :: d_X1c_d_zeta, d_Y1s_d_zeta, d_Y1c_d_zeta
   real(dp), dimension(:), allocatable :: div_B, should_be_curvature
   real(dp), dimension(:,:), allocatable :: should_be_curvature_times_normal, should_be_normal_Cartesian
   integer :: j, k
@@ -15,16 +14,9 @@ subroutine quasisymmetry_grad_B_tensor
 
 
   allocate(grad_B_tensor(N_phi,3,3))
-  allocate(d_X1c_d_zeta(N_phi))
-  allocate(d_Y1c_d_zeta(N_phi))
-  allocate(d_Y1s_d_zeta(N_phi))
 
   if (allocated(modBinv_sqrt_half_grad_B_colon_grad_B)) deallocate(modBinv_sqrt_half_grad_B_colon_grad_B)
   allocate(modBinv_sqrt_half_grad_B_colon_grad_B(N_phi))
-
-  d_X1c_d_zeta = matmul(d_d_zeta, X1c)
-  d_Y1c_d_zeta = matmul(d_d_zeta, Y1c)
-  d_Y1s_d_zeta = matmul(d_d_zeta, Y1s)
 
   iota_N = iota + axis_helicity*nfp
 
@@ -104,7 +96,6 @@ subroutine quasisymmetry_grad_B_tensor
   call quasisymmetry_max_modBinv_sqrt_half_grad_B_colon_grad_B()
 
   deallocate(grad_B_tensor)
-  deallocate(d_X1c_d_zeta, d_Y1c_d_zeta, d_Y1s_d_zeta)
 
 end subroutine quasisymmetry_grad_B_tensor
 

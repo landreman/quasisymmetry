@@ -23,13 +23,6 @@ subroutine quasisymmetry_elongation
   !elongation = 2*abs(q) / (p - sqrt(p*p-4*q*q)) ! This version suffers precision loss for large elongation.
   elongation = (p + sqrt(p*p-4*q*q))/(2*abs(q)) ! This version is more stable numerically.
 
-  p = R1s*R1s + R1c*R1c + Z1s*Z1s + Z1c*Z1c
-  q = R1s*Z1c - R1c*Z1s
-
-  elongation_in_Rz_plane = (p + sqrt(p*p-4*q*q))/(2*abs(q)) ! This version is more stable numerically.
-
-  if (verbose) print *,"maxval(elongation_in_Rz_plane):",maxval(elongation_in_Rz_plane)
-
   ! Search for maximum using Fourier interpolation...
   index_of_max = maxloc(elongation,1)
   maxval_elongation = elongation(index_of_max)
@@ -110,3 +103,30 @@ contains
 end subroutine quasisymmetry_elongation
 
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+subroutine quasisymmetry_elongation_in_Rz_plane
+
+  use quasisymmetry_variables
+
+  implicit none
+
+  real(dp), dimension(:), allocatable :: p, q
+
+  allocate(q(N_phi))
+  allocate(p(N_phi))
+
+  p = R1s*R1s + R1c*R1c + Z1s*Z1s + Z1c*Z1c
+  q = R1s*Z1c - R1c*Z1s
+
+  if (allocated(elongation_in_Rz_plane)) deallocate(elongation_in_Rz_plane)
+  allocate(elongation_in_Rz_plane(N_phi))
+
+  elongation_in_Rz_plane = (p + sqrt(p*p-4*q*q))/(2*abs(q))
+
+  if (verbose) print *,"maxval(elongation_in_Rz_plane):",maxval(elongation_in_Rz_plane)
+
+  deallocate(q,p)
+
+end subroutine quasisymmetry_elongation_in_Rz_plane

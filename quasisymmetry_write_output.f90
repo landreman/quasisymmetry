@@ -58,7 +58,7 @@ subroutine quasisymmetry_write_output
        vn_ntor = "ntor", &
        vn_lasym = "lasym", &
        vn_untwist = "untwist", &
-       vn_order_r_squared = "order_r_squared", &
+       vn_order_r_option = "order_r_option", &
        vn_B2s = "B2s", &
        vn_B2c = "B2c", &
        vn_p2 = "p2", &
@@ -147,7 +147,39 @@ subroutine quasisymmetry_write_output
        vn_R2c = "R2c", &
        vn_z20_cylindrical = "z20_cylindrical", &
        vn_z2s_cylindrical = "z2s_cylindrical", &
-       vn_z2c_cylindrical = "z2c_cylindrical"
+       vn_z2c_cylindrical = "z2c_cylindrical", &
+       vn_X3s1 = "X3s1", &
+       vn_X3s3 = "X3s3", &
+       vn_X3c1 = "X3c1", &
+       vn_X3c3 = "X3c3", &
+       vn_Y3s1 = "Y3s1", &
+       vn_Y3s3 = "Y3s3", &
+       vn_Y3c1 = "Y3c1", &
+       vn_Y3c3 = "Y3c3", &
+       vn_Z3s1 = "Z3s1", &
+       vn_Z3s3 = "Z3s3", &
+       vn_Z3c1 = "Z3c1", &
+       vn_Z3c3 = "Z3c3", &
+       vn_X3s1_untwisted = "X3s1_untwisted", &
+       vn_X3s3_untwisted = "X3s3_untwisted", &
+       vn_X3c1_untwisted = "X3c1_untwisted", &
+       vn_X3c3_untwisted = "X3c3_untwisted", &
+       vn_Y3s1_untwisted = "Y3s1_untwisted", &
+       vn_Y3s3_untwisted = "Y3s3_untwisted", &
+       vn_Y3c1_untwisted = "Y3c1_untwisted", &
+       vn_Y3c3_untwisted = "Y3c3_untwisted", &
+       vn_Z3s1_untwisted = "Z3s1_untwisted", &
+       vn_Z3s3_untwisted = "Z3s3_untwisted", &
+       vn_Z3c1_untwisted = "Z3c1_untwisted", &
+       vn_Z3c3_untwisted = "Z3c3_untwisted", &
+       vn_R3s1 = "R3s1", &
+       vn_R3s3 = "R3s3", &
+       vn_R3c1 = "R3c1", &
+       vn_R3c3 = "R3c3", &
+       vn_z3s1_cylindrical = "z3s1_cylindrical", &
+       vn_z3s3_cylindrical = "z3s3_cylindrical", &
+       vn_z3c1_cylindrical = "z3c1_cylindrical", &
+       vn_z3c3_cylindrical = "z3c3_cylindrical"
 
   ! Arrays with dimension 2
   character(len=*), parameter :: &
@@ -218,7 +250,7 @@ subroutine quasisymmetry_write_output
   !call cdf_setatt(ncid, vn_resolution_option, 'Method used to define the geometry of the plasma surface.' // input_parameter_text)
 
   call cdf_define(ncid, vn_max_precise_elongation, max_precise_elongation)
-  call cdf_define(ncid, vn_order_r_squared, order_r_squared)
+  call cdf_define(ncid, vn_order_r_option, order_r_option)
 
   select case (trim(general_option))
   case (general_option_single)
@@ -247,7 +279,7 @@ subroutine quasisymmetry_write_output
      call cdf_define(ncid, vn_ntor, ntor)
      call cdf_define(ncid, vn_lasym, lasym)
      call cdf_define(ncid, vn_untwist, untwist)
-     if (order_r_squared) then
+     if (trim(order_r_option) .ne. order_r_option_r1) then
         call cdf_define(ncid, vn_B2s, B2s)
         call cdf_define(ncid, vn_B2c, B2c)
         call cdf_define(ncid, vn_p2, p2)
@@ -300,7 +332,8 @@ subroutine quasisymmetry_write_output
      call cdf_define(ncid, vn_elongation_in_Rz_plane, elongation_in_Rz_plane, dimname=N_phi_dim)
      call cdf_define(ncid, vn_d_l_d_phi, d_l_d_phi, dimname=N_phi_dim)
      call cdf_define(ncid, vn_modBinv_sqrt_half_grad_B_colon_grad_B, modBinv_sqrt_half_grad_B_colon_grad_B, dimname=N_phi_dim)
-     if (order_r_squared) then
+     if (trim(order_r_option) .ne. order_r_option_r1) then
+        ! O(r^2) quantities
         call cdf_define(ncid, vn_X20, X20, dimname=N_phi_dim)
         call cdf_define(ncid, vn_X2s, X2s, dimname=N_phi_dim)
         call cdf_define(ncid, vn_X2c, X2c, dimname=N_phi_dim)
@@ -326,6 +359,41 @@ subroutine quasisymmetry_write_output
         call cdf_define(ncid, vn_z20_cylindrical, z20_cylindrical, dimname=N_phi_dim)
         call cdf_define(ncid, vn_z2s_cylindrical, z2s_cylindrical, dimname=N_phi_dim)
         call cdf_define(ncid, vn_z2c_cylindrical, z2c_cylindrical, dimname=N_phi_dim)
+     end if
+     if (trim(order_r_option)==order_r_option_r3_simplified .or. trim(order_r_option)==order_r_option_r3_full) then
+        ! O(r^3) quantities
+        call cdf_define(ncid, vn_X3s1, X3s1, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_X3s3, X3s3, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_X3c1, X3c1, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_X3c3, X3c3, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_Y3s1, Y3s1, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_Y3s3, Y3s3, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_Y3c1, Y3c1, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_Y3c3, Y3c3, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_Z3s1, Z3s1, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_Z3s3, Z3s3, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_Z3c1, Z3c1, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_Z3c3, Z3c3, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_X3s1_untwisted, X3s1_untwisted, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_X3s3_untwisted, X3s3_untwisted, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_X3c1_untwisted, X3c1_untwisted, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_X3c3_untwisted, X3c3_untwisted, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_Y3s1_untwisted, Y3s1_untwisted, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_Y3s3_untwisted, Y3s3_untwisted, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_Y3c1_untwisted, Y3c1_untwisted, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_Y3c3_untwisted, Y3c3_untwisted, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_Z3s1_untwisted, Z3s1_untwisted, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_Z3s3_untwisted, Z3s3_untwisted, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_Z3c1_untwisted, Z3c1_untwisted, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_Z3c3_untwisted, Z3c3_untwisted, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_R3s1, R3s1, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_R3s3, R3s3, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_R3c1, R3c1, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_R3c3, R3c3, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_z3s1_cylindrical, z3s1_cylindrical, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_z3s3_cylindrical, z3s3_cylindrical, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_z3c1_cylindrical, z3c1_cylindrical, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_z3c3_cylindrical, z3c3_cylindrical, dimname=N_phi_dim)
      end if
   case (general_option_scan)
      call cdf_define(ncid, vn_iotas, iotas, dimname=N_scan_dim)
@@ -392,7 +460,7 @@ subroutine quasisymmetry_write_output
   call cdf_write(ncid, vn_sign_psi, sign_psi)
   call cdf_write(ncid, vn_resolution_option, resolution_option)
   call cdf_write(ncid, vn_max_precise_elongation, max_precise_elongation)
-  call cdf_write(ncid, vn_order_r_squared, order_r_squared)
+  call cdf_write(ncid, vn_order_r_option, order_r_option)
 
   select case (trim(general_option))
   case (general_option_single)
@@ -421,7 +489,7 @@ subroutine quasisymmetry_write_output
      call cdf_write(ncid, vn_ntor, ntor)
      call cdf_write(ncid, vn_lasym, lasym)
      call cdf_write(ncid, vn_untwist, untwist)
-     if (order_r_squared) then
+     if (trim(order_r_option) .ne. order_r_option_r1) then
         call cdf_write(ncid, vn_B2s, B2s)
         call cdf_write(ncid, vn_B2c, B2c)
         call cdf_write(ncid, vn_p2, p2)
@@ -474,7 +542,8 @@ subroutine quasisymmetry_write_output
      call cdf_write(ncid, vn_elongation_in_Rz_plane, elongation_in_Rz_plane)
      call cdf_write(ncid, vn_d_l_d_phi, d_l_d_phi)
      call cdf_write(ncid, vn_modBinv_sqrt_half_grad_B_colon_grad_B, modBinv_sqrt_half_grad_B_colon_grad_B)
-     if (order_r_squared) then
+     if (trim(order_r_option) .ne. order_r_option_r1) then
+        ! O(r^2) quantities
         call cdf_write(ncid, vn_X20, X20)
         call cdf_write(ncid, vn_X2s, X2s)
         call cdf_write(ncid, vn_X2c, X2c)
@@ -500,6 +569,41 @@ subroutine quasisymmetry_write_output
         call cdf_write(ncid, vn_z20_cylindrical, z20_cylindrical)
         call cdf_write(ncid, vn_z2s_cylindrical, z2s_cylindrical)
         call cdf_write(ncid, vn_z2c_cylindrical, z2c_cylindrical)
+     end if
+     if (trim(order_r_option)==order_r_option_r3_simplified .or. trim(order_r_option)==order_r_option_r3_full) then
+        ! O(r^3) quantities
+        call cdf_write(ncid, vn_X3s1, X3s1)
+        call cdf_write(ncid, vn_X3s3, X3s3)
+        call cdf_write(ncid, vn_X3c1, X3c1)
+        call cdf_write(ncid, vn_X3c3, X3c3)
+        call cdf_write(ncid, vn_Y3s1, Y3s1)
+        call cdf_write(ncid, vn_Y3s3, Y3s3)
+        call cdf_write(ncid, vn_Y3c1, Y3c1)
+        call cdf_write(ncid, vn_Y3c3, Y3c3)
+        call cdf_write(ncid, vn_Z3s1, Z3s1)
+        call cdf_write(ncid, vn_Z3s3, Z3s3)
+        call cdf_write(ncid, vn_Z3c1, Z3c1)
+        call cdf_write(ncid, vn_Z3c3, Z3c3)
+        call cdf_write(ncid, vn_X3s1_untwisted, X3s1_untwisted)
+        call cdf_write(ncid, vn_X3s3_untwisted, X3s3_untwisted)
+        call cdf_write(ncid, vn_X3c1_untwisted, X3c1_untwisted)
+        call cdf_write(ncid, vn_X3c3_untwisted, X3c3_untwisted)
+        call cdf_write(ncid, vn_Y3s1_untwisted, Y3s1_untwisted)
+        call cdf_write(ncid, vn_Y3s3_untwisted, Y3s3_untwisted)
+        call cdf_write(ncid, vn_Y3c1_untwisted, Y3c1_untwisted)
+        call cdf_write(ncid, vn_Y3c3_untwisted, Y3c3_untwisted)
+        call cdf_write(ncid, vn_Z3s1_untwisted, Z3s1_untwisted)
+        call cdf_write(ncid, vn_Z3s3_untwisted, Z3s3_untwisted)
+        call cdf_write(ncid, vn_Z3c1_untwisted, Z3c1_untwisted)
+        call cdf_write(ncid, vn_Z3c3_untwisted, Z3c3_untwisted)
+        call cdf_write(ncid, vn_R3s1, R3s1)
+        call cdf_write(ncid, vn_R3s3, R3s3)
+        call cdf_write(ncid, vn_R3c1, R3c1)
+        call cdf_write(ncid, vn_R3c3, R3c3)
+        call cdf_write(ncid, vn_z3s1_cylindrical, z3s1_cylindrical)
+        call cdf_write(ncid, vn_z3s3_cylindrical, z3s3_cylindrical)
+        call cdf_write(ncid, vn_z3c1_cylindrical, z3c1_cylindrical)
+        call cdf_write(ncid, vn_z3c3_cylindrical, z3c3_cylindrical)
      end if
   case (general_option_scan)
      call cdf_write(ncid, vn_iotas, iotas)

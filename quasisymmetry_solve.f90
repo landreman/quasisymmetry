@@ -82,63 +82,7 @@ subroutine quasisymmetry_solve
   Y1s = sign_G * sign_psi * curvature / eta_bar
   Y1c = sign_G * sign_psi * curvature * sigma / eta_bar
 
-  if (order_r_squared) then
-     call quasisymmetry_order_r_squared()
-  end if
-
-  ! If helicity is nonzero, then the original X1s/X1c/Y1s/Y1c variables are defined with respect to a "poloidal" angle that
-  ! is actually helical, with the theta=0 curve wrapping around the magnetic axis as you follow phi around toroidally. Therefore
-  ! here we convert to an untwisted poloidal angle, such that the theta=0 curve does not wrap around the axis.
-  if (axis_helicity == 0 .or. (.not. untwist)) then
-     X1s_untwisted = 0
-     X1c_untwisted = X1c
-     Y1s_untwisted = Y1s
-     Y1c_untwisted = Y1c
-     if (order_r_squared) then
-        X20_untwisted = X20
-        X2s_untwisted = X2s
-        X2c_untwisted = X2c
-        Y20_untwisted = Y20
-        Y2s_untwisted = Y2s
-        Y2c_untwisted = Y2c
-        Z20_untwisted = Z20
-        Z2s_untwisted = Z2s
-        Z2c_untwisted = Z2c
-     end if
-  else
-     allocate(angle(N_phi))
-     allocate(sinangle(N_phi))
-     allocate(cosangle(N_phi))
-     angle = -axis_helicity * nfp * Boozer_toroidal_angle
-     sinangle = sin(angle)
-     cosangle = cos(angle)
-     X1s_untwisted = X1s *   cosangle  + X1c * sinangle
-     X1c_untwisted = X1s * (-sinangle) + X1c * cosangle
-     Y1s_untwisted = Y1s *   cosangle  + Y1c * sinangle
-     Y1c_untwisted = Y1s * (-sinangle) + Y1c * cosangle
-     if (order_r_squared) then
-        X20_untwisted = X20
-        Y20_untwisted = Y20
-        Z20_untwisted = Z20
-        sinangle = sin(2*angle)
-        cosangle = cos(2*angle)
-        X2s_untwisted = X2s *   cosangle  + X2c * sinangle
-        X2c_untwisted = X2s * (-sinangle) + X2c * cosangle
-        Y2s_untwisted = Y2s *   cosangle  + Y2c * sinangle
-        Y2c_untwisted = Y2s * (-sinangle) + Y2c * cosangle
-        Z2s_untwisted = Z2s *   cosangle  + Z2c * sinangle
-        Z2c_untwisted = Z2s * (-sinangle) + Z2c * cosangle
-     end if
-     deallocate(sinangle,cosangle,angle)
-  end if
-
-  call quasisymmetry_Frenet_to_cylindrical_linear()
-    
   call quasisymmetry_elongation()
-
-  call quasisymmetry_determine_B_helicity()
-
-  call quasisymmetry_grad_B_tensor()
 
   !print *,"elongation:"
   !print *,elongation

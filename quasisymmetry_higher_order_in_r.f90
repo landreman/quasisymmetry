@@ -1,4 +1,4 @@
-subroutine quasisymmetry_order_r_squared
+subroutine quasisymmetry_higher_order_in_r
 
   use quasisymmetry_variables
 
@@ -17,6 +17,8 @@ subroutine quasisymmetry_order_r_squared
   real(dp), dimension(:), allocatable :: right_hand_side
   integer :: j, iunit=20
   real(dp), dimension(:), allocatable :: fX0, fXs, fXc, fY0, fYs, fYc, eq1residual, eq2residual
+  integer :: N_helicity
+  real(dp) :: I2, G0
   ! Variables needed by LAPACK:
   integer :: INFO
   integer, dimension(:), allocatable :: IPIV
@@ -26,7 +28,7 @@ subroutine quasisymmetry_order_r_squared
   iota_N = iota + axis_helicity*nfp
   abs_G0_over_B0 = 1 / B0_over_abs_G0
 
-  if ((verbose) .and. abs(iota_N) < 1e-8) print "(a,es20.14)","Warning: |iota_N| is very small so O(r^2) solve will be poorly conditioned. iota_N=",iota_N
+  if ((verbose) .and. abs(iota_N) < 1e-8) print "(a,es21.14)","Warning: |iota_N| is very small so O(r^2) solve will be poorly conditioned. iota_N=",iota_N
 
   if (allocated(X20)) deallocate(X20)
   if (allocated(Y20)) deallocate(Y20)
@@ -394,4 +396,125 @@ subroutine quasisymmetry_order_r_squared
   deallocate(fYs_from_X20, fYs_from_Y20, fYs_inhomogeneous)
   deallocate(fYc_from_X20, fYc_from_Y20, fYc_inhomogeneous)
 
-end subroutine quasisymmetry_order_r_squared
+  if (trim(order_r_option) == order_r_option_r2) return
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! Beginning of O(r^3) calculation
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  if (allocated(X3s1)) deallocate(X3s1)
+  if (allocated(X3s3)) deallocate(X3s3)
+  if (allocated(X3c1)) deallocate(X3c1)
+  if (allocated(X3c3)) deallocate(X3c3)
+  if (allocated(Y3s1)) deallocate(Y3s1)
+  if (allocated(Y3s3)) deallocate(Y3s3)
+  if (allocated(Y3c1)) deallocate(Y3c1)
+  if (allocated(Y3c3)) deallocate(Y3c3)
+  if (allocated(Z3s1)) deallocate(Z3s1)
+  if (allocated(Z3s3)) deallocate(Z3s3)
+  if (allocated(Z3c1)) deallocate(Z3c1)
+  if (allocated(Z3c3)) deallocate(Z3c3)
+  if (allocated(R3s1)) deallocate(R3s1)
+  if (allocated(R3s3)) deallocate(R3s3)
+  if (allocated(R3c1)) deallocate(R3c1)
+  if (allocated(R3c3)) deallocate(R3c3)
+  if (allocated(z3s1_cylindrical)) deallocate(z3s1_cylindrical)
+  if (allocated(z3s3_cylindrical)) deallocate(z3s3_cylindrical)
+  if (allocated(z3c1_cylindrical)) deallocate(z3c1_cylindrical)
+  if (allocated(z3c3_cylindrical)) deallocate(z3c3_cylindrical)
+
+  if (allocated(X3s1_untwisted)) deallocate(X3s1_untwisted)
+  if (allocated(X3s3_untwisted)) deallocate(X3s3_untwisted)
+  if (allocated(X3c1_untwisted)) deallocate(X3c1_untwisted)
+  if (allocated(X3c3_untwisted)) deallocate(X3c3_untwisted)
+  if (allocated(Y3s1_untwisted)) deallocate(Y3s1_untwisted)
+  if (allocated(Y3s3_untwisted)) deallocate(Y3s3_untwisted)
+  if (allocated(Y3c1_untwisted)) deallocate(Y3c1_untwisted)
+  if (allocated(Y3c3_untwisted)) deallocate(Y3c3_untwisted)
+  if (allocated(Z3s1_untwisted)) deallocate(Z3s1_untwisted)
+  if (allocated(Z3s3_untwisted)) deallocate(Z3s3_untwisted)
+  if (allocated(Z3c1_untwisted)) deallocate(Z3c1_untwisted)
+  if (allocated(Z3c3_untwisted)) deallocate(Z3c3_untwisted)
+
+  allocate(X20(N_phi))
+  allocate(X2s(N_phi))
+  allocate(X2c(N_phi))
+  allocate(Y20(N_phi))
+  allocate(Y2s(N_phi))
+  allocate(Y2c(N_phi))
+  allocate(Z20(N_phi))
+  allocate(Z2s(N_phi))
+  allocate(Z2c(N_phi))
+
+  allocate(X20_untwisted(N_phi))
+  allocate(X2s_untwisted(N_phi))
+  allocate(X2c_untwisted(N_phi))
+  allocate(Y20_untwisted(N_phi))
+  allocate(Y2s_untwisted(N_phi))
+  allocate(Y2c_untwisted(N_phi))
+  allocate(Z20_untwisted(N_phi))
+  allocate(Z2s_untwisted(N_phi))
+  allocate(Z2c_untwisted(N_phi))
+
+  allocate(R20(N_phi))
+  allocate(R2s(N_phi))
+  allocate(R2c(N_phi))
+  allocate(z20_cylindrical(N_phi))
+  allocate(z2s_cylindrical(N_phi))
+  allocate(z2c_cylindrical(N_phi))
+
+  ! Derivatives of Z20, Z2c, and Z2s are needed to compute (X3,Y3).
+  if (allocated(d_Z20_d_zeta)) deallocate(d_Z20_d_zeta)
+  if (allocated(d_Z2c_d_zeta)) deallocate(d_Z2c_d_zeta)
+  if (allocated(d_Z2s_d_zeta)) deallocate(d_Z2s_d_zeta)
+  allocate(d_Z20_d_zeta(N_phi))
+  allocate(d_Z2c_d_zeta(N_phi))
+  allocate(d_Z2s_d_zeta(N_phi))
+  d_Z20_d_zeta = matmul(d_d_zeta,Z20)
+  d_Z2c_d_zeta = matmul(d_d_zeta,Z2c)
+  d_Z2s_d_zeta = matmul(d_d_zeta,Z2s)
+
+  N_helicity = - axis_helicity*nfp
+  I2 = I2_over_B0 * B0
+  G0 = sign_G * abs_G0_over_B0 * B0
+
+  if (trim(order_r_option) == order_r_option_r3_simplified) then
+     X3s1 = 0
+     X3s3 = 0
+     X3c3 = 0
+
+     Y3c3 = 0
+     Y3s3 = 0
+
+     Z3s1 = 0
+     Z3s3 = 0
+     Z3c1 = 0
+     Z3c3 = 0
+
+     X3c1 = -(1/(8 * G0 * Y1s)) * (2 * I2 * N_helicity * X1c * Y1s + 2 * (-I2 * iota - (G0 * p2 * mu0)/ (B0*B0)) * X1c * Y1s - &
+          16 * G0 * X2s * Y20 - 8 * G0 * X2s * Y2c + 16 * G0 * X20 * Y2s + 8 * G0 * X2c * Y2s - 8 * B0 * sign_psi * (iota - N_helicity) * Z2s + &
+          2 * B0 * abs_G0_over_B0 * sign_psi * X20 * curvature + 4 * B0 * abs_G0_over_B0 * sign_psi * X2c * curvature - 3 * abs_G0_over_B0 * I2 * X1c**2 * torsion - &
+          3 * abs_G0_over_B0 * I2 * Y1c**2 * torsion + abs_G0_over_B0 * I2 * Y1s**2 * torsion + 3 * I2 * Y1c * d_X1c_d_zeta - 3 * I2 * X1c * d_Y1c_d_zeta - &
+          2 * B0 * sign_psi * d_Z20_d_zeta - 4 * B0 * sign_psi * d_Z2c_d_zeta)
+     
+     
+     Y3c1 =-(1/(8 * G0 * X1c * Y1s)) * (2 * I2 * N_helicity * X1c * Y1c * Y1s + 2 * (-I2 * iota - (G0 * p2 * mu0)/(B0**2)) * X1c * Y1c * Y1s - &
+          16 * G0 * X2s * Y1c * Y20 + 32 * G0 * X2c * Y1s * Y20 - 8 * G0 * X2s * Y1c * Y2c - 32 * G0 * X20 * Y1s * Y2c + 16 * G0 * X20 * Y1c * Y2s + &
+          8 * G0 * X2c * Y1c * Y2s + 16 * B0 * sign_psi * (iota - N_helicity) * Y1s * Z2c - 8 * B0 * sign_psi * (iota - N_helicity) * Y1c * Z2s + &
+          2 * B0 * abs_G0_over_B0 * sign_psi * X20 * Y1c * curvature + 4 * B0 * abs_G0_over_B0 * sign_psi * X2c * Y1c * curvature + &
+          8 * B0 * abs_G0_over_B0 * sign_psi * X2s * Y1s * curvature - 3 * abs_G0_over_B0 * I2 * X1c**2 * Y1c * torsion - 3 * abs_G0_over_B0 * I2 * Y1c**3 * torsion - &
+          7 * abs_G0_over_B0 * I2 * Y1c * Y1s**2 * torsion + 3 * I2 * Y1c**2 * d_X1c_d_zeta + 4 * I2 * Y1s**2 * d_X1c_d_zeta - 3 * I2 * X1c * Y1c * d_Y1c_d_zeta - &
+          4 * I2 * X1c * Y1s * d_Y1s_d_zeta - 2 * B0 * sign_psi * Y1c * d_Z20_d_zeta - 4 * B0 * sign_psi * Y1c * d_Z2c_d_zeta - 8 * B0 * sign_psi * Y1s * d_Z2s_d_zeta)
+     
+     
+     Y3s1 = -(1/(8 * G0 * X1c)) * (2 * I2 * N_helicity * X1c * Y1s + 2 * (-I2 * iota - (G0 * p2 * mu0)/(B0**2)) * X1c * Y1s + 16 * G0 * X2s * Y20 - &
+          8 * G0 * X2s * Y2c - 16 * G0 * X20 * Y2s + 8 * G0 * X2c * Y2s + 8 * B0 * sign_psi * (iota - N_helicity) * Z2s + 2 * B0 * abs_G0_over_B0 * sign_psi * X20 * curvature &
+          - 4 * B0 * abs_G0_over_B0 * sign_psi * X2c * curvature + abs_G0_over_B0 * I2 * X1c**2 * torsion + abs_G0_over_B0 * I2 * Y1c**2 * torsion - &
+          3 * abs_G0_over_B0 * I2 * Y1s**2 * torsion - I2 * Y1c * d_X1c_d_zeta + I2 * X1c * d_Y1c_d_zeta - 2 * B0 * sign_psi * d_Z20_d_zeta + 4 * B0 * sign_psi * d_Z2c_d_zeta)
+  else
+     ! Full O(r^3) calculation
+
+
+  end if
+
+end subroutine quasisymmetry_higher_order_in_r

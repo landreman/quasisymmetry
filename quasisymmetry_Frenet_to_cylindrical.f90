@@ -4,65 +4,217 @@ subroutine quasisymmetry_Frenet_to_cylindrical_linear
 
   implicit none
 
-  real(dp), dimension(:), allocatable :: nu_1s, nu_1c, r2_source_1, r2_source_2
-  real(dp), dimension(:), allocatable :: d_X1c_d_zeta, d_Y1c_d_zeta, d_Y1s_d_zeta
+  real(dp), dimension(:), allocatable :: nu_1s, nu_1c, source_n, source_b, nu_20, nu_2s, nu_2c
+  real(dp), dimension(:), allocatable :: d_X1c_untwisted_d_zeta, d_X1s_untwisted_d_zeta, d_Y1c_untwisted_d_zeta, d_Y1s_untwisted_d_zeta
+  real(dp), dimension(:), allocatable :: d_curvature_d_zeta, d_torsion_d_zeta
+  real(dp), dimension(:), allocatable :: d_X20_untwisted_d_zeta, d_X2s_untwisted_d_zeta, d_X2c_untwisted_d_zeta
+  real(dp), dimension(:), allocatable :: d_Y20_untwisted_d_zeta, d_Y2s_untwisted_d_zeta, d_Y2c_untwisted_d_zeta
+  real(dp), dimension(:), allocatable :: d2_X1s_untwisted_d_zeta2, d2_X1c_untwisted_d_zeta2, d2_Y1s_untwisted_d_zeta2, d2_Y1c_untwisted_d_zeta2
 
   R1c = (-binormal_cylindrical(:,3) * X1c_untwisted + normal_cylindrical(:,3) * Y1c_untwisted) * d_l_d_phi / R0
   R1s = (-binormal_cylindrical(:,3) * X1s_untwisted + normal_cylindrical(:,3) * Y1s_untwisted) * d_l_d_phi / R0
-  Z1c = ( binormal_cylindrical(:,1) * X1c_untwisted - normal_cylindrical(:,1) * Y1c_untwisted) * d_l_d_phi / R0
-  Z1s = ( binormal_cylindrical(:,1) * X1s_untwisted - normal_cylindrical(:,1) * Y1s_untwisted) * d_l_d_phi / R0
+  z1c = ( binormal_cylindrical(:,1) * X1c_untwisted - normal_cylindrical(:,1) * Y1c_untwisted) * d_l_d_phi / R0
+  z1s = ( binormal_cylindrical(:,1) * X1s_untwisted - normal_cylindrical(:,1) * Y1s_untwisted) * d_l_d_phi / R0
 
-  if (.not. order_r_squared) return
+  if (trim(order_r_option)==order_r_option_r1) return
 
-  ! See the note "20190215-02 Frenet to cylindrical transformation to next order.docx" for derivation of the equations that follow:
+  ! Now let us begin to handle the O(r^2) terms.
+
+  allocate(d_X1c_untwisted_d_zeta(N_phi))
+  allocate(d_X1s_untwisted_d_zeta(N_phi))
+  allocate(d_Y1c_untwisted_d_zeta(N_phi))
+  allocate(d_Y1s_untwisted_d_zeta(N_phi))
+
+  if (axis_helicity == 0 .or. (.not. untwist)) then
+     d_X1c_untwisted_d_zeta = d_X1c_d_zeta
+     d_X1s_untwisted_d_zeta = 0
+     d_Y1c_untwisted_d_zeta = d_Y1c_d_zeta
+     d_Y1s_untwisted_d_zeta = d_Y1s_d_zeta
+  else
+     d_X1c_untwisted_d_zeta = matmul(d_d_zeta, X1c_untwisted)
+     d_X1s_untwisted_d_zeta = matmul(d_d_zeta, X1s_untwisted)
+     d_Y1c_untwisted_d_zeta = matmul(d_d_zeta, Y1c_untwisted)
+     d_Y1s_untwisted_d_zeta = matmul(d_d_zeta, Y1s_untwisted)
+  end if
+
+
   allocate(nu_1s(N_phi))
   allocate(nu_1c(N_phi))
-  allocate(r2_source_1(N_phi))
-  allocate(r2_source_2(N_phi))
-  allocate(d_X1c_d_zeta(N_phi))
-  allocate(d_Y1c_d_zeta(N_phi))
-  allocate(d_Y1s_d_zeta(N_phi))
+  allocate(source_n(N_phi))
+  allocate(source_b(N_phi))
   nu_1s = B0_over_abs_G0 / d_l_d_phi * (R1s * R0p + z1s * z0p)
   nu_1c = B0_over_abs_G0 / d_l_d_phi * (R1c * R0p + z1c * z0p)
-  d_X1c_d_zeta = matmul(d_d_zeta,X1c)
-  d_Y1c_d_zeta = matmul(d_d_zeta,Y1c)
-  d_Y1s_d_zeta = matmul(d_d_zeta,Y1s)
+
+  ! See the note "20190215-02 Frenet to cylindrical transformation to next order.docx" for derivation of the equations that follow:
 
   ! r^2 terms that are independent of theta
-  r2_source_1 = (0.25d+0) * (nu_1s * nu_1s + nu_1c * nu_1c) * abs_G0_over_B0 * abs_G0_over_B0 * curvature + (0.5d+0) * d_X1c_d_zeta * nu_1c &
-       - (0.5d+0) * (Y1s * nu_1s + Y1c * nu_1c) * abs_G0_over_B0 * torsion + X20
-  r2_source_2 = (0.5d+0) * abs_G0_over_B0 * torsion * X1c * nu_1c + (0.5d+0) * (d_Y1s_d_zeta * nu_1s + d_Y1c_d_zeta * nu_1c) + Y20
-  R20             = (-binormal_cylindrical(:,3) * r2_source_1 + normal_cylindrical(:,3) * r2_source_2) * d_l_d_phi / R0
-  z20_cylindrical = ( binormal_cylindrical(:,1) * r2_source_1 - normal_cylindrical(:,1) * r2_source_2) * d_l_d_phi / R0
+  source_n = (0.25d+0) * (nu_1s * nu_1s + nu_1c * nu_1c) * abs_G0_over_B0 * abs_G0_over_B0 * curvature &
+       + (0.5d+0) * (d_X1c_untwisted_d_zeta * nu_1c + d_X1s_untwisted_d_zeta * nu_1s) &
+       - (0.5d+0) * (Y1s_untwisted * nu_1s + Y1c_untwisted * nu_1c) * abs_G0_over_B0 * torsion + X20_untwisted
+  source_b = (0.5d+0) * abs_G0_over_B0 * torsion * (X1c_untwisted * nu_1c + X1s_untwisted * nu_1s) &
+       + (0.5d+0) * (d_Y1s_d_zeta * nu_1s + d_Y1c_d_zeta * nu_1c) + Y20_untwisted
+  R20             = (-binormal_cylindrical(:,3) * source_n + normal_cylindrical(:,3) * source_b) * d_l_d_phi / R0
+  z20_cylindrical = ( binormal_cylindrical(:,1) * source_n - normal_cylindrical(:,1) * source_b) * d_l_d_phi / R0
 
   ! r^2 terms proportional to sin(2 theta)
-  r2_source_1 = (0.25d+0) * (nu_1s * nu_1c + nu_1c * nu_1s) * abs_G0_over_B0 * abs_G0_over_B0 * curvature + (0.5d+0) * d_X1c_d_zeta * nu_1s &
-       - (0.5d+0) * (Y1s * nu_1c + Y1c * nu_1s) * abs_G0_over_B0 * torsion + X2s
-  r2_source_2 = (0.5d+0) * abs_G0_over_B0 * torsion * X1c * nu_1s + (0.5d+0) * (d_Y1s_d_zeta * nu_1c + d_Y1c_d_zeta * nu_1s) + Y2s
-  R2s             = (-binormal_cylindrical(:,3) * r2_source_1 + normal_cylindrical(:,3) * r2_source_2) * d_l_d_phi / R0
-  z2s_cylindrical = ( binormal_cylindrical(:,1) * r2_source_1 - normal_cylindrical(:,1) * r2_source_2) * d_l_d_phi / R0
+  source_n = (0.25d+0) * (nu_1s * nu_1c + nu_1c * nu_1s) * abs_G0_over_B0 * abs_G0_over_B0 * curvature &
+       + (0.5d+0) * (d_X1c_untwisted_d_zeta * nu_1s + d_X1s_untwisted_d_zeta * nu_1c) &
+       - (0.5d+0) * (Y1s_untwisted * nu_1c + Y1c_untwisted * nu_1s) * abs_G0_over_B0 * torsion + X2s_untwisted
+  source_b = (0.5d+0) * abs_G0_over_B0 * torsion * (X1c_untwisted * nu_1s + X1s_untwisted * nu_1c) &
+       + (0.5d+0) * (d_Y1s_d_zeta * nu_1c + d_Y1c_d_zeta * nu_1s) + Y2s_untwisted
+  R2s             = (-binormal_cylindrical(:,3) * source_n + normal_cylindrical(:,3) * source_b) * d_l_d_phi / R0
+  z2s_cylindrical = ( binormal_cylindrical(:,1) * source_n - normal_cylindrical(:,1) * source_b) * d_l_d_phi / R0
 
   ! r^2 terms proportional to cos(2 theta)
-  r2_source_1 = (0.25d+0) * (-nu_1s * nu_1s + nu_1c * nu_1c) * abs_G0_over_B0 * abs_G0_over_B0 * curvature + (0.5d+0) * d_X1c_d_zeta * nu_1c &
-       - (0.5d+0) * (-Y1s * nu_1s + Y1c * nu_1c) * abs_G0_over_B0 * torsion + X2c
-  r2_source_2 = (0.5d+0) * abs_G0_over_B0 * torsion * X1c * nu_1c + (0.5d+0) * (-d_Y1s_d_zeta * nu_1s + d_Y1c_d_zeta * nu_1c) + Y2c
-  R2c             = (-binormal_cylindrical(:,3) * r2_source_1 + normal_cylindrical(:,3) * r2_source_2) * d_l_d_phi / R0
-  z2c_cylindrical = ( binormal_cylindrical(:,1) * r2_source_1 - normal_cylindrical(:,1) * r2_source_2) * d_l_d_phi / R0
+  source_n = (0.25d+0) * (-nu_1s * nu_1s + nu_1c * nu_1c) * abs_G0_over_B0 * abs_G0_over_B0 * curvature &
+       + (0.5d+0) * (d_X1c_untwisted_d_zeta * nu_1c - d_X1s_untwisted_d_zeta * nu_1s) &
+       - (0.5d+0) * (-Y1s_untwisted * nu_1s + Y1c_untwisted * nu_1c) * abs_G0_over_B0 * torsion + X2c_untwisted
+  source_b = (0.5d+0) * abs_G0_over_B0 * torsion * (X1c_untwisted * nu_1c - X1s_untwisted * nu_1s) &
+       + (0.5d+0) * (-d_Y1s_d_zeta * nu_1s + d_Y1c_d_zeta * nu_1c) + Y2c_untwisted
+  R2c             = (-binormal_cylindrical(:,3) * source_n + normal_cylindrical(:,3) * source_b) * d_l_d_phi / R0
+  z2c_cylindrical = ( binormal_cylindrical(:,1) * source_n - normal_cylindrical(:,1) * source_b) * d_l_d_phi / R0
 
 
-  print *,"nu_1s:",nu_1s
-  print *,"nu_1c:",nu_1c
-  print *,"r2_source_1:",r2_source_1
-  print *,"r2_source_2:",r2_source_2
-  print *,"d_X1c_d_zeta",d_X1c_d_zeta
-  print *,"d_Y1c_d_zeta",d_Y1c_d_zeta
-  print *,"d_Y1s_d_zeta",d_Y1s_d_zeta
-  print *,"R20:",R20
-  print *,"R2s:",R2s
-  print *,"R2c:",R2c
-  print *,"z20_cylindrical:",z20_cylindrical
+!!$  print *,"nu_1s:",nu_1s
+!!$  print *,"nu_1c:",nu_1c
+!!$  print *,"source_n:",source_n
+!!$  print *,"source_b:",source_b
+!!$  print *,"d_X1c_d_zeta",d_X1c_d_zeta
+!!$  print *,"d_Y1c_d_zeta",d_Y1c_d_zeta
+!!$  print *,"d_Y1s_d_zeta",d_Y1s_d_zeta
+!!$  print *,"R20:",R20
+!!$  print *,"R2s:",R2s
+!!$  print *,"R2c:",R2c
+!!$  print *,"z20_cylindrical:",z20_cylindrical
 
-  deallocate(nu_1s, nu_1c, r2_source_1, r2_source_2, d_X1c_d_zeta, d_Y1c_d_zeta, d_Y1s_d_zeta)
+  if (trim(order_r_option)==order_r_option_r2) then
+     ! In this case we will not proceed to 3rd order.
+     deallocate(nu_1s, nu_1c, source_n, source_b)
+     deallocate(d_X1c_untwisted_d_zeta, d_X1s_untwisted_d_zeta, d_Y1c_untwisted_d_zeta, d_Y1s_untwisted_d_zeta)
+     return
+  end if
+
+  ! If we made it here, then we need to handle the O(r^3) terms. 
+
+  allocate(nu_20(N_phi))
+  allocate(nu_2c(N_phi))
+  allocate(nu_2s(N_phi))
+
+  nu_20 = (R20 * R0p + z20_cylindrical * z0p) * B0_over_abs_G0 / d_l_d_phi - Z20 * B0_over_abs_G0 &
+       + curvature * (0.5d+0) * (nu_1c * X1c_untwisted + nu_1s * X1s_untwisted)
+
+  nu_2s = (R2s * R0p + z2s_cylindrical * z0p) * B0_over_abs_G0 / d_l_d_phi - Z2s * B0_over_abs_G0 &
+       + curvature * (0.5d+0) * (nu_1c * X1s_untwisted + nu_1s * X1c_untwisted)
+
+  nu_2c = (R2c * R0p + z2c_cylindrical * z0p) * B0_over_abs_G0 / d_l_d_phi - Z2c * B0_over_abs_G0 &
+       + curvature * (0.5d+0) * (nu_1c * X1c_untwisted - nu_1s * X1s_untwisted)
+
+  allocate(d_curvature_d_zeta)
+  allocate(d_torsion_d_zeta)
+  d_curvature_d_zeta = matmul(d_d_zeta,curvature)
+  d_torsion_d_zeta = matmul(d_d_zeta,torsion)
+
+  allocate(d2_X1s_untwisted_d_zeta2(N_phi))
+  allocate(d2_X1c_untwisted_d_zeta2(N_phi))
+  allocate(d2_Y1s_untwisted_d_zeta2(N_phi))
+  allocate(d2_Y1c_untwisted_d_zeta2(N_phi))
+  d2_X1s_untwisted_d_zeta2 = matmul(d_d_zeta, d_X1s_d_zeta)
+  d2_X1c_untwisted_d_zeta2 = matmul(d_d_zeta, d_X1c_d_zeta)
+  d2_Y1s_untwisted_d_zeta2 = matmul(d_d_zeta, d_Y1s_d_zeta)
+  d2_Y1c_untwisted_d_zeta2 = matmul(d_d_zeta, d_Y1c_d_zeta)
+
+  allocate(d_X20_untwisted_d_zeta(N_phi))
+  allocate(d_X2s_untwisted_d_zeta(N_phi))
+  allocate(d_X2c_untwisted_d_zeta(N_phi))
+  allocate(d_Y20_untwisted_d_zeta(N_phi))
+  allocate(d_Y2s_untwisted_d_zeta(N_phi))
+  allocate(d_Y2c_untwisted_d_zeta(N_phi))
+  d_X20_untwisted_d_zeta = matmul(d_d_zeta,X20_untwisted)
+  d_X2s_untwisted_d_zeta = matmul(d_d_zeta,X2s_untwisted)
+  d_X2c_untwisted_d_zeta = matmul(d_d_zeta,X2c_untwisted)
+  d_Y20_untwisted_d_zeta = matmul(d_d_zeta,Y20_untwisted)
+  d_Y2s_untwisted_d_zeta = matmul(d_d_zeta,Y2s_untwisted)
+  d_Y2c_untwisted_d_zeta = matmul(d_d_zeta,Y2c_untwisted)
+
+  ! The equations below are pasted from "20190308-01 Converting Frenet to cylindrical to 3rd order.nb"
+  ! (and I had to search-and-replace a bunch of things.)
+
+  ! r^3 terms that are \propto sin(theta)
+  source_n = (8*X3s1_untwisted + 4*d_X2s_untwisted_d_zeta*nu_1c + 4*abs_G0_over_B0*Z2s_untwisted*curvature*nu_1c + d2_X1s_untwisted_d_zeta2*nu_1c**2 - abs_G0_over_B0**2*X1s_untwisted*curvature**2*nu_1c**2 + 8*d_X20_untwisted_d_zeta*nu_1s - 4*d_X2c_untwisted_d_zeta*nu_1s + 8*abs_G0_over_B0*Z20_untwisted*curvature*nu_1s - &
+       4*abs_G0_over_B0*Z2c_untwisted*curvature*nu_1s + 2*d2_X1c_untwisted_d_zeta2*nu_1c*nu_1s - 2*abs_G0_over_B0**2*X1c_untwisted*curvature**2*nu_1c*nu_1s + abs_G0_over_B0**2*d_curvature_d_zeta*nu_1c**2*nu_1s + 3*d2_X1s_untwisted_d_zeta2*nu_1s**2 - &
+       3*abs_G0_over_B0**2*X1s_untwisted*curvature**2*nu_1s**2 + abs_G0_over_B0**2*d_curvature_d_zeta*nu_1s**3 + 8*d_X1s_untwisted_d_zeta*nu_20 + 8*abs_G0_over_B0**2*curvature*nu_1s*nu_20 - 4*d_X1s_untwisted_d_zeta*nu_2c - 4*abs_G0_over_B0**2*curvature*nu_1s*nu_2c + 4*d_X1c_untwisted_d_zeta*nu_2s + &
+       4*abs_G0_over_B0**2*curvature*nu_1c*nu_2s - 4*abs_G0_over_B0*Y2s_untwisted*nu_1c*torsion - 2*abs_G0_over_B0*d_Y1s_untwisted_d_zeta*nu_1c**2*torsion - 8*abs_G0_over_B0*Y20_untwisted*nu_1s*torsion + 4*abs_G0_over_B0*Y2c_untwisted*nu_1s*torsion - 4*abs_G0_over_B0*d_Y1c_untwisted_d_zeta*nu_1c*nu_1s*torsion - &
+       6*abs_G0_over_B0*d_Y1s_untwisted_d_zeta*nu_1s**2*torsion - 8*abs_G0_over_B0*Y1s_untwisted*nu_20*torsion + 4*abs_G0_over_B0*Y1s_untwisted*nu_2c*torsion - 4*abs_G0_over_B0*Y1c_untwisted*nu_2s*torsion - abs_G0_over_B0**2*X1s_untwisted*nu_1c**2*torsion**2 - &
+       2*abs_G0_over_B0**2*X1c_untwisted*nu_1c*nu_1s*torsion**2 - 3*abs_G0_over_B0**2*X1s_untwisted*nu_1s**2*torsion**2 - abs_G0_over_B0*Y1s_untwisted*nu_1c**2*d_torsion_d_zeta - 2*abs_G0_over_B0*Y1c_untwisted*nu_1c*nu_1s*d_torsion_d_zeta - 3*abs_G0_over_B0*Y1s_untwisted*nu_1s**2*d_torsion_d_zeta) * 0.125_dp
+  
+  source_b = (8*Y3s1_untwisted + 4*d_Y2s_untwisted_d_zeta*nu_1c + d2_Y1s_untwisted_d_zeta2*nu_1c**2 + 8*d_Y20_untwisted_d_zeta*nu_1s - 4*d_Y2c_untwisted_d_zeta*nu_1s + 2*d2_Y1c_untwisted_d_zeta2*nu_1c*nu_1s + 3*d2_Y1s_untwisted_d_zeta2*nu_1s**2 + 8*d_Y1s_untwisted_d_zeta*nu_20 - 4*d_Y1s_untwisted_d_zeta*nu_2c + &
+       4*d_Y1c_untwisted_d_zeta*nu_2s + 4*abs_G0_over_B0*X2s_untwisted*nu_1c*torsion + 2*abs_G0_over_B0*d_X1s_untwisted_d_zeta*nu_1c**2*torsion + 8*abs_G0_over_B0*X20_untwisted*nu_1s*torsion - 4*abs_G0_over_B0*X2c_untwisted*nu_1s*torsion + 4*abs_G0_over_B0*d_X1c_untwisted_d_zeta*nu_1c*nu_1s*torsion + &
+       abs_G0_over_B0**3*curvature*nu_1c**2*nu_1s*torsion + 6*abs_G0_over_B0*d_X1s_untwisted_d_zeta*nu_1s**2*torsion + abs_G0_over_B0**3*curvature*nu_1s**3*torsion + 8*abs_G0_over_B0*X1s_untwisted*nu_20*torsion - 4*abs_G0_over_B0*X1s_untwisted*nu_2c*torsion + 4*abs_G0_over_B0*X1c_untwisted*nu_2s*torsion - &
+       abs_G0_over_B0**2*Y1s_untwisted*nu_1c**2*torsion**2 - 2*abs_G0_over_B0**2*Y1c_untwisted*nu_1c*nu_1s*torsion**2 - 3*abs_G0_over_B0**2*Y1s_untwisted*nu_1s**2*torsion**2 + abs_G0_over_B0*X1s_untwisted*nu_1c**2*d_torsion_d_zeta + 2*abs_G0_over_B0*X1c_untwisted*nu_1c*nu_1s*d_torsion_d_zeta + &
+       3*abs_G0_over_B0*X1s_untwisted*nu_1s**2*d_torsion_d_zeta) * 0.125_dp
+  
+  R3s1             = (-binormal_cylindrical(:,3) * source_n + normal_cylindrical(:,3) * source_b) * d_l_d_phi / R0
+  z3s1_cylindrical = ( binormal_cylindrical(:,1) * source_n - normal_cylindrical(:,1) * source_b) * d_l_d_phi / R0
+
+  ! r^3 terms that are \propto cos(theta)
+  source_n = (8*X3c1_untwisted + 8*d_X20_untwisted_d_zeta*nu_1c + 4*d_X2c_untwisted_d_zeta*nu_1c + 8*abs_G0_over_B0*Z20_untwisted*curvature*nu_1c + 4*abs_G0_over_B0*Z2c_untwisted*curvature*nu_1c + 3*d2_X1c_untwisted_d_zeta2*nu_1c**2 - 3*abs_G0_over_B0**2*X1c_untwisted*curvature**2*nu_1c**2 + &
+       abs_G0_over_B0**2*d_curvature_d_zeta*nu_1c**3 + 4*d_X2s_untwisted_d_zeta*nu_1s + 4*abs_G0_over_B0*Z2s_untwisted*curvature*nu_1s + 2*d2_X1s_untwisted_d_zeta2*nu_1c*nu_1s - 2*abs_G0_over_B0**2*X1s_untwisted*curvature**2*nu_1c*nu_1s + d2_X1c_untwisted_d_zeta2*nu_1s**2 - &
+       abs_G0_over_B0**2*X1c_untwisted*curvature**2*nu_1s**2 + abs_G0_over_B0**2*d_curvature_d_zeta*nu_1c*nu_1s**2 + 8*d_X1c_untwisted_d_zeta*nu_20 + 8*abs_G0_over_B0**2*curvature*nu_1c*nu_20 + 4*d_X1c_untwisted_d_zeta*nu_2c + 4*abs_G0_over_B0**2*curvature*nu_1c*nu_2c + &
+       4*d_X1s_untwisted_d_zeta*nu_2s + 4*abs_G0_over_B0**2*curvature*nu_1s*nu_2s - 8*abs_G0_over_B0*Y20_untwisted*nu_1c*torsion - 4*abs_G0_over_B0*Y2c_untwisted*nu_1c*torsion - 6*abs_G0_over_B0*d_Y1c_untwisted_d_zeta*nu_1c**2*torsion - 4*abs_G0_over_B0*Y2s_untwisted*nu_1s*torsion - &
+       4*abs_G0_over_B0*d_Y1s_untwisted_d_zeta*nu_1c*nu_1s*torsion - 2*abs_G0_over_B0*d_Y1c_untwisted_d_zeta*nu_1s**2*torsion - 8*abs_G0_over_B0*Y1c_untwisted*nu_20*torsion - 4*abs_G0_over_B0*Y1c_untwisted*nu_2c*torsion - 4*abs_G0_over_B0*Y1s_untwisted*nu_2s*torsion - &
+       3*abs_G0_over_B0**2*X1c_untwisted*nu_1c**2*torsion**2 - 2*abs_G0_over_B0**2*X1s_untwisted*nu_1c*nu_1s*torsion**2 - abs_G0_over_B0**2*X1c_untwisted*nu_1s**2*torsion**2 - 3*abs_G0_over_B0*Y1c_untwisted*nu_1c**2*d_torsion_d_zeta - 2*abs_G0_over_B0*Y1s_untwisted*nu_1c*nu_1s*d_torsion_d_zeta - &
+       abs_G0_over_B0*Y1c_untwisted*nu_1s**2*d_torsion_d_zeta) * 0.125_dp
+
+  source_b = (8*Y3c1_untwisted + 8*d_Y20_untwisted_d_zeta*nu_1c + 4*d_Y2c_untwisted_d_zeta*nu_1c + 3*d2_Y1c_untwisted_d_zeta2*nu_1c**2 + 4*d_Y2s_untwisted_d_zeta*nu_1s + 2*d2_Y1s_untwisted_d_zeta2*nu_1c*nu_1s + d2_Y1c_untwisted_d_zeta2*nu_1s**2 + 8*d_Y1c_untwisted_d_zeta*nu_20 + 4*d_Y1c_untwisted_d_zeta*nu_2c + &
+       4*d_Y1s_untwisted_d_zeta*nu_2s + 8*abs_G0_over_B0*X20_untwisted*nu_1c*torsion + 4*abs_G0_over_B0*X2c_untwisted*nu_1c*torsion + 6*abs_G0_over_B0*d_X1c_untwisted_d_zeta*nu_1c**2*torsion + abs_G0_over_B0**3*curvature*nu_1c**3*torsion + 4*abs_G0_over_B0*X2s_untwisted*nu_1s*torsion + &
+       4*abs_G0_over_B0*d_X1s_untwisted_d_zeta*nu_1c*nu_1s*torsion + 2*abs_G0_over_B0*d_X1c_untwisted_d_zeta*nu_1s**2*torsion + abs_G0_over_B0**3*curvature*nu_1c*nu_1s**2*torsion + 8*abs_G0_over_B0*X1c_untwisted*nu_20*torsion + 4*abs_G0_over_B0*X1c_untwisted*nu_2c*torsion + 4*abs_G0_over_B0*X1s_untwisted*nu_2s*torsion - &
+       3*abs_G0_over_B0**2*Y1c_untwisted*nu_1c**2*torsion**2 - 2*abs_G0_over_B0**2*Y1s_untwisted*nu_1c*nu_1s*torsion**2 - abs_G0_over_B0**2*Y1c_untwisted*nu_1s**2*torsion**2 + 3*abs_G0_over_B0*X1c_untwisted*nu_1c**2*d_torsion_d_zeta + 2*abs_G0_over_B0*X1s_untwisted*nu_1c*nu_1s*d_torsion_d_zeta + &
+       abs_G0_over_B0*X1c_untwisted*nu_1s**2*d_torsion_d_zeta) * 0.125_dp
+
+  R3c1             = (-binormal_cylindrical(:,3) * source_n + normal_cylindrical(:,3) * source_b) * d_l_d_phi / R0
+  z3c1_cylindrical = ( binormal_cylindrical(:,1) * source_n - normal_cylindrical(:,1) * source_b) * d_l_d_phi / R0
+
+  ! r^3 terms that are \propto sin(3*theta)
+  source_n = (8*X2s_untwisted3_untwisted + 4*d_X2s_untwisted_d_zeta*nu_1c + 4*abs_G0_over_B0*Z2s_untwisted*curvature*nu_1c + d2_X1s_untwisted_d_zeta2*nu_1c**2 - abs_G0_over_B0**2*X1s_untwisted*curvature**2*nu_1c**2 + 4*d_X2c_untwisted_d_zeta*nu_1s + 4*abs_G0_over_B0*Z2c_untwisted*curvature*nu_1s + &
+       2*d2_X1c_untwisted_d_zeta2*nu_1c*nu_1s - 2*abs_G0_over_B0**2*X1c_untwisted*curvature**2*nu_1c*nu_1s + abs_G0_over_B0**2*d_curvature_d_zeta*nu_1c**2*nu_1s - d2_X1s_untwisted_d_zeta2*nu_1s**2 + abs_G0_over_B0**2*X1s_untwisted*curvature**2*nu_1s**2 - &
+       (abs_G0_over_B0**2*d_curvature_d_zeta*nu_1s**3)/3.0_dp + 4*d_X1s_untwisted_d_zeta*nu_2c + 4*abs_G0_over_B0**2*curvature*nu_1s*nu_2c + 4*d_X1c_untwisted_d_zeta*nu_2s + 4*abs_G0_over_B0**2*curvature*nu_1c*nu_2s - 4*abs_G0_over_B0*Y2s_untwisted*nu_1c*torsion - &
+       2*abs_G0_over_B0*d_Y1s_untwisted_d_zeta*nu_1c**2*torsion - 4*abs_G0_over_B0*Y2c_untwisted*nu_1s*torsion - 4*abs_G0_over_B0*d_Y1c_untwisted_d_zeta*nu_1c*nu_1s*torsion + 2*abs_G0_over_B0*d_Y1s_untwisted_d_zeta*nu_1s**2*torsion - 4*abs_G0_over_B0*Y1s_untwisted*nu_2c*torsion - 4*abs_G0_over_B0*Y1c_untwisted*nu_2s*torsion - &
+       abs_G0_over_B0**2*X1s_untwisted*nu_1c**2*torsion**2 - 2*abs_G0_over_B0**2*X1c_untwisted*nu_1c*nu_1s*torsion**2 + abs_G0_over_B0**2*X1s_untwisted*nu_1s**2*torsion**2 - abs_G0_over_B0*Y1s_untwisted*nu_1c**2*d_torsion_d_zeta - 2*abs_G0_over_B0*Y1c_untwisted*nu_1c*nu_1s*d_torsion_d_zeta + &
+       abs_G0_over_B0*Y1s_untwisted*nu_1s**2*d_torsion_d_zeta) * 0.125_dp
+
+  source_b = (8*Y2s_untwisted3_untwisted + 4*d_Y2s_untwisted_d_zeta*nu_1c + d2_Y1s_untwisted_d_zeta2*nu_1c**2 + 4*d_Y2c_untwisted_d_zeta*nu_1s + 2*d2_Y1c_untwisted_d_zeta2*nu_1c*nu_1s - d2_Y1s_untwisted_d_zeta2*nu_1s**2 + 4*d_Y1s_untwisted_d_zeta*nu_2c + &
+       4*d_Y1c_untwisted_d_zeta*nu_2s + 4*abs_G0_over_B0*X2s_untwisted*nu_1c*torsion + 2*abs_G0_over_B0*d_X1s_untwisted_d_zeta*nu_1c**2*torsion + 4*abs_G0_over_B0*X2c_untwisted*nu_1s*torsion + 4*abs_G0_over_B0*d_X1c_untwisted_d_zeta*nu_1c*nu_1s*torsion + abs_G0_over_B0**3*curvature*nu_1c**2*nu_1s*torsion - &
+       2*abs_G0_over_B0*d_X1s_untwisted_d_zeta*nu_1s**2*torsion - (abs_G0_over_B0**3*curvature*nu_1s**3*torsion)/3.0_dp + 4*abs_G0_over_B0*X1s_untwisted*nu_2c*torsion + 4*abs_G0_over_B0*X1c_untwisted*nu_2s*torsion - abs_G0_over_B0**2*Y1s_untwisted*nu_1c**2*torsion**2 - &
+       2*abs_G0_over_B0**2*Y1c_untwisted*nu_1c*nu_1s*torsion**2 + abs_G0_over_B0**2*Y1s_untwisted*nu_1s**2*torsion**2 + abs_G0_over_B0*X1s_untwisted*nu_1c**2*d_torsion_d_zeta + 2*abs_G0_over_B0*X1c_untwisted*nu_1c*nu_1s*d_torsion_d_zeta &
+       - abs_G0_over_B0*X1s_untwisted*nu_1s**2*d_torsion_d_zeta) * 0.125_dp
+  
+  R3s3             = (-binormal_cylindrical(:,3) * source_n + normal_cylindrical(:,3) * source_b) * d_l_d_phi / R0
+  z3s3_cylindrical = ( binormal_cylindrical(:,1) * source_n - normal_cylindrical(:,1) * source_b) * d_l_d_phi / R0
+
+  ! r^3 terms that are \propto cos(3*theta)
+  source_n = (8*X3c3_untwisted + 4*d_X2c_untwisted_d_zeta*nu_1c + 4*abs_G0_over_B0*Z2c_untwisted*curvature*nu_1c + d2_X1c_untwisted_d_zeta2*nu_1c**2 - abs_G0_over_B0**2*X1c_untwisted*curvature**2*nu_1c**2 + &
+       (abs_G0_over_B0**2*d_curvature_d_zeta*nu_1c**3)/3.0_dp - 4*d_X2s_untwisted_d_zeta*nu_1s - 4*abs_G0_over_B0*Z2s_untwisted*curvature*nu_1s - 2*d2_X1s_untwisted_d_zeta2*nu_1c*nu_1s + 2*abs_G0_over_B0**2*X1s_untwisted*curvature**2*nu_1c*nu_1s - d2_X1c_untwisted_d_zeta2*nu_1s**2 + &
+       abs_G0_over_B0**2*X1c_untwisted*curvature**2*nu_1s**2 - abs_G0_over_B0**2*d_curvature_d_zeta*nu_1c*nu_1s**2 + 4*d_X1c_untwisted_d_zeta*nu_2c + 4*abs_G0_over_B0**2*curvature*nu_1c*nu_2c - 4*d_X1s_untwisted_d_zeta*nu_2s - 4*abs_G0_over_B0**2*curvature*nu_1s*nu_2s - &
+       4*abs_G0_over_B0*Y2c_untwisted*nu_1c*torsion - 2*abs_G0_over_B0*d_Y1c_untwisted_d_zeta*nu_1c**2*torsion + 4*abs_G0_over_B0*Y2s_untwisted*nu_1s*torsion + 4*abs_G0_over_B0*d_Y1s_untwisted_d_zeta*nu_1c*nu_1s*torsion + 2*abs_G0_over_B0*d_Y1c_untwisted_d_zeta*nu_1s**2*torsion - 4*abs_G0_over_B0*Y1c_untwisted*nu_2c*torsion + &
+       4*abs_G0_over_B0*Y1s_untwisted*nu_2s*torsion - abs_G0_over_B0**2*X1c_untwisted*nu_1c**2*torsion**2 + 2*abs_G0_over_B0**2*X1s_untwisted*nu_1c*nu_1s*torsion**2 + abs_G0_over_B0**2*X1c_untwisted*nu_1s**2*torsion**2 - abs_G0_over_B0*Y1c_untwisted*nu_1c**2*d_torsion_d_zeta + &
+       2*abs_G0_over_B0*Y1s_untwisted*nu_1c*nu_1s*d_torsion_d_zeta + abs_G0_over_B0*Y1c_untwisted*nu_1s**2*d_torsion_d_zeta) * 0.125_dp
+  
+  source_b = (8*Y3c3_untwisted + 4*d_Y2c_untwisted_d_zeta*nu_1c + d2_Y1c_untwisted_d_zeta2*nu_1c**2 - 4*d_Y2s_untwisted_d_zeta*nu_1s - 2*d2_Y1s_untwisted_d_zeta2*nu_1c*nu_1s - d2_Y1c_untwisted_d_zeta2*nu_1s**2 + 4*d_Y1c_untwisted_d_zeta*nu_2c - &
+       4*d_Y1s_untwisted_d_zeta*nu_2s + 4*abs_G0_over_B0*X2c_untwisted*nu_1c*torsion + 2*abs_G0_over_B0*d_X1c_untwisted_d_zeta*nu_1c**2*torsion + (abs_G0_over_B0**3*curvature*nu_1c**3*torsion)/3.0_dp - 4*abs_G0_over_B0*X2s_untwisted*nu_1s*torsion - 4*abs_G0_over_B0*d_X1s_untwisted_d_zeta*nu_1c*nu_1s*torsion - &
+       2*abs_G0_over_B0*d_X1c_untwisted_d_zeta*nu_1s**2*torsion - abs_G0_over_B0**3*curvature*nu_1c*nu_1s**2*torsion + 4*abs_G0_over_B0*X1c_untwisted*nu_2c*torsion - 4*abs_G0_over_B0*X1s_untwisted*nu_2s*torsion - abs_G0_over_B0**2*Y1c_untwisted*nu_1c**2*torsion**2 + &
+       2*abs_G0_over_B0**2*Y1s_untwisted*nu_1c*nu_1s*torsion**2 + abs_G0_over_B0**2*Y1c_untwisted*nu_1s**2*torsion**2 + abs_G0_over_B0*X1c_untwisted*nu_1c**2*d_torsion_d_zeta &
+       - 2*abs_G0_over_B0*X1s_untwisted*nu_1c*nu_1s*d_torsion_d_zeta - abs_G0_over_B0*X1c_untwisted*nu_1s**2*d_torsion_d_zeta) * 0.125_dp
+  
+  R3c3             = (-binormal_cylindrical(:,3) * source_n + normal_cylindrical(:,3) * source_b) * d_l_d_phi / R0
+  z3c3_cylindrical = ( binormal_cylindrical(:,1) * source_n - normal_cylindrical(:,1) * source_b) * d_l_d_phi / R0
+
+  deallocate(nu_20, nu_2s, nu_2c)
+  deallocate(d_curvature_d_zeta, d_torsion_d_zeta)
+  deallocate(nu_1s, nu_1c, source_n, source_b)
+  deallocate(d_X1c_untwisted_d_zeta, d_X1s_untwisted_d_zeta, d_Y1c_untwisted_d_zeta, d_Y1s_untwisted_d_zeta)
+  deallocate(d_X20_untwisted_d_zeta, d_X2s_untwisted_d_zeta, d_X2c_untwisted_d_zeta)
+  deallocate(d_Y20_untwisted_d_zeta, d_Y2s_untwisted_d_zeta, d_Y2c_untwisted_d_zeta)
+  deallocate(d2_X1s_untwisted_d_zeta2, d2_X1c_untwisted_d_zeta2, d2_Y1s_untwisted_d_zeta2, d2_Y1c_untwisted_d_zeta2)
 
 end subroutine quasisymmetry_Frenet_to_cylindrical_linear
 
@@ -96,11 +248,9 @@ contains
     implicit none
 
     integer :: N_theta, j_theta, N_phi_conversion, j_phi, i, m, n, nmin
-    real(dp) :: costheta, sintheta, cos2theta, sin2theta, final_R, final_z
+    real(dp) :: costheta, sintheta, cos2theta, sin2theta, cos3theta, sin3theta, final_R, final_z
     real(dp), dimension(:,:), allocatable :: R_2D, z_2D, phi0_2D
     real(dp), dimension(:), allocatable :: theta, phi_conversion
-    real(dp), dimension(:), allocatable :: d_X1c_d_zeta, d_Y1c_d_zeta, r_local, d_Y1s_d_zeta
-    real(dp), dimension(:), allocatable :: d_Z20_d_zeta, d_Z2c_d_zeta, d_Z2s_d_zeta, X3c, Y3c, Y3s
     real(dp), dimension(:), allocatable :: X_at_this_theta, Y_at_this_theta, Z_at_this_theta
     type(periodic_spline) :: normal_R_spline, normal_phi_spline, normal_z_spline, binormal_R_spline, binormal_phi_spline, binormal_z_spline
     type(periodic_spline) :: tangent_R_spline, tangent_phi_spline, tangent_z_spline
@@ -108,8 +258,6 @@ contains
     real(dp) :: rootSolve_abserr, rootSolve_relerr, phi0_rootSolve_min, phi0_rootSolve_max
     real(dp) :: phi0_solution, phi_target, factor, factor2, angle, cosangle, sinangle
     integer :: fzeroFlag
-    integer :: N_helicity
-    real(dp) :: I2, G0
 
     !----------------------------------------------
 
@@ -126,10 +274,6 @@ contains
     allocate(X_at_this_theta(N_phi))
     allocate(Y_at_this_theta(N_phi))
     allocate(Z_at_this_theta(N_phi))
-    allocate(r_local(N_phi))
-    allocate(X3c(N_phi))
-    allocate(Y3c(N_phi))
-    allocate(Y3s(N_phi))
 
     call new_periodic_spline(N_phi, phi, R0, 2*pi/nfp, R0_spline)
     call new_periodic_spline(N_phi, phi, z0, 2*pi/nfp, z0_spline)
@@ -139,67 +283,10 @@ contains
     call new_periodic_spline(N_phi, phi, binormal_cylindrical(:,1), 2*pi/nfp, binormal_R_spline)
     call new_periodic_spline(N_phi, phi, binormal_cylindrical(:,2), 2*pi/nfp, binormal_phi_spline)
     call new_periodic_spline(N_phi, phi, binormal_cylindrical(:,3), 2*pi/nfp, binormal_z_spline)
-    if (order_r_squared) then
+    if (trim(order_r_option) .ne. order_r_option_r1) then
        call new_periodic_spline(N_phi, phi, tangent_cylindrical(:,1), 2*pi/nfp, tangent_R_spline)
        call new_periodic_spline(N_phi, phi, tangent_cylindrical(:,2), 2*pi/nfp, tangent_phi_spline)
        call new_periodic_spline(N_phi, phi, tangent_cylindrical(:,3), 2*pi/nfp, tangent_z_spline)
-    end if
-
-    r_local = r
-    if (order_r_squared) then
-       allocate(d_Y1c_d_zeta(N_phi))
-       allocate(d_Y1s_d_zeta(N_phi))
-       allocate(d_X1c_d_zeta(N_phi))
-       allocate(d_Z20_d_zeta(N_phi))
-       allocate(d_Z2c_d_zeta(N_phi))
-       allocate(d_Z2s_d_zeta(N_phi))
-       d_Y1c_d_zeta = matmul(d_d_zeta,Y1c)
-       d_Y1s_d_zeta = matmul(d_d_zeta,Y1s)
-       d_X1c_d_zeta = matmul(d_d_zeta,X1c)
-       d_Z20_d_zeta = matmul(d_d_zeta,Z20)
-       d_Z2c_d_zeta = matmul(d_d_zeta,Z2c)
-       d_Z2s_d_zeta = matmul(d_d_zeta,Z2s)
-
-!!$       r_local = r * (1 - r*r/8*(&
-!!$            4 * X2s**2 * Y1c**2 - 8 * eta_bar * X1c * X2s * Y1c * Y1s - 16 * X20 * X2s * Y1c * Y1s + 4 * (B20/B0) * X1c**2 * Y1s**2 + eta_bar**2 * X1c**2 * Y1s**2 + &
-!!$            8 * eta_bar * X1c * X20 * Y1s**2 + 8 * eta_bar * X1c * X2c * Y1s**2 + 4 * X2s**2 * Y1s**2 - 8 * X20 * X2c * (Y1c**2 - Y1s**2) + 4 * X20**2 * (Y1c**2 + Y1s**2) + &
-!!$            4 * X2c**2 * (Y1c**2 + Y1s**2) + 8 * X1c * X2s * Y1s * Y20 + 4 * X1c**2 * Y20**2 - 24 * X1c * X2s * Y1s * Y2c - 8 * X1c**2 * Y20 * Y2c + 4 * X1c**2 * Y2c**2 - &
-!!$            8 * X1c * X2s * Y1c * Y2s + 8 * eta_bar * X1c**2 * Y1s * Y2s + 4 * X1c**2 * Y2s**2 + 8 * X1c * X20 * (Y1c * (-Y20 + Y2c) + Y1s * Y2s) &
-!!$            + 8 * X1c * X2c * (Y1c * (Y20 - Y2c) + 3 * Y1s * Y2s) + 4 * X1c**2 * Z20**2 + 4 * Y1c**2 * Z20**2 + 4 * Y1s**2 * Z20**2 - 8 * X1c**2 * Z20 * Z2c - 8 * Y1c**2 * Z20 * Z2c + &
-!!$            8 * Y1s**2 * Z20 * Z2c + 4 * X1c**2 * Z2c**2 + 4 * Y1c**2 * Z2c**2 + 4 * Y1s**2 * Z2c**2 - 16 * Y1c * Y1s * Z20 * Z2s + 4 * X1c**2 * Z2s**2 + 4 * Y1c**2 * Z2s**2 + &
-!!$            4 * Y1s**2 * Z2s**2 &
-!!$            + I2_over_B0 / abs_G0_over_B0 * sign_G * ( &
-!!$            -2 * iota * X1c**2 * Y1s**2 + 4 * abs_G0_over_B0 * Y1c * Y1s * Z2c - 2 * abs_G0_over_B0 * X1c**2 * Z2s - 2 * abs_G0_over_B0 * Y1c**2 * Z2s + 2 * abs_G0_over_B0 * Y1s**2 * Z2s - & 
-!!$            abs_G0_over_B0 * X1c**3 * Y1s * torsion - abs_G0_over_B0 * X1c * Y1c**2 * Y1s * torsion - abs_G0_over_B0 * X1c * Y1s**3 * torsion &
-!!$            + X1c * Y1c * Y1s * d_X1c_d_zeta - X1c**2 * Y1s * d_Y1c_d_zeta)))
-
-       N_helicity = - axis_helicity*nfp
-       I2 = I2_over_B0 * B0
-       G0 = sign_G * abs_G0_over_B0 * B0
-
-       X3c = -(1/(8 * G0 * Y1s)) * (2 * I2 * N_helicity * X1c * Y1s + 2 * (-I2 * iota - (G0 * p2 * mu0)/ (B0*B0)) * X1c * Y1s - &
-            16 * G0 * X2s * Y20 - 8 * G0 * X2s * Y2c + 16 * G0 * X20 * Y2s + 8 * G0 * X2c * Y2s - 8 * B0 * sign_psi * (iota - N_helicity) * Z2s + &
-            2 * B0 * abs_G0_over_B0 * sign_psi * X20 * curvature + 4 * B0 * abs_G0_over_B0 * sign_psi * X2c * curvature - 3 * abs_G0_over_B0 * I2 * X1c**2 * torsion - &
-            3 * abs_G0_over_B0 * I2 * Y1c**2 * torsion + abs_G0_over_B0 * I2 * Y1s**2 * torsion + 3 * I2 * Y1c * d_X1c_d_zeta - 3 * I2 * X1c * d_Y1c_d_zeta - &
-            2 * B0 * sign_psi * d_Z20_d_zeta - 4 * B0 * sign_psi * d_Z2c_d_zeta)
-       
-
-       Y3c =-(1/(8 * G0 * X1c * Y1s)) * (2 * I2 * N_helicity * X1c * Y1c * Y1s + 2 * (-I2 * iota - (G0 * p2 * mu0)/(B0**2)) * X1c * Y1c * Y1s - &
-            16 * G0 * X2s * Y1c * Y20 + 32 * G0 * X2c * Y1s * Y20 - 8 * G0 * X2s * Y1c * Y2c - 32 * G0 * X20 * Y1s * Y2c + 16 * G0 * X20 * Y1c * Y2s + &
-            8 * G0 * X2c * Y1c * Y2s + 16 * B0 * sign_psi * (iota - N_helicity) * Y1s * Z2c - 8 * B0 * sign_psi * (iota - N_helicity) * Y1c * Z2s + &
-            2 * B0 * abs_G0_over_B0 * sign_psi * X20 * Y1c * curvature + 4 * B0 * abs_G0_over_B0 * sign_psi * X2c * Y1c * curvature + &
-            8 * B0 * abs_G0_over_B0 * sign_psi * X2s * Y1s * curvature - 3 * abs_G0_over_B0 * I2 * X1c**2 * Y1c * torsion - 3 * abs_G0_over_B0 * I2 * Y1c**3 * torsion - &
-            7 * abs_G0_over_B0 * I2 * Y1c * Y1s**2 * torsion + 3 * I2 * Y1c**2 * d_X1c_d_zeta + 4 * I2 * Y1s**2 * d_X1c_d_zeta - 3 * I2 * X1c * Y1c * d_Y1c_d_zeta - &
-            4 * I2 * X1c * Y1s * d_Y1s_d_zeta - 2 * B0 * sign_psi * Y1c * d_Z20_d_zeta - 4 * B0 * sign_psi * Y1c * d_Z2c_d_zeta - 8 * B0 * sign_psi * Y1s * d_Z2s_d_zeta)
-
-
-       Y3s = -(1/(8 * G0 * X1c)) * (2 * I2 * N_helicity * X1c * Y1s + 2 * (-I2 * iota - (G0 * p2 * mu0)/(B0**2)) * X1c * Y1s + 16 * G0 * X2s * Y20 - &
-            8 * G0 * X2s * Y2c - 16 * G0 * X20 * Y2s + 8 * G0 * X2c * Y2s + 8 * B0 * sign_psi * (iota - N_helicity) * Z2s + 2 * B0 * abs_G0_over_B0 * sign_psi * X20 * curvature &
-            - 4 * B0 * abs_G0_over_B0 * sign_psi * X2c * curvature + abs_G0_over_B0 * I2 * X1c**2 * torsion + abs_G0_over_B0 * I2 * Y1c**2 * torsion - &
-            3 * abs_G0_over_B0 * I2 * Y1s**2 * torsion - I2 * Y1c * d_X1c_d_zeta + I2 * X1c * d_Y1c_d_zeta - 2 * B0 * sign_psi * d_Z20_d_zeta + 4 * B0 * sign_psi * d_Z2c_d_zeta)
-
-       deallocate(d_X1c_d_zeta, d_Y1c_d_zeta, d_Y1s_d_zeta)
-       deallocate(d_Z20_d_zeta, d_Z2c_d_zeta, d_Z2s_d_zeta)
     end if
 
     rootSolve_abserr = 1.0e-10_dp
@@ -208,18 +295,23 @@ contains
     do j_theta = 1, N_theta
        costheta = cos(theta(j_theta))
        sintheta = sin(theta(j_theta))
-       !X_at_this_theta = r_local * (X1c_untwisted * costheta + X1s_untwisted * sintheta)
-       !Y_at_this_theta = r_local * (Y1c_untwisted * costheta + Y1s_untwisted * sintheta)
        X_at_this_theta = r * (X1c_untwisted * costheta + X1s_untwisted * sintheta)
        Y_at_this_theta = r * (Y1c_untwisted * costheta + Y1s_untwisted * sintheta)
-       if (order_r_squared) then
+       if (trim(order_r_option) .ne. order_r_option_r1) then
+          ! We need O(r^2) terms:
           cos2theta = cos(2*theta(j_theta))
           sin2theta = sin(2*theta(j_theta))
-          !X_at_this_theta = X_at_this_theta + r*r*(X20_untwisted + X2c_untwisted * cos2theta + X2s_untwisted * sin2theta)
-          !Y_at_this_theta = Y_at_this_theta + r*r*(Y20_untwisted + Y2c_untwisted * cos2theta + Y2s_untwisted * sin2theta)
-          X_at_this_theta = X_at_this_theta + r*r*(X20_untwisted + X2c_untwisted * cos2theta + X2s_untwisted * sin2theta) + r*r*r*X3c*costheta
-          Y_at_this_theta = Y_at_this_theta + r*r*(Y20_untwisted + Y2c_untwisted * cos2theta + Y2s_untwisted * sin2theta) + r*r*r*(Y3c*costheta + Y3s*sintheta)
+          X_at_this_theta = X_at_this_theta + r*r*(X20_untwisted + X2c_untwisted * cos2theta + X2s_untwisted * sin2theta)
+          Y_at_this_theta = Y_at_this_theta + r*r*(Y20_untwisted + Y2c_untwisted * cos2theta + Y2s_untwisted * sin2theta)
           Z_at_this_theta =                   r*r*(Z20_untwisted + Z2c_untwisted * cos2theta + Z2s_untwisted * sin2theta)
+          if (trim(order_r_option) .ne. order_r_option_r2) then
+             ! We need O(r^3) terms:
+             cos3theta = cos(3*theta(j_theta))
+             sin3theta = sin(3*theta(j_theta))
+             X_at_this_theta = X_at_this_theta + r*r*r*(X3c1*costheta + X3c3*cos3theta + X3s1*sintheta + X3s3*sin3theta)
+             Y_at_this_theta = Y_at_this_theta + r*r*r*(Y3c1*costheta + Y3c3*cos3theta + Y3s1*sintheta + Y3s3*sin3theta)
+             Z_at_this_theta = Z_at_this_theta + r*r*r*(Z3c1*costheta + Z3c3*cos3theta + Z3s1*sintheta + Z3s3*sin3theta)
+          end if
           call new_periodic_spline(N_phi, phi, Z_at_this_theta, 2*pi/nfp, Z_spline)
        end if
        call new_periodic_spline(N_phi, phi, X_at_this_theta, 2*pi/nfp, X_spline)
@@ -285,8 +377,6 @@ contains
        call delete_periodic_spline(tangent_z_spline)
     end if
     deallocate(X_at_this_theta, Y_at_this_theta, Z_at_this_theta)
-    deallocate(r_local)
-    deallocate(X3c,Y3c,Y3s)
 
     ! Fourier transform the result.
     ! This is not a rate-limiting step, so for clarity of code, we don't bother with an FFT.
