@@ -17,6 +17,8 @@ subroutine quasisymmetry_higher_order_in_r
   real(dp), dimension(:), allocatable :: right_hand_side
   integer :: j, iunit=20
   real(dp), dimension(:), allocatable :: fX0, fXs, fXc, fY0, fYs, fYc, eq1residual, eq2residual
+  real(dp), dimension(:), allocatable :: d_X20_d_zeta, d_X2s_d_zeta, d_X2c_d_zeta
+  real(dp), dimension(:), allocatable :: d_Y20_d_zeta, d_Y2s_d_zeta, d_Y2c_d_zeta
   integer :: N_helicity
   real(dp) :: I2, G0
   ! Variables needed by LAPACK:
@@ -484,7 +486,7 @@ subroutine quasisymmetry_higher_order_in_r
   I2 = I2_over_B0 * B0
   G0 = sign_G * abs_G0_over_B0 * B0
 
-  if (trim(order_r_option) == order_r_option_r3_simplified) then
+  if (trim(order_r_option) == order_r_option_r3_simplified .or. trim(order_r_option) == order_r_option_r3_simplified_with_Z3) then
      X3s1 = 0
      X3s3 = 0
      X3c3 = 0
@@ -517,7 +519,66 @@ subroutine quasisymmetry_higher_order_in_r
           8 * G0 * X2s * Y2c - 16 * G0 * X20 * Y2s + 8 * G0 * X2c * Y2s + 8 * B0 * sign_psi * (iota - N_helicity) * Z2s + 2 * B0 * abs_G0_over_B0 * sign_psi * X20 * curvature &
           - 4 * B0 * abs_G0_over_B0 * sign_psi * X2c * curvature + abs_G0_over_B0 * I2 * X1c**2 * torsion + abs_G0_over_B0 * I2 * Y1c**2 * torsion - &
           3 * abs_G0_over_B0 * I2 * Y1s**2 * torsion - I2 * Y1c * d_X1c_d_zeta + I2 * X1c * d_Y1c_d_zeta - 2 * B0 * sign_psi * d_Z20_d_zeta + 4 * B0 * sign_psi * d_Z2c_d_zeta)
-  else
+  end if
+
+  if (trim(order_r_option) == order_r_option_r3_simplified_with_Z3 .or. trim(order_r_option) == order_r_option_r3_full) then
+     ! Compute Z3 terms
+     ! These are worked out in "20190318-01 Wrick's streamlined Garren-Boozer method, MHD.nb"
+
+     allocate(d_X20_d_zeta(N_phi))
+     allocate(d_X2c_d_zeta(N_phi))
+     allocate(d_X2s_d_zeta(N_phi))
+     allocate(d_Y20_d_zeta(N_phi))
+     allocate(d_Y2c_d_zeta(N_phi))
+     allocate(d_Y2s_d_zeta(N_phi))
+     d_X20_d_zeta = matmul(d_d_zeta,X20)
+     d_X2c_d_zeta = matmul(d_d_zeta,X2c)
+     d_X2s_d_zeta = matmul(d_d_zeta,X2s)
+     d_Y20_d_zeta = matmul(d_d_zeta,Y20)
+     d_Y2c_d_zeta = matmul(d_d_zeta,Y2c)
+     d_Y2s_d_zeta = matmul(d_d_zeta,Y2s)
+
+     Z3s1 = (8*iota_N*X1c*X20 + 8*iota_N*Y1c*Y20 + 4*beta_1s*abs_G0_over_B0*X1c*Y1s + &
+          iota_N*X1c**3*curvature + iota_N*X1c*Y1c**2*curvature - iota_N*X1c*Y1s**2*curvature - &
+          2*abs_G0_over_B0*X1c*Z2s*curvature + 2*abs_G0_over_B0*X2s*Y1c*torsion + 4*abs_G0_over_B0*X20*Y1s*torsion - &
+          2*abs_G0_over_B0*X2c*Y1s*torsion - 2*abs_G0_over_B0*X1c*Y2s*torsion - 4*X2s*d_X1c_d_zeta - &
+          2*X1c*d_X2s_d_zeta - 4*Y2s*d_Y1c_d_zeta - &
+          X1c*Y1s*curvature*d_Y1c_d_zeta - 8*Y20*d_Y1s_d_zeta + &
+          4*Y2c*d_Y1s_d_zeta - X1c*Y1c*curvature*d_Y1s_d_zeta - &
+          4*Y1s*d_Y20_d_zeta + 2*Y1s*d_Y2c_d_zeta - 2*Y1c*d_Y2s_d_zeta)/ &
+        (12*abs_G0_over_B0)
+
+     Z3c1 = (-8*iota_N*Y1s*Y20 - 2*iota_N*X1c*Y1c*Y1s*curvature - 4*abs_G0_over_B0*X1c*Z20*curvature - &
+          2*abs_G0_over_B0*X1c*Z2c*curvature + 4*abs_G0_over_B0*X20*Y1c*torsion + 2*abs_G0_over_B0*X2c*Y1c*torsion + &
+          2*abs_G0_over_B0*X2s*Y1s*torsion - 4*abs_G0_over_B0*X1c*Y20*torsion - 2*abs_G0_over_B0*X1c*Y2c*torsion - &
+          8*X20*d_X1c_d_zeta - 4*X2c*d_X1c_d_zeta - &
+          3*X1c**2*curvature*d_X1c_d_zeta - 4*X1c*d_X20_d_zeta - &
+          2*X1c*d_X2c_d_zeta - 8*Y20*d_Y1c_d_zeta - 4*Y2c*d_Y1c_d_zeta - &
+          3*X1c*Y1c*curvature*d_Y1c_d_zeta - 4*Y2s*d_Y1s_d_zeta - &
+          X1c*Y1s*curvature*d_Y1s_d_zeta - 4*Y1c*d_Y20_d_zeta - &
+          2*Y1c*d_Y2c_d_zeta - 2*Y1s*d_Y2s_d_zeta)/(12*abs_G0_over_B0)
+
+     Z3s3 = (8*iota_N*X1c*X2c + 8*iota_N*Y1c*Y2c - 8*iota_N*Y1s*Y2s + iota_N*X1c**3*curvature + &
+          iota_N*X1c*Y1c**2*curvature - iota_N*X1c*Y1s**2*curvature - 2*abs_G0_over_B0*X1c*Z2s*curvature + &
+          2*abs_G0_over_B0*X2s*Y1c*torsion + 2*abs_G0_over_B0*X2c*Y1s*torsion - 2*abs_G0_over_B0*X1c*Y2s*torsion - &
+          4*X2s*d_X1c_d_zeta - 2*X1c*d_X2s_d_zeta - 4*Y2s*d_Y1c_d_zeta - &
+          X1c*Y1s*curvature*d_Y1c_d_zeta - 4*Y2c*d_Y1s_d_zeta - &
+          X1c*Y1c*curvature*d_Y1s_d_zeta - 2*Y1s*d_Y2c_d_zeta - &
+          2*Y1c*d_Y2s_d_zeta)/(12*abs_G0_over_B0)
+
+     Z3c3 = (-8*iota_N*X1c*X2s - 8*iota_N*Y1s*Y2c - 8*iota_N*Y1c*Y2s - &
+          2*iota_N*X1c*Y1c*Y1s*curvature - 2*abs_G0_over_B0*X1c*Z2c*curvature + 2*abs_G0_over_B0*X2c*Y1c*torsion - &
+          2*abs_G0_over_B0*X2s*Y1s*torsion - 2*abs_G0_over_B0*X1c*Y2c*torsion - 4*X2c*d_X1c_d_zeta - &
+          X1c**2*curvature*d_X1c_d_zeta - 2*X1c*d_X2c_d_zeta - &
+          4*Y2c*d_Y1c_d_zeta - X1c*Y1c*curvature*d_Y1c_d_zeta + &
+          4*Y2s*d_Y1s_d_zeta + X1c*Y1s*curvature*d_Y1s_d_zeta - &
+          2*Y1c*d_Y2c_d_zeta + 2*Y1s*d_Y2s_d_zeta)/(12*abs_G0_over_B0)
+
+     deallocate(d_X20_d_zeta, d_X2s_d_zeta, d_X2c_d_zeta)
+     deallocate(d_Y20_d_zeta, d_Y2s_d_zeta, d_Y2c_d_zeta)
+  end if
+
+  if (trim(order_r_option) == order_r_option_r3_full) then
      ! Full O(r^3) calculation
 
      stop "r3_full has not yet been implemented !!"

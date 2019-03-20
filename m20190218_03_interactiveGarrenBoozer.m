@@ -61,8 +61,8 @@ f = figure('Visible','off','Units','pixels','Position',[0,0,1600,800]);
 ax = axes('Units','pixels','Position',[300,32,950,600]);
 
 label_margin=25;
-margin = 50;
-height=600;
+margin = 45;
+height=615;
 label_left = 30;
 label_width=200;
 text_left = 100;
@@ -126,7 +126,7 @@ text_minus_mu0_p2 = uicontrol('Style','edit','Units','pixels','Position',[text_l
 
 height = height - margin;
 %slider_B2c = uicontrol('Style','slider','Min',-3,'Max',3,'Value',B2c,'Units','pixels','Position',[30,height,200,20],'Callback',@slider_B2c_callback);
-slider_B2c = uicontrol('Style','slider','Min',-3,'Max',3,'Value',B2c,'Units','pixels','Position',[30,height,200,20]);
+slider_B2c = uicontrol('Style','slider','Min',-20,'Max',20,'Value',B2c,'Units','pixels','Position',[30,height,200,20]);
 addlistener(slider_B2c,'Value',eventName,@slider_B2c_callback);
 label_B2c = uicontrol('Style','text','Units','pixels','Position',[label_left,height+label_margin,label_width,20],'String','B2c','horizontalalignment','left');
 text_B2c = uicontrol('Style','edit','Units','pixels','Position',[text_left,height+label_margin,text_width,20],'Callback',@text_B2c_callback);
@@ -148,8 +148,14 @@ text_r0 = uicontrol('Style','edit','Units','pixels','Position',[text_left,height
 height = height - margin;
 finite_r_nonlinear_button = uicontrol('Style','checkbox','Units','pixels','Position',[label_left,height+label_margin,button_width,button_height],'String','Use nonlinear finite-r method','Callback',@finite_r_nonlinear_callback,'fontsize',12);
 
-height = height - margin/2;
-order_r_squared_button = uicontrol('Style','checkbox','Units','pixels','Position',[label_left,height+label_margin,button_width,button_height],'String','Include O(r^2) terms','Callback',@order_r_squared_callback,'fontsize',12);
+height = height - 90;
+%order_r_squared_button = uicontrol('Style','checkbox','Units','pixels','Position',[label_left,height+label_margin,button_width,button_height],'String','Include O(r^2) terms','Callback',@order_r_squared_callback,'fontsize',12);
+order_r_option_button_group = uibuttongroup('Units','pixels','Position',[label_left,height+label_margin,button_width,85],'SelectionChangedFcn',@order_r_option_callback);
+spacing=20;
+order_r_option_r1_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^1)','position',[10,5+3*spacing,200,15]);
+order_r_option_r2_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^2)','position',[10,5+2*spacing,200,15]);
+order_r_option_r3_simplified_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^3), simplified','position',[10,5+1*spacing,200,15]);
+order_r_option_r3_simplified_with_Z3_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^3), simplified, with Z3','position',[10,5+0*spacing,200,15]);
 
 height = height - margin/2;
 label_iota = uicontrol('Style','text','Units','pixels','Position',[label_left,height+label_margin,label_width,20],'String','Iota: ','horizontalalignment','left','fontsize',15);
@@ -186,7 +192,7 @@ set(f,'Visible','on')
     function finite_r_nonlinear_callback(source,callbackdata)
         update()
     end
-    function order_r_squared_callback(source,callbackdata)
+    function order_r_option_callback(source,callbackdata)
         update()
     end
 
@@ -419,10 +425,24 @@ set(f,'Visible','on')
         else
             fprintf(fid,' finite_r_option="linear"\n');
         end
+        %{
         if order_r_squared_button.Value == order_r_squared_button.Max
             fprintf(fid,' order_r_squared=.true.\n');
         else
             fprintf(fid,' order_r_squared=.false.\n');
+        end
+        %}
+        order_r_option = get(order_r_option_button_group,'SelectedObject');
+        if order_r_option == order_r_option_r1_button
+            fprintf(fid,' order_r_option="r1"\n');
+        elseif order_r_option == order_r_option_r2_button
+            fprintf(fid,' order_r_option="r2"\n');
+        elseif order_r_option == order_r_option_r3_simplified_button
+            fprintf(fid,' order_r_option="r3_simplified"\n');
+        elseif order_r_option == order_r_option_r3_simplified_with_Z3_button
+            fprintf(fid,' order_r_option="r3_simplified_with_Z3"\n');
+        else
+            error('Should not get here!')
         end
         fprintf(fid,' N_phi=31\n');
         fprintf(fid,' nfp = %d\n',round(nfp));

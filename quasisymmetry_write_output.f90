@@ -360,7 +360,7 @@ subroutine quasisymmetry_write_output
         call cdf_define(ncid, vn_z2s_cylindrical, z2s_cylindrical, dimname=N_phi_dim)
         call cdf_define(ncid, vn_z2c_cylindrical, z2c_cylindrical, dimname=N_phi_dim)
      end if
-     if (trim(order_r_option)==order_r_option_r3_simplified .or. trim(order_r_option)==order_r_option_r3_full) then
+     if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option).ne.order_r_option_r2) then
         ! O(r^3) quantities
         call cdf_define(ncid, vn_X3s1, X3s1, dimname=N_phi_dim)
         call cdf_define(ncid, vn_X3s3, X3s3, dimname=N_phi_dim)
@@ -570,7 +570,7 @@ subroutine quasisymmetry_write_output
         call cdf_write(ncid, vn_z2s_cylindrical, z2s_cylindrical)
         call cdf_write(ncid, vn_z2c_cylindrical, z2c_cylindrical)
      end if
-     if (trim(order_r_option)==order_r_option_r3_simplified .or. trim(order_r_option)==order_r_option_r3_full) then
+     if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option).ne.order_r_option_r2) then
         ! O(r^3) quantities
         call cdf_write(ncid, vn_X3s1, X3s1)
         call cdf_write(ncid, vn_X3s3, X3s3)

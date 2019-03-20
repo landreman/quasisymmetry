@@ -141,7 +141,7 @@ subroutine quasisymmetry_single_solve
         Z2s_untwisted = Z2s
         Z2c_untwisted = Z2c
      end if
-     if (trim(order_r_option)==order_r_option_r3_simplified .or. trim(order_r_option)==order_r_option_r3_full) then
+     if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option).ne.order_r_option_r2) then
         ! We have O(r^3) terms
         X3s1_untwisted = X3s1
         X3s3_untwisted = X3s3
@@ -167,7 +167,7 @@ subroutine quasisymmetry_single_solve
      X1c_untwisted = X1s * (-sinangle) + X1c * cosangle
      Y1s_untwisted = Y1s *   cosangle  + Y1c * sinangle
      Y1c_untwisted = Y1s * (-sinangle) + Y1c * cosangle
-     if (trim(order_r_option)==order_r_option_r3_simplified .or. trim(order_r_option)==order_r_option_r3_full) then
+     if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option).ne.order_r_option_r2) then
         ! Then we have O(r^3) terms
         X3s1_untwisted = X3s1 *   cosangle  + X3c1 * sinangle
         X3c1_untwisted = X3s1 * (-sinangle) + X3c1 * cosangle
