@@ -19,8 +19,9 @@ subroutine quasisymmetry_higher_order_in_r
   real(dp), dimension(:), allocatable :: fX0, fXs, fXc, fY0, fYs, fYc, eq1residual, eq2residual
   real(dp), dimension(:), allocatable :: d_X20_d_zeta, d_X2s_d_zeta, d_X2c_d_zeta
   real(dp), dimension(:), allocatable :: d_Y20_d_zeta, d_Y2s_d_zeta, d_Y2c_d_zeta
+  real(dp), dimension(:), allocatable :: flux_constraint_coefficient
   integer :: N_helicity
-  real(dp) :: I2, G0
+  real(dp) :: I2, G0, B1c
   ! Variables needed by LAPACK:
   integer :: INFO
   integer, dimension(:), allocatable :: IPIV
@@ -485,6 +486,49 @@ subroutine quasisymmetry_higher_order_in_r
   N_helicity = - axis_helicity*nfp
   I2 = I2_over_B0 * B0
   G0 = sign_G * abs_G0_over_B0 * B0
+
+  if (trim(order_r_option) == order_r_option_r3_flux_constraint) then
+     X3s1 = 0
+     X3s3 = 0
+     X3c3 = 0
+
+     Y3c3 = 0
+     Y3s3 = 0
+
+     Z3s1 = 0
+     Z3s3 = 0
+     Z3c1 = 0
+     Z3c3 = 0
+
+     allocate(flux_constraint_coefficient(N_phi))
+
+     ! The formula below is copied from "20190305-01 GarrenBoozer r2 corrected radius.nb"
+     B1c = B0 * eta_bar
+     flux_constraint_coefficient = (-4*B0**2*G0*X20**2*Y1c**2 + 8*B0**2*G0*X20*X2c*Y1c**2 - 4*B0**2*G0*X2c**2*Y1c**2 - &
+           4*B0**2*G0*X2s**2*Y1c**2 + 8*B0*G0*B1c*X1c*X2s*Y1c*Y1s + 16*B0**2*G0*X20*X2s*Y1c*Y1s + &
+           2*B0**2*I2*iota*X1c**2*Y1s**2 - G0*B1c**2*X1c**2*Y1s**2 - 4*B0*G0*B20*X1c**2*Y1s**2 - &
+           8*B0*G0*B1c*X1c*X20*Y1s**2 - 4*B0**2*G0*X20**2*Y1s**2 - 8*B0*G0*B1c*X1c*X2c*Y1s**2 - &
+           8*B0**2*G0*X20*X2c*Y1s**2 - 4*B0**2*G0*X2c**2*Y1s**2 - 4*B0**2*G0*X2s**2*Y1s**2 + &
+           8*B0**2*G0*X1c*X20*Y1c*Y20 - 8*B0**2*G0*X1c*X2c*Y1c*Y20 - 8*B0**2*G0*X1c*X2s*Y1s*Y20 - &
+           4*B0**2*G0*X1c**2*Y20**2 - 8*B0**2*G0*X1c*X20*Y1c*Y2c + 8*B0**2*G0*X1c*X2c*Y1c*Y2c + &
+           24*B0**2*G0*X1c*X2s*Y1s*Y2c + 8*B0**2*G0*X1c**2*Y20*Y2c - 4*B0**2*G0*X1c**2*Y2c**2 + &
+           8*B0**2*G0*X1c*X2s*Y1c*Y2s - 8*B0*G0*B1c*X1c**2*Y1s*Y2s - 8*B0**2*G0*X1c*X20*Y1s*Y2s - &
+           24*B0**2*G0*X1c*X2c*Y1s*Y2s - 4*B0**2*G0*X1c**2*Y2s**2 - 4*B0**2*G0*X1c**2*Z20**2 - &
+           4*B0**2*G0*Y1c**2*Z20**2 - 4*B0**2*G0*Y1s**2*Z20**2 - 4*B0**2*abs_G0_over_B0*I2*Y1c*Y1s*Z2c + &
+           8*B0**2*G0*X1c**2*Z20*Z2c + 8*B0**2*G0*Y1c**2*Z20*Z2c - 8*B0**2*G0*Y1s**2*Z20*Z2c - &
+           4*B0**2*G0*X1c**2*Z2c**2 - 4*B0**2*G0*Y1c**2*Z2c**2 - 4*B0**2*G0*Y1s**2*Z2c**2 + &
+           2*B0**2*abs_G0_over_B0*I2*X1c**2*Z2s + 2*B0**2*abs_G0_over_B0*I2*Y1c**2*Z2s - 2*B0**2*abs_G0_over_B0*I2*Y1s**2*Z2s + &
+           16*B0**2*G0*Y1c*Y1s*Z20*Z2s - 4*B0**2*G0*X1c**2*Z2s**2 - 4*B0**2*G0*Y1c**2*Z2s**2 - &
+           4*B0**2*G0*Y1s**2*Z2s**2 + B0**2*abs_G0_over_B0*I2*X1c**3*Y1s*torsion + B0**2*abs_G0_over_B0*I2*X1c*Y1c**2*Y1s*torsion + &
+           B0**2*abs_G0_over_B0*I2*X1c*Y1s**3*torsion - B0**2*I2*X1c*Y1c*Y1s*d_X1c_d_zeta + &
+           B0**2*I2*X1c**2*Y1s*d_Y1c_d_zeta)/(16*B0**2*G0*X1c**2*Y1s**2)
+
+     X3c1 = X1c * flux_constraint_coefficient
+     Y3c1 = Y1c * flux_constraint_coefficient
+     Y3s1 = Y1s * flux_constraint_coefficient
+
+     deallocate(flux_constraint_coefficient)
+  end if
 
   if (trim(order_r_option) == order_r_option_r3_simplified .or. trim(order_r_option) == order_r_option_r3_simplified_with_Z3) then
      X3s1 = 0

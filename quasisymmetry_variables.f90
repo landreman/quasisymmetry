@@ -52,6 +52,7 @@ module quasisymmetry_variables
        order_r_option_r2 = "r2", &
        order_r_option_r3_simplified = "r3_simplified", &
        order_r_option_r3_simplified_with_Z3 = "r3_simplified_with_Z3", &
+       order_r_option_r3_flux_constraint = "r3_flux_constraint", &
        order_r_option_r3_full = "r3_full"
   character(len=50) :: order_r_option = order_r_option_r1
 

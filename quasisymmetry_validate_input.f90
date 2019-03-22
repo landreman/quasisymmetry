@@ -22,6 +22,7 @@ subroutine quasisymmetry_validate_input
   case (resolution_option_adaptive)
   case default
      print *,"Error! Invalid resolution_option:",resolution_option
+     stop
   end select
 
   select case (trim(general_option))
@@ -29,6 +30,7 @@ subroutine quasisymmetry_validate_input
   case (general_option_scan)
   case default
      print *,"Error! Invalid general_option:",general_option
+     stop
   end select
 
   select case (trim(verbose_option))
@@ -37,6 +39,7 @@ subroutine quasisymmetry_validate_input
   case (verbose_option_summary)
   case default
      print *,"Error! Invalid verbose_option:",verbose_option
+     stop
   end select
 
   select case (trim(finite_r_option))
@@ -44,6 +47,46 @@ subroutine quasisymmetry_validate_input
   case (finite_r_option_nonlinear)
   case default
      print *,"Error! Invalid finite_r_option:",finite_r_option
+     stop
+  end select
+
+  select case (trim(order_r_option))
+  case (order_r_option_r1)
+  case (order_r_option_r2)
+  case (order_r_option_r3_simplified)
+  case (order_r_option_r3_simplified_with_Z3)
+  case (order_r_option_r3_flux_constraint)
+  case (order_r_option_r3_full)
+  case default
+     print *,"Error! Invalid order_r_option:",order_r_option
+     stop
+  end select
+
+  select case (trim(eta_bar_scan_option))
+  case (eta_bar_scan_option_linear)
+  case (eta_bar_scan_option_log)
+  case (eta_bar_scan_option_2_sided_log)
+  case default
+     print *,"Error! Invalid eta_bar_scan_option:",eta_bar_scan_option
+     stop
+  end select
+
+  select case (trim(sigma_initial_scan_option))
+  case (sigma_initial_scan_option_linear)
+  case (sigma_initial_scan_option_log)
+  case (sigma_initial_scan_option_2_sided_log)
+  case default
+     print *,"Error! Invalid sigma_initial_scan_option:",sigma_initial_scan_option
+     stop
+  end select
+
+  select case (trim(Fourier_scan_option))
+  case (Fourier_scan_option_linear)
+  case (Fourier_scan_option_2_sided_log)
+  case (Fourier_scan_option_2_sided_log_except_Z0s1)
+  case default
+     print *,"Error! Invalid Fourier_scan_option:",Fourier_scan_option
+     stop
   end select
 
 !!$  if (order_r_squared .and. trim(finite_r_option)==finite_r_option_linear) then

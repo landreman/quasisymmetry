@@ -148,12 +148,13 @@ text_r0 = uicontrol('Style','edit','Units','pixels','Position',[text_left,height
 height = height - margin;
 finite_r_nonlinear_button = uicontrol('Style','checkbox','Units','pixels','Position',[label_left,height+label_margin,button_width,button_height],'String','Use nonlinear finite-r method','Callback',@finite_r_nonlinear_callback,'fontsize',12);
 
-height = height - 90;
+height = height - 110;
 %order_r_squared_button = uicontrol('Style','checkbox','Units','pixels','Position',[label_left,height+label_margin,button_width,button_height],'String','Include O(r^2) terms','Callback',@order_r_squared_callback,'fontsize',12);
-order_r_option_button_group = uibuttongroup('Units','pixels','Position',[label_left,height+label_margin,button_width,85],'SelectionChangedFcn',@order_r_option_callback);
+order_r_option_button_group = uibuttongroup('Units','pixels','Position',[label_left,height+label_margin,button_width,105],'SelectionChangedFcn',@order_r_option_callback);
 spacing=20;
-order_r_option_r1_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^1)','position',[10,5+3*spacing,200,15]);
-order_r_option_r2_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^2)','position',[10,5+2*spacing,200,15]);
+order_r_option_r1_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^1)','position',[10,5+4*spacing,200,15]);
+order_r_option_r2_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^2)','position',[10,5+3*spacing,200,15]);
+order_r_option_r3_flux_constraint_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^3), flux constraint','position',[10,5+2*spacing,200,15]);
 order_r_option_r3_simplified_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^3), simplified','position',[10,5+1*spacing,200,15]);
 order_r_option_r3_simplified_with_Z3_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^3), simplified, with Z3','position',[10,5+0*spacing,200,15]);
 
@@ -437,6 +438,8 @@ set(f,'Visible','on')
             fprintf(fid,' order_r_option="r1"\n');
         elseif order_r_option == order_r_option_r2_button
             fprintf(fid,' order_r_option="r2"\n');
+        elseif order_r_option == order_r_option_r3_flux_constraint_button
+            fprintf(fid,' order_r_option="r3_flux_constraint"\n');
         elseif order_r_option == order_r_option_r3_simplified_button
             fprintf(fid,' order_r_option="r3_simplified"\n');
         elseif order_r_option == order_r_option_r3_simplified_with_Z3_button
@@ -444,7 +447,7 @@ set(f,'Visible','on')
         else
             error('Should not get here!')
         end
-        fprintf(fid,' N_phi=31\n');
+        fprintf(fid,' N_phi=101\n');
         fprintf(fid,' nfp = %d\n',round(nfp));
         fprintf(fid,' eta_bar = %.15g\n',eta_bar);
         fprintf(fid,' sigma_initial = %.15g\n',sigma);
