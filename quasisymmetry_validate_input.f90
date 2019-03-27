@@ -42,26 +42,6 @@ subroutine quasisymmetry_validate_input
      stop
   end select
 
-  select case (trim(finite_r_option))
-  case (finite_r_option_linear)
-  case (finite_r_option_nonlinear)
-  case default
-     print *,"Error! Invalid finite_r_option:",finite_r_option
-     stop
-  end select
-
-  select case (trim(order_r_option))
-  case (order_r_option_r1)
-  case (order_r_option_r2)
-  case (order_r_option_r3_simplified)
-  case (order_r_option_r3_simplified_with_Z3)
-  case (order_r_option_r3_flux_constraint)
-  case (order_r_option_r3_full)
-  case default
-     print *,"Error! Invalid order_r_option:",order_r_option
-     stop
-  end select
-
   select case (trim(eta_bar_scan_option))
   case (eta_bar_scan_option_linear)
   case (eta_bar_scan_option_log)
@@ -86,6 +66,30 @@ subroutine quasisymmetry_validate_input
   case (Fourier_scan_option_2_sided_log_except_Z0s1)
   case default
      print *,"Error! Invalid Fourier_scan_option:",Fourier_scan_option
+     stop
+  end select
+
+  select case (trim(finite_r_option))
+  case (finite_r_option_linear)
+  case (finite_r_option_nonlinear)
+  case default
+     print *,"Error! Invalid finite_r_option:",finite_r_option
+     stop
+  end select
+
+  select case (trim(order_r_option))
+  case (order_r_option_r1)
+  case (order_r_option_r2)
+  case (order_r_option_r3_simplified)
+  case (order_r_option_r3_simplified_with_Z3)
+  case (order_r_option_r3_flux_constraint)
+  case (order_r_option_r3_B3)
+  case (order_r_option_r3_X3s3_X3c3)
+  case (order_r_option_r3_X3s3_Y3s3)
+  case (order_r_option_r3_X3c3_Y3c3)
+  case (order_r_option_r3_Y3s3_Y3c3)
+  case default
+     print *,"Error! Invalid order_r_option:",order_r_option
      stop
   end select
 

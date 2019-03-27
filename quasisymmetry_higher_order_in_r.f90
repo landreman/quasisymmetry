@@ -19,6 +19,7 @@ subroutine quasisymmetry_higher_order_in_r
   real(dp), dimension(:), allocatable :: fX0, fXs, fXc, fY0, fYs, fYc, eq1residual, eq2residual
   real(dp), dimension(:), allocatable :: d_X20_d_zeta, d_X2s_d_zeta, d_X2c_d_zeta
   real(dp), dimension(:), allocatable :: d_Y20_d_zeta, d_Y2s_d_zeta, d_Y2c_d_zeta
+  real(dp), dimension(:), allocatable :: d_Z20_d_zeta, d_Z2s_d_zeta, d_Z2c_d_zeta
   real(dp), dimension(:), allocatable :: flux_constraint_coefficient
   integer :: N_helicity
   real(dp) :: I2, G0, B1c
@@ -473,9 +474,6 @@ subroutine quasisymmetry_higher_order_in_r
   allocate(Z3c3_untwisted(N_phi))
 
   ! Derivatives of Z20, Z2c, and Z2s are needed to compute (X3,Y3).
-  if (allocated(d_Z20_d_zeta)) deallocate(d_Z20_d_zeta)
-  if (allocated(d_Z2c_d_zeta)) deallocate(d_Z2c_d_zeta)
-  if (allocated(d_Z2s_d_zeta)) deallocate(d_Z2s_d_zeta)
   allocate(d_Z20_d_zeta(N_phi))
   allocate(d_Z2c_d_zeta(N_phi))
   allocate(d_Z2s_d_zeta(N_phi))
@@ -565,7 +563,12 @@ subroutine quasisymmetry_higher_order_in_r
           3 * abs_G0_over_B0 * I2 * Y1s**2 * torsion - I2 * Y1c * d_X1c_d_zeta + I2 * X1c * d_Y1c_d_zeta - 2 * B0 * sign_psi * d_Z20_d_zeta + 4 * B0 * sign_psi * d_Z2c_d_zeta)
   end if
 
-  if (trim(order_r_option) == order_r_option_r3_simplified_with_Z3 .or. trim(order_r_option) == order_r_option_r3_full) then
+  if (trim(order_r_option) == order_r_option_r3_simplified_with_Z3 &
+       .or. trim(order_r_option) == order_r_option_r3_B3 &
+       .or. trim(order_r_option) == order_r_option_r3_X3s3_X3c3 &
+       .or. trim(order_r_option) == order_r_option_r3_X3s3_Y3s3 &
+       .or. trim(order_r_option) == order_r_option_r3_X3c3_Y3c3 &
+       .or. trim(order_r_option) == order_r_option_r3_Y3s3_Y3c3) then
      ! Compute Z3 terms
      ! These are worked out in "20190318-01 Wrick's streamlined Garren-Boozer method, MHD.nb"
 
@@ -618,15 +621,529 @@ subroutine quasisymmetry_higher_order_in_r
           4*Y2s*d_Y1s_d_zeta + X1c*Y1s*curvature*d_Y1s_d_zeta - &
           2*Y1c*d_Y2c_d_zeta + 2*Y1s*d_Y2s_d_zeta)/(12*abs_G0_over_B0)
 
-     deallocate(d_X20_d_zeta, d_X2s_d_zeta, d_X2c_d_zeta)
-     deallocate(d_Y20_d_zeta, d_Y2s_d_zeta, d_Y2c_d_zeta)
   end if
 
-  if (trim(order_r_option) == order_r_option_r3_full) then
-     ! Full O(r^3) calculation
+  if (trim(order_r_option) == order_r_option_r3_B3 &
+       .or. trim(order_r_option) == order_r_option_r3_X3s3_X3c3 &
+       .or. trim(order_r_option) == order_r_option_r3_X3s3_Y3s3 &
+       .or. trim(order_r_option) == order_r_option_r3_X3c3_Y3c3 &
+       .or. trim(order_r_option) == order_r_option_r3_Y3s3_Y3c3) then
+     d_Z3c1_d_zeta = matmul(d_d_zeta,Z3c1)
+     d_Z3s1_d_zeta = matmul(d_d_zeta,Z3s1)
+     d_Z3c3_d_zeta = matmul(d_d_zeta,Z3c3)
+     d_Z3s3_d_zeta = matmul(d_d_zeta,Z3s3)
+  end if
 
-     stop "r3_full has not yet been implemented !!"
+  if (trim(order_r_option) == order_r_option_B3) then
+     ! Compute X3s3 and X3c3 from B3s3 and B3c3
+ 
+     ! Equations copied from "20190318-01 Wrick's streamlined Garren-Boozer method, MHD.nb"
+     X3c3 = ((G0**2*B1c**3)/B0**5 - (3*G0**2*B1c*B2c)/B0**4 + (2*G0**2*B3c3_input)/B0**3 - &
+         2*iota_N**2*X1c*X2c - 2*iota_N**2*Y1c*Y2c + 2*iota_N**2*Y1s*Y2s + 6*abs_G0_over_B0*iota_N*Z3s3 - &
+         abs_G0_over_B0*iota_N*X1c*Z2s*curvature + abs_G0_over_B0**2*X1c*X2c*curvature**2 - abs_G0_over_B0*iota_N*X2s*Y1c*torsion - &
+         abs_G0_over_B0*iota_N*X2c*Y1s*torsion + abs_G0_over_B0*iota_N*X1c*Y2s*torsion - abs_G0_over_B0**2*Y1c*Z2c*curvature*torsion + &
+         abs_G0_over_B0**2*Y1s*Z2s*curvature*torsion + abs_G0_over_B0**2*X1c*X2c*torsion**2 + abs_G0_over_B0**2*Y1c*Y2c*torsion**2 - &
+         abs_G0_over_B0**2*Y1s*Y2s*torsion**2 + 2*iota_N*X2s*d_X1c_d_zeta + &
+         abs_G0_over_B0*Z2c*curvature*d_X1c_d_zeta - abs_G0_over_B0*Y2c*torsion*d_X1c_d_zeta - &
+         abs_G0_over_B0*Y1c*torsion*d_X2c_d_zeta + d_X1c_d_zeta*d_X2c_d_zeta + &
+         iota_N*X1c*d_X2s_d_zeta + abs_G0_over_B0*Y1s*torsion*d_X2s_d_zeta + &
+         2*iota_N*Y2s*d_Y1c_d_zeta + abs_G0_over_B0*X2c*torsion*d_Y1c_d_zeta + &
+         2*iota_N*Y2c*d_Y1s_d_zeta - abs_G0_over_B0*X2s*torsion*d_Y1s_d_zeta + &
+         iota_N*Y1s*d_Y2c_d_zeta + abs_G0_over_B0*X1c*torsion*d_Y2c_d_zeta + &
+         d_Y1c_d_zeta*d_Y2c_d_zeta + iota_N*Y1c*d_Y2s_d_zeta - &
+         d_Y1s_d_zeta*d_Y2s_d_zeta - abs_G0_over_B0*X1c*curvature*d_Z2c_d_zeta + &
+         2*abs_G0_over_B0*d_Z3c3_d_zeta)/(2*abs_G0_over_B0**2*curvature)
+
+     X3s3 = ((-3*G0**2*B1c*B2s)/B0**4 + (2*G0**2*B3s3_input)/B0**3 - 2*iota_N**2*X1c*X2s - &
+         2*iota_N**2*Y1s*Y2c - 2*iota_N**2*Y1c*Y2s - 6*abs_G0_over_B0*iota_N*Z3c3 + abs_G0_over_B0*iota_N*X1c*Z2c*curvature + &
+         abs_G0_over_B0**2*X1c*X2s*curvature**2 + abs_G0_over_B0*iota_N*X2c*Y1c*torsion - abs_G0_over_B0*iota_N*X2s*Y1s*torsion - &
+         abs_G0_over_B0*iota_N*X1c*Y2c*torsion - abs_G0_over_B0**2*Y1s*Z2c*curvature*torsion - abs_G0_over_B0**2*Y1c*Z2s*curvature*torsion + &
+         abs_G0_over_B0**2*X1c*X2s*torsion**2 + abs_G0_over_B0**2*Y1s*Y2c*torsion**2 + abs_G0_over_B0**2*Y1c*Y2s*torsion**2 - &
+         2*iota_N*X2c*d_X1c_d_zeta + abs_G0_over_B0*Z2s*curvature*d_X1c_d_zeta - &
+         abs_G0_over_B0*Y2s*torsion*d_X1c_d_zeta - iota_N*X1c*d_X2c_d_zeta - &
+         abs_G0_over_B0*Y1s*torsion*d_X2c_d_zeta - abs_G0_over_B0*Y1c*torsion*d_X2s_d_zeta + &
+         d_X1c_d_zeta*d_X2s_d_zeta - 2*iota_N*Y2c*d_Y1c_d_zeta + &
+         abs_G0_over_B0*X2s*torsion*d_Y1c_d_zeta + 2*iota_N*Y2s*d_Y1s_d_zeta + &
+         abs_G0_over_B0*X2c*torsion*d_Y1s_d_zeta - iota_N*Y1c*d_Y2c_d_zeta + &
+         d_Y1s_d_zeta*d_Y2c_d_zeta + iota_N*Y1s*d_Y2s_d_zeta + &
+         abs_G0_over_B0*X1c*torsion*d_Y2s_d_zeta + d_Y1c_d_zeta*d_Y2s_d_zeta - &
+         abs_G0_over_B0*X1c*curvature*d_Z2s_d_zeta + 2*abs_G0_over_B0*d_Z3s3_d_zeta)/(2*abs_G0_over_B0**2*curvature)
+
+     d_X3s3_d_zeta = matmul(d_d_zeta, X3s3)
+     d_X3c3_d_zeta = matmul(d_d_zeta, X3c3)
+  else
+     X3c3 = 0
+     X3s3 = 0
+     d_X3s3_d_zeta = 0
+     d_X3c3_d_zeta = 0
+  end if
+
+  if (trim(order_r_option) == order_r_option_r3_B3 &
+       .or. trim(order_r_option) == order_r_option_r3_X3s3_X3c3 &
+       .or. trim(order_r_option) == order_r_option_r3_X3s3_Y3s3 &
+       .or. trim(order_r_option) == order_r_option_r3_X3c3_Y3c3 &
+       .or. trim(order_r_option) == order_r_option_r3_Y3s3_Y3c3) then
+
+     
+     d_X3s3_d_zeta = matmul(
+
+     ! Set up and solve the O(r^3) linear system
+     vector_size = 6 * N_phi + 1
+     allocate(matrix(vector_size, vector_size))
+     allocate(right_hand_side(vector_size))
+     matrix = 0
+
+     ! Rows of the vector of unknowns, and columns of the matrix:
+     index_X3c1      = 1 + 0 * N_phi
+     index_X3s1      = 1 + 1 * N_phi
+     index_Y3c1      = 1 + 2 * N_phi
+     index_Y3s1      = 1 + 3 * N_phi
+     !index_unknown1  = 1 + 4 * N_phi
+     !index_unknown2  = 1 + 5 * N_phi
+     index_Y3c3      = 1 + 4 * N_phi
+     index_Y3s3      = 1 + 5 * N_phi
+     index_iota2     = 1 + 6 * N_phi
+
+!!$     if(trim(order_r_option)==order_r_option_r3_B3 .or. trim(order_r_option)==order_r_option_r3_X3s3_X3c3) then
+!!$        index_Y3s3 = index_unknown1
+!!$        index_Y3c3 = index_unknown2
+!!$     elseif(trim(order_r_option)==order_r_option_r3_X3s3_Y3s3) then
+!!$        index_X3c3 = index_unknown1
+!!$        index_Y3c3 = index_unknown2
+!!$     elseif(trim(order_r_option)==order_r_option_r3_X3c3_Y3c3) then
+!!$        index_X3s3 = index_unknown1
+!!$        index_Y3s3 = index_unknown2
+!!$     elseif(trim(order_r_option)==order_r_option_r3_Y3s3_Y3c3) then
+!!$        index_X3s3 = index_unknown1
+!!$        index_X3c3 = index_unknown2
+!!$     else
+!!$        stop "Should not get here."
+!!$     end if
+
+     ! Rows of the right-hand-side vector, and rows of the matrix:
+     index_XYEquation_0            = 1 + 0 * N_phi
+     index_XYEquation_s            = 1 + 1 * N_phi
+     index_XYEquation_c            = 1 + 2 * N_phi
+     index_mixedPartialsEquation_0 = 1 + 3 * N_phi
+     index_mixedPartialsEquation_s = 1 + 4 * N_phi
+     index_mixedPartialsEquation_c = 1 + 5 * N_phi
+     index_initialCondition        = 1 + 6 * N_phi
+
+     ! Impose initial condition for Y3c1
+     matrix(index_initialCondition, index_Y3c1) = 1 
+     right_hand_side(index_initial_condition) = Y3c1_initial
+
+     ! These next equations come from "20190318-01 Wrick's streamlined Garren-Boozer method, MHD.nb"
+        
+     ! sin(2 theta) part of the XY equation:
+     right_hand_side(index_XYEquation_s:(index_XYEquation_s+N_phi-1)) = -( 4*X2c*Y20 - 4*X20*Y2c + (2*Bbar*iota_N*Z2c)/G0 + &
+            (Bbar*abs_G0_over_B0*X2s*curvature)/G0 - (abs_G0_over_B0*I2*Y1c*Y1s*torsion)/G0 + &
+            (I2*Y1s*d_X1c_d_zeta)/(2*G0) - (I2*X1c*d_Y1s_d_zeta)/(2*G0) - (Bbar*d_Z2s_d_zeta)/G0)
+     right_hand_side(index_XYEquation_s:(index_XYEquation_s+N_phi-1)) = right_hand_side(index_XYEquation_s:(index_XYEquation_s+N_phi-1)) - 3*Y1c*X3c3 - 3*Y1s*X3s3
+     do j = 1, N_phi
+        matrix(index_XYEquation_s+j-1,index_X3c1+j-1) = -Y1c(j)
+        matrix(index_XYEquation_s+j-1,index_X3s1+j-1) = Y1s(j)
+        matrix(index_XYEquation_s+j-1,index_Y3c1+j-1) = X1c(j)
+        matrix(index_XYEquation_s+j-1,index_Y3c3+j-1) = -3*X1c(j)
+     end do
+
+     ! cos(2 theta) part of the XY equation:
+     right_hand_side(index_XYEquation_c:(index_XYEquation_c+N_phi-1)) = -(- 4*X2s*Y20 + &
+          4*X20*Y2s - (2*Bbar*iota_N*Z2s)/G0 + &
+          (Bbar*abs_G0_over_B0*X2c*curvature)/G0 - (abs_G0_over_B0*I2*(X1c**2)*torsion)/(2*G0) - (abs_G0_over_B0*I2*(Y1c**2)*torsion)/(2*G0) + &
+          (abs_G0_over_B0*I2*(Y1s**2)*torsion)/(2*G0) + (I2*Y1c*d_X1c_d_zeta)/(2*G0) - &
+          (I2*X1c*d_Y1c_d_zeta)/(2*G0) - (Bbar*d_Z2c_d_zeta)/G0)
+     right_hand_side(index_XYEquation_c:(index_XYEquation_c+N_phi-1)) = right_hand_side(index_XYEquation_c:(index_XYEquation_c+N_phi-1)) - 3*Y1s*X3c3 -(-3*Y1c)*X3s3
+     do j = 1, N_phi
+        matrix(index_XYEquation_c+j-1,index_X3c1+j-1) = Y1s(j)
+        !matrix(index_XYEquation_c+j-1,index_X3c3+j-1) = 3*Y1s(j)
+        matrix(index_XYEquation_c+j-1,index_X3s1+j-1) = Y1c(j)
+        !matrix(index_XYEquation_c+j-1,index_X3s3+j-1) = -3*Y1c(j)
+        matrix(index_XYEquation_c+j-1,index_Y3s1+j-1) = -X1c(j)
+        matrix(index_XYEquation_c+j-1,index_Y3s3+j-1) = 3*X1c(j)
+     end do
+
+     ! cos(0 theta) part of the XY equation:
+     right_hand_side(index_XYEquation_0:(index_XYEquation_0+N_phi-1)) = -((Bbar*abs_G0_over_B0*G2)/(G0*G0) + (Bbar*abs_G0_over_B0*I2*NN)/(G0*G0) - &
+          4*X2s*Y2c + 4*X2c*Y2s + (Bbar*abs_G0_over_B0*X20*curvature)/G0 - &
+          (abs_G0_over_B0*I2*X1c*X1c*torsion)/(2*G0) - (abs_G0_over_B0*I2*Y1c*Y1c*torsion)/(2*G0) - &
+          (abs_G0_over_B0*I2*Y1s*Y1s*torsion)/(2*G0) + (I2*Y1c*d_X1c_d_zeta)/(2*G0) - &
+          (I2*X1c*d_Y1c_d_zeta)/(2*G0) - (Bbar*d_Z20_d_zeta)/G0)
+     do j = 1, N_phi
+        matrix(index_XYEquation_0+j-1,index_X3c1+j-1) = 2*Y1s(j)
+        matrix(index_XYEquation_0+j-1,index_X3s1+j-1) = -2*Y1c(j)
+        matrix(index_XYEquation_0+j-1,index_Y3s1+j-1) = 2*X1c(j)
+     end do
+
+     ! sin(2 theta) part of the mixed-partials equation:
+     right_hand_side(index_mixedPartialsEquation_s:(index_mixedPartialsEquation_s+N_phi-1)) = -((-8*iota_N*X20*X2s)/abs_G0_over_B0   + &
+          + (16*I2*X2c*Y20)/Bbar - (16*I2*X20*Y2c)/Bbar - &
+          (8*iota_N*Y20*Y2s)/abs_G0_over_B0  - (4*iota_N**2*X1c**2*Z2c)/abs_G0_over_B0**2 - &
+          (4*iota_N**2*Y1c**2*Z2c)/abs_G0_over_B0**2 + (8*I2*iota_N*X1c*Y1s*Z2c)/(Bbar*abs_G0_over_B0) - &
+          (4*iota_N**2*Y1s**2*Z2c)/abs_G0_over_B0**2 + 2*X20*Y1c*beta_1s - 2*X2c*Y1c*beta_1s - &
+          2*X2s*Y1s*beta_1s - 2*X1c*Y20*beta_1s + 2*X1c*Y2c*beta_1s + 2*X1c*Y1s*beta_2c - &
+          (4*iota_N*X1c**2*X2s*curvature)/abs_G0_over_B0 - (2*iota_N*X2s*Y1c**2*curvature)/abs_G0_over_B0 + &
+          (2*iota_N*X20*Y1c*Y1s*curvature)/abs_G0_over_B0 - (2*iota_N*X2s*Y1s**2*curvature)/abs_G0_over_B0 - &
+          (2*iota_N*X1c*Y1s*Y20*curvature)/abs_G0_over_B0 + (6*iota_N*X1c*Y1s*Y2c*curvature)/abs_G0_over_B0 - &
+          (2*iota_N*X1c*Y1c*Y2s*curvature)/abs_G0_over_B0 + 4*X2c*Z20*curvature - 4*X20*Z2c*curvature + &
+          X1c*Z3c1*curvature - 3*X1c*Z3c3*curvature + (iota_N*X1c**2*Y1c*Y1s*curvature**2)/abs_G0_over_B0 + &
+          X1c**2*Z20*curvature**2 - X1c**2*Z2c*curvature**2     + (I2*iota_N*X1c**2*Y1c*Y1s*torsion)/(Bbar*abs_G0_over_B0) + &
+          (I2*iota_N*Y1c**3*Y1s*torsion)/(Bbar*abs_G0_over_B0) - (4*I2**2*X1c*Y1c*Y1s**2*torsion)/Bbar**2 + &
+          (I2*iota_N*Y1c*Y1s**3*torsion)/(Bbar*abs_G0_over_B0) - 8*X2c*Y20*torsion + 8*X20*Y2c*torsion  - (2*I2*X1c**2*Z20*torsion)/Bbar - &
+          (2*I2*Y1c**2*Z20*torsion)/Bbar + (2*I2*Y1s**2*Z20*torsion)/Bbar + &
+          (2*I2*X1c**2*Z2c*torsion)/Bbar + (2*I2*Y1c**2*Z2c*torsion)/Bbar - &
+          (8*iota_N*X1c*Y1s*Z2c*torsion)/abs_G0_over_B0 + (2*I2*Y1s**2*Z2c*torsion)/Bbar + &
+          3*X1c*X20*Y1c*curvature*torsion - 3*X1c*X2c*Y1c*curvature*torsion - &
+          6*X1c*X2s*Y1s*curvature*torsion - 3*X1c**2*Y20*curvature*torsion + 3*X1c**2*Y2c*curvature*torsion + &
+          (4*I2*X1c*Y1c*Y1s**2*torsion**2)/Bbar   - &
+          (I2*iota_N*X1c**2*Y1s*d_X1c_d_zeta)/(Bbar*abs_G0_over_B0**2) + &
+          (2*I2**2*X1c*Y1s**2*d_X1c_d_zeta)/(Bbar**2*abs_G0_over_B0) - &
+          (I2*iota_N*Y1s**3*d_X1c_d_zeta)/(Bbar*abs_G0_over_B0**2) + &
+          (2*I2*Y1c*Z20*d_X1c_d_zeta)/(Bbar*abs_G0_over_B0) - &
+          (2*I2*Y1c*Z2c*d_X1c_d_zeta)/(Bbar*abs_G0_over_B0) + &
+          (2*iota_N*X1c*Z2s*d_X1c_d_zeta)/abs_G0_over_B0**2 - &
+          (4*I2*Y1s*Z2s*d_X1c_d_zeta)/(Bbar*abs_G0_over_B0) - &
+          (X1c*X20*curvature*d_X1c_d_zeta)/abs_G0_over_B0 + (X1c*X2c*curvature*d_X1c_d_zeta)/abs_G0_over_B0 - &
+          (3*I2*X1c*Y1s**2*torsion*d_X1c_d_zeta)/(Bbar*abs_G0_over_B0) + &
+          (4*X2c*d_X20_d_zeta)/abs_G0_over_B0 + (X1c**2*curvature*d_X20_d_zeta)/abs_G0_over_B0 - &
+          (4*X20*d_X2c_d_zeta)/abs_G0_over_B0 - (X1c**2*curvature*d_X2c_d_zeta)/abs_G0_over_B0   - &
+          (I2*iota_N*X1c*Y1c*Y1s*d_Y1c_d_zeta)/(Bbar*abs_G0_over_B0**2)  - &
+          (2*I2*X1c*Z20*d_Y1c_d_zeta)/(Bbar*abs_G0_over_B0) + &
+          (2*I2*X1c*Z2c*d_Y1c_d_zeta)/(Bbar*abs_G0_over_B0) - &
+          (4*iota_N*Y1s*Z2c*d_Y1c_d_zeta)/abs_G0_over_B0**2 + &
+          (2*iota_N*Y1c*Z2s*d_Y1c_d_zeta)/abs_G0_over_B0**2 + &
+          (X20*Y1c*curvature*d_Y1c_d_zeta)/abs_G0_over_B0 - (X2c*Y1c*curvature*d_Y1c_d_zeta)/abs_G0_over_B0 - &
+          (2*X2s*Y1s*curvature*d_Y1c_d_zeta)/abs_G0_over_B0 - &
+          (2*X1c*Y20*curvature*d_Y1c_d_zeta)/abs_G0_over_B0 + &
+          (2*X1c*Y2c*curvature*d_Y1c_d_zeta)/abs_G0_over_B0 + &
+          (I2*Y1c*Y1s**2*torsion*d_Y1c_d_zeta)/(Bbar*abs_G0_over_B0) - &
+          (I2*Y1s**2*d_X1c_d_zeta*d_Y1c_d_zeta)/(Bbar*abs_G0_over_B0**2) + &
+          (I2*iota_N*X1c**3*d_Y1s_d_zeta)/(Bbar*abs_G0_over_B0**2) + &
+          (I2*iota_N*X1c*Y1c**2*d_Y1s_d_zeta)/(Bbar*abs_G0_over_B0**2) -&
+          (2*I2**2*X1c**2*Y1s*d_Y1s_d_zeta)/(Bbar**2*abs_G0_over_B0) + &
+          (I2*iota_N*X1c*Y1s**2*d_Y1s_d_zeta)/(Bbar*abs_G0_over_B0**2)  + &
+          (4*iota_N*Y1c*Z2c*d_Y1s_d_zeta)/abs_G0_over_B0**2 - &
+          (4*I2*X1c*Z2s*d_Y1s_d_zeta)/(Bbar*abs_G0_over_B0) + &
+          (2*iota_N*Y1s*Z2s*d_Y1s_d_zeta)/abs_G0_over_B0**2 + &
+          (2*X2s*Y1c*curvature*d_Y1s_d_zeta)/abs_G0_over_B0 - (X20*Y1s*curvature*d_Y1s_d_zeta)/abs_G0_over_B0 - &
+          (X2c*Y1s*curvature*d_Y1s_d_zeta)/abs_G0_over_B0 - &
+          (X1c**2*Y1s*curvature**2*d_Y1s_d_zeta)/abs_G0_over_B0 + &
+          (3*I2*X1c**2*Y1s*torsion*d_Y1s_d_zeta)/(Bbar*abs_G0_over_B0) - &
+          (I2*Y1c**2*Y1s*torsion*d_Y1s_d_zeta)/(Bbar*abs_G0_over_B0) + &
+          (2*I2*X1c*Y1s*d_Y1c_d_zeta*d_Y1s_d_zeta)/(Bbar*abs_G0_over_B0**2) - &
+          (I2*X1c*Y1c*d_Y1s_d_zeta**2)/(Bbar*abs_G0_over_B0**2) + (4*Y2c*d_Y20_d_zeta)/abs_G0_over_B0 + &
+          (X1c*Y1c*curvature*d_Y20_d_zeta)/abs_G0_over_B0 - (4*Y20*d_Y2c_d_zeta)/abs_G0_over_B0 - &
+          (X1c*Y1c*curvature*d_Y2c_d_zeta)/abs_G0_over_B0 - (2*X1c*Y1s*curvature*d_Y2s_d_zeta)/abs_G0_over_B0    - &
+          (2*iota_N*Y1c*Y1s*d_Z20_d_zeta)/abs_G0_over_B0**2 - &
+          (X1c*d_X1c_d_zeta*d_Z20_d_zeta)/abs_G0_over_B0**2 - &
+          (Y1c*d_Y1c_d_zeta*d_Z20_d_zeta)/abs_G0_over_B0**2 + &
+          (Y1s*d_Y1s_d_zeta*d_Z20_d_zeta)/abs_G0_over_B0**2 + &
+          (X1c*d_X1c_d_zeta*d_Z2c_d_zeta)/abs_G0_over_B0**2 + &
+          (Y1c*d_Y1c_d_zeta*d_Z2c_d_zeta)/abs_G0_over_B0**2 + &
+          (Y1s*d_Y1s_d_zeta*d_Z2c_d_zeta)/abs_G0_over_B0**2 + &
+          (2*iota_N*X1c**2*d_Z2s_d_zeta)/abs_G0_over_B0**2 + (2*iota_N*Y1c**2*d_Z2s_d_zeta)/abs_G0_over_B0**2 + &
+          (2*iota_N*Y1s**2*d_Z2s_d_zeta)/abs_G0_over_B0**2 + (4*X1c*Y1s*torsion*d_Z2s_d_zeta)/abs_G0_over_B0 + &
+          (2*Y1s*d_Y1c_d_zeta*d_Z2s_d_zeta)/abs_G0_over_B0**2 - &
+          (2*Y1c*d_Y1s_d_zeta*d_Z2s_d_zeta)/abs_G0_over_B0**2)
+     right_hand_side(index_mixedPartialsEquation_s:(index_mixedPartialsEquation_s+N_phi-1)) = right_hand_side(index_mixedPartialsEquation_s:(index_mixedPartialsEquation_s+N_phi-1)) &
+          -(diag(- (3*X1c)/abs_G0_over_B0) * d_d_zeta + diag((12*I2*Y1c)/Bbar - 6*Y1c*torsion + (3*d_X1c_d_zeta)/abs_G0_over_B0) + diag(- (12*iota_N*X1c)/abs_G0_over_B0 + (12*I2*Y1s)/Bbar - 6*Y1s*torsion)
+     matrix(index_mixedPartialsEquation_s:(index_mixedPartialsEquation_s+N_phi-1),index_iota2) = (2*Y1c*Y1s)/abs_G0_over_B0
+     !matrix(index_mixedPartialsEquation_s,index_X3c1) = diag(X1c/abs_G0_over_B0) * d_d_zeta + diag(- (4*I2*Y1c)/Bbar + 2*Y1c*torsion - (d_X1c_d_zeta)/abs_G0_over_B0)
+     !matrix(index_mixedPartialsEquation_s,index_X3c3) = diag(- (3*X1c)/abs_G0_over_B0) * d_d_zeta + diag((12*I2*Y1c)/Bbar - 6*Y1c*torsion + (3*d_X1c_d_zeta)/abs_G0_over_B0)
+     !matrix(index_mixedPartialsEquation_s,index_X3s1) = diag((4*I2*Y1s)/Bbar - 2*Y1s*torsion)
+     !matrix(index_mixedPartialsEquation_s,index_X3s3) = diag(- (12*iota_N*X1c)/abs_G0_over_B0 + (12*I2*Y1s)/Bbar - 6*Y1s*torsion)
+     !matrix(index_mixedPartialsEquation_s,index_Y3c1) = diag((Y1c)/abs_G0_over_B0) * d_d_zeta + diag((4*I2*X1c)/Bbar - 2*X1c*torsion - (d_Y1c_d_zeta)/abs_G0_over_B0)
+     !matrix(index_mixedPartialsEquation_s,index_Y3c3) = diag(- (3*Y1c)/abs_G0_over_B0) * d_d_zeta + diag(- (12*I2*X1c)/Bbar + (12*iota_N*Y1s)/abs_G0_over_B0 + 6*X1c*torsion  + (3*d_Y1c_d_zeta)/abs_G0_over_B0)
+     !matrix(index_mixedPartialsEquation_s,index_Y3s1) = diag(- (Y1s)/abs_G0_over_B0) * d_d_zeta + diag((d_Y1s_d_zeta)/abs_G0_over_B0)
+     !matrix(index_mixedPartialsEquation_s,index_Y3s3) = diag(- (3*Y1s)/abs_G0_over_B0) * d_d_zeta + diag(- (12*iota_N*Y1c)/abs_G0_over_B0  + (3*d_Y1s_d_zeta)/abs_G0_over_B0)
+     !matrix(index_mixedPartialsEquation_s,index_iota2) = (2*Y1c*Y1s)/abs_G0_over_B0
+     do j = 1, N_phi
+        matrix(index_mixedPartialsEquation_s+j-1,index_X3c1:(index_X3c1+N_phi-1)) = X1c(j)/abs_G0_over_B0 * d_d_zeta(j,:)
+        matrix(index_mixedPartialsEquation_s+j-1,index_Y3c1) = (Y1c(j))/abs_G0_over_B0) * d_d_zeta(j,:)
+        matrix(index_mixedPartialsEquation_s+j-1,index_Y3c3) = - (3*Y1c(j))/abs_G0_over_B0) * d_d_zeta(j,:)
+        matrix(index_mixedPartialsEquation_s+j-1,index_Y3s1) = - (Y1s(j))/abs_G0_over_B0) * d_d_zeta(j,:)
+        matrix(index_mixedPartialsEquation_s+j-1,index_Y3s3) = - (3*Y1s(j))/abs_G0_over_B0) * d_d_zeta(j,:)
+     end do
+     do j = 1, N_phi
+        matrix(index_mixedPartialsEquation_s+j-1,index_X3c1+j-1) = - (4*I2*Y1c(j))/Bbar + 2*Y1c*torsion(j) - (d_X1c_d_zeta(j))/abs_G0_over_B0
+        matrix(index_mixedPartialsEquation_s+j-1,index_X3c3+j-1) = - (3*X1c)/abs_G0_over_B0) * d_d_zeta + diag((12*I2*Y1c)/Bbar - 6*Y1c*torsion + (3*d_X1c_d_zeta)/abs_G0_over_B0
+        matrix(index_mixedPartialsEquation_s+j-1,index_X3s1+j-1) = (4*I2*Y1s)/Bbar - 2*Y1s*torsion
+        matrix(index_mixedPartialsEquation_s+j-1,index_X3s3+j-1) = - (12*iota_N*X1c)/abs_G0_over_B0 + (12*I2*Y1s)/Bbar - 6*Y1s*torsion
+        matrix(index_mixedPartialsEquation_s+j-1,index_Y3c1+j-1) = (Y1c)/abs_G0_over_B0) * d_d_zeta + diag((4*I2*X1c)/Bbar - 2*X1c*torsion - (d_Y1c_d_zeta)/abs_G0_over_B0
+        matrix(index_mixedPartialsEquation_s+j-1,index_Y3c3+j-1) = - (3*Y1c)/abs_G0_over_B0) * d_d_zeta + diag(- (12*I2*X1c)/Bbar + (12*iota_N*Y1s)/abs_G0_over_B0 + 6*X1c*torsion  + (3*d_Y1c_d_zeta)/abs_G0_over_B0
+        matrix(index_mixedPartialsEquation_s+j-1,index_Y3s1+j-1) = diag(- (Y1s)/abs_G0_over_B0) * d_d_zeta + diag((d_Y1s_d_zeta)/abs_G0_over_B0
+        matrix(index_mixedPartialsEquation_s+j-1,index_Y3s3+j-1) = diag(- (3*Y1s)/abs_G0_over_B0) * d_d_zeta + diag(- (12*iota_N*Y1c)/abs_G0_over_B0  + (3*d_Y1s_d_zeta)/abs_G0_over_B0
+     end do
+
+     ! cos(2 theta) part of the mixed-partials equation:
+     right_hand_side(index_mixedPartialsEquation_c:(index_mixedPartialsEquation_c+N_phi-1)) = -((-8*iota_N*X20*X2c)/abs_G0_over_B0      - (16*I2*X2s*Y20)/Bbar - &
+          (8*iota_N*Y20*Y2c)/abs_G0_over_B0 + (16*I2*X20*Y2s)/Bbar    + &
+          (4*iota_N**2*X1c**2*Z2s)/abs_G0_over_B0**2 + (4*iota_N**2*Y1c**2*Z2s)/abs_G0_over_B0**2 - &
+          (8*I2*iota_N*X1c*Y1s*Z2s)/(Bbar*abs_G0_over_B0) + (4*iota_N**2*Y1s**2*Z2s)/abs_G0_over_B0**2 + &
+          2*X2s*Y1c*beta_1s - 2*X20*Y1s*beta_1s - 2*X2c*Y1s*beta_1s - 2*X1c*Y2s*beta_1s - &
+          2*X1c*Y1s*beta_2s - (iota_N*X1c**2*X20*curvature)/abs_G0_over_B0 - (4*iota_N*X1c**2*X2c*curvature)/abs_G0_over_B0 + &
+          (iota_N*X20*Y1c**2*curvature)/abs_G0_over_B0 - (2*iota_N*X2c*Y1c**2*curvature)/abs_G0_over_B0 - &
+          (iota_N*X20*Y1s**2*curvature)/abs_G0_over_B0 - (2*iota_N*X2c*Y1s**2*curvature)/abs_G0_over_B0 - &
+          (2*iota_N*X1c*Y1c*Y20*curvature)/abs_G0_over_B0 - (2*iota_N*X1c*Y1c*Y2c*curvature)/abs_G0_over_B0 - &
+          (6*iota_N*X1c*Y1s*Y2s*curvature)/abs_G0_over_B0 - 4*X2s*Z20*curvature + 4*X20*Z2s*curvature - &
+          X1c*Z3s1*curvature + 3*X1c*Z3s3*curvature - (iota_N*X1c**4*curvature**2)/(2*abs_G0_over_B0) - &
+          (iota_N*X1c**2*Y1c**2*curvature**2)/(2*abs_G0_over_B0) - (3*iota_N*X1c**2*Y1s**2*curvature**2)/(2*abs_G0_over_B0) + &
+          X1c**2*Z2s*curvature**2 + (I2*iota_N*X1c**4*torsion)/(2*Bbar*abs_G0_over_B0)   + (I2*iota_N*X1c**2*Y1c**2*torsion)/(Bbar*abs_G0_over_B0) + &
+          (I2*iota_N*Y1c**4*torsion)/(2*Bbar*abs_G0_over_B0) - (2*I2**2*X1c**3*Y1s*torsion)/Bbar**2  - (2*I2**2*X1c*Y1c**2*Y1s*torsion)/Bbar**2 + &
+          (2*I2**2*X1c*Y1s**3*torsion)/Bbar**2 - (I2*iota_N*Y1s**4*torsion)/(2*Bbar*abs_G0_over_B0) + &
+          8*X2s*Y20*torsion - 8*X20*Y2s*torsion   + &
+          (4*I2*Y1c*Y1s*Z20*torsion)/Bbar - (2*I2*X1c**2*Z2s*torsion)/Bbar - &
+          (2*I2*Y1c**2*Z2s*torsion)/Bbar + (8*iota_N*X1c*Y1s*Z2s*torsion)/abs_G0_over_B0 - &
+          (2*I2*Y1s**2*Z2s*torsion)/Bbar + 3*X1c*X2s*Y1c*curvature*torsion - &
+          3*X1c*X20*Y1s*curvature*torsion - 6*X1c*X2c*Y1s*curvature*torsion - 3*X1c**2*Y2s*curvature*torsion - &
+          2*X1c**3*Y1s*curvature**2*torsion + (2*I2*X1c**3*Y1s*torsion**2)/Bbar + &
+          (2*I2*X1c*Y1c**2*Y1s*torsion**2)/Bbar - (2*I2*X1c*Y1s**3*torsion**2)/Bbar   - &
+          (I2*iota_N*X1c**2*Y1c*d_X1c_d_zeta)/(2*Bbar*abs_G0_over_B0**2) - &
+          (I2*iota_N*Y1c**3*d_X1c_d_zeta)/(2*Bbar*abs_G0_over_B0**2) + &
+          (2*I2**2*X1c*Y1c*Y1s*d_X1c_d_zeta)/(Bbar**2*abs_G0_over_B0) - &
+          (3*I2*iota_N*Y1c*Y1s**2*d_X1c_d_zeta)/(2*Bbar*abs_G0_over_B0**2) - &
+          (2*I2*Y1s*Z20*d_X1c_d_zeta)/(Bbar*abs_G0_over_B0) + &
+          (2*iota_N*X1c*Z2c*d_X1c_d_zeta)/abs_G0_over_B0**2 - &
+          (4*I2*Y1s*Z2c*d_X1c_d_zeta)/(Bbar*abs_G0_over_B0) + &
+          (2*I2*Y1c*Z2s*d_X1c_d_zeta)/(Bbar*abs_G0_over_B0) - &
+          (X1c*X2s*curvature*d_X1c_d_zeta)/abs_G0_over_B0 - &
+          (3*I2*X1c*Y1c*Y1s*torsion*d_X1c_d_zeta)/(Bbar*abs_G0_over_B0) + &
+          (I2*X1c*Y1s*d_X1c_d_zeta**2)/(2*Bbar*abs_G0_over_B0**2) - &
+          (4*X2s*d_X20_d_zeta)/abs_G0_over_B0 + (4*X20*d_X2s_d_zeta)/abs_G0_over_B0 + &
+          (X1c**2*curvature*d_X2s_d_zeta)/abs_G0_over_B0   + (I2*iota_N*X1c**3*d_Y1c_d_zeta)/(2*Bbar*abs_G0_over_B0**2) + &
+          (I2*iota_N*X1c*Y1c**2*d_Y1c_d_zeta)/(2*Bbar*abs_G0_over_B0**2) - &
+          (2*I2**2*X1c**2*Y1s*d_Y1c_d_zeta)/(Bbar**2*abs_G0_over_B0) + &
+          (3*I2*iota_N*X1c*Y1s**2*d_Y1c_d_zeta)/(2*Bbar*abs_G0_over_B0**2)   + &
+          (2*iota_N*Y1c*Z2c*d_Y1c_d_zeta)/abs_G0_over_B0**2 - &
+          (2*I2*X1c*Z2s*d_Y1c_d_zeta)/(Bbar*abs_G0_over_B0) + &
+          (4*iota_N*Y1s*Z2s*d_Y1c_d_zeta)/abs_G0_over_B0**2 + &
+          (X2s*Y1c*curvature*d_Y1c_d_zeta)/abs_G0_over_B0 - (X20*Y1s*curvature*d_Y1c_d_zeta)/abs_G0_over_B0 - &
+          (2*X2c*Y1s*curvature*d_Y1c_d_zeta)/abs_G0_over_B0 - &
+          (2*X1c*Y2s*curvature*d_Y1c_d_zeta)/abs_G0_over_B0 - &
+          (3*X1c**2*Y1s*curvature**2*d_Y1c_d_zeta)/(2*abs_G0_over_B0) + &
+          (7*I2*X1c**2*Y1s*torsion*d_Y1c_d_zeta)/(2*Bbar*abs_G0_over_B0) + &
+          (I2*Y1c**2*Y1s*torsion*d_Y1c_d_zeta)/(2*Bbar*abs_G0_over_B0) - &
+          (I2*Y1s**3*torsion*d_Y1c_d_zeta)/(2*Bbar*abs_G0_over_B0) - &
+          (I2*Y1c*Y1s*d_X1c_d_zeta*d_Y1c_d_zeta)/(Bbar*abs_G0_over_B0**2) + &
+          (3*I2*X1c*Y1s*d_Y1c_d_zeta**2)/(2*Bbar*abs_G0_over_B0**2)   + &
+          (2*I2*X1c*Z20*d_Y1s_d_zeta)/(Bbar*abs_G0_over_B0) - &
+          (4*I2*X1c*Z2c*d_Y1s_d_zeta)/(Bbar*abs_G0_over_B0) + &
+          (2*iota_N*Y1s*Z2c*d_Y1s_d_zeta)/abs_G0_over_B0**2 - &
+          (4*iota_N*Y1c*Z2s*d_Y1s_d_zeta)/abs_G0_over_B0**2 - &
+          (X20*Y1c*curvature*d_Y1s_d_zeta)/abs_G0_over_B0 + (2*X2c*Y1c*curvature*d_Y1s_d_zeta)/abs_G0_over_B0 + &
+          (X2s*Y1s*curvature*d_Y1s_d_zeta)/abs_G0_over_B0 + (2*X1c*Y20*curvature*d_Y1s_d_zeta)/abs_G0_over_B0 + &
+          (X1c**2*Y1c*curvature**2*d_Y1s_d_zeta)/(2*abs_G0_over_B0) - &
+          (I2*X1c**2*Y1c*torsion*d_Y1s_d_zeta)/(2*Bbar*abs_G0_over_B0) - &
+          (I2*Y1c**3*torsion*d_Y1s_d_zeta)/(2*Bbar*abs_G0_over_B0) + &
+          (I2*Y1c*Y1s**2*torsion*d_Y1s_d_zeta)/(2*Bbar*abs_G0_over_B0) - &
+          (I2*X1c**2*d_X1c_d_zeta*d_Y1s_d_zeta)/(2*Bbar*abs_G0_over_B0**2) + &
+          (I2*Y1c**2*d_X1c_d_zeta*d_Y1s_d_zeta)/(2*Bbar*abs_G0_over_B0**2) + &
+          (I2*Y1s**2*d_X1c_d_zeta*d_Y1s_d_zeta)/(2*Bbar*abs_G0_over_B0**2) - &
+          (I2*X1c*Y1c*d_Y1c_d_zeta*d_Y1s_d_zeta)/(Bbar*abs_G0_over_B0**2) - &
+          (I2*X1c*Y1s*d_Y1s_d_zeta**2)/(2*Bbar*abs_G0_over_B0**2) - &
+          (4*Y2s*d_Y20_d_zeta)/abs_G0_over_B0 - (X1c*Y1s*curvature*d_Y20_d_zeta)/abs_G0_over_B0 - &
+          (2*X1c*Y1s*curvature*d_Y2c_d_zeta)/abs_G0_over_B0 + (4*Y20*d_Y2s_d_zeta)/abs_G0_over_B0 + &
+          (X1c*Y1c*curvature*d_Y2s_d_zeta)/abs_G0_over_B0     - (iota_N*X1c**2*d_Z20_d_zeta)/abs_G0_over_B0**2 - &
+          (iota_N*Y1c**2*d_Z20_d_zeta)/abs_G0_over_B0**2 + (iota_N*Y1s**2*d_Z20_d_zeta)/abs_G0_over_B0**2 + &
+          (Y1s*d_Y1c_d_zeta*d_Z20_d_zeta)/abs_G0_over_B0**2 + &
+          (Y1c*d_Y1s_d_zeta*d_Z20_d_zeta)/abs_G0_over_B0**2 + &
+          (2*iota_N*X1c**2*d_Z2c_d_zeta)/abs_G0_over_B0**2 + (2*iota_N*Y1c**2*d_Z2c_d_zeta)/abs_G0_over_B0**2 + &
+          (2*iota_N*Y1s**2*d_Z2c_d_zeta)/abs_G0_over_B0**2 + (4*X1c*Y1s*torsion*d_Z2c_d_zeta)/abs_G0_over_B0 + &
+          (2*Y1s*d_Y1c_d_zeta*d_Z2c_d_zeta)/abs_G0_over_B0**2 - &
+          (2*Y1c*d_Y1s_d_zeta*d_Z2c_d_zeta)/abs_G0_over_B0**2 - &
+          (X1c*d_X1c_d_zeta*d_Z2s_d_zeta)/abs_G0_over_B0**2 - &
+          (Y1c*d_Y1c_d_zeta*d_Z2s_d_zeta)/abs_G0_over_B0**2 - &
+          (Y1s*d_Y1s_d_zeta*d_Z2s_d_zeta)/abs_G0_over_B0**2)
+     matrix(index_mixedPartialsEquation_c,index_X3c1) = diag((4*I2*Y1s)/Bbar - 2*Y1s*torsion)
+     matrix(index_mixedPartialsEquation_c,index_X3c3) = diag(- (12*iota_N*X1c)/abs_G0_over_B0 + (12*I2*Y1s)/Bbar  - 6*Y1s*torsion)
+     matrix(index_mixedPartialsEquation_c,index_X3s1) = diag(- (X1c)/abs_G0_over_B0) * d_d_zeta + diag((4*I2*Y1c)/Bbar - 2*Y1c*torsion + (d_X1c_d_zeta)/abs_G0_over_B0)
+     matrix(index_mixedPartialsEquation_c,index_X3s3) = diag((3*X1c)/abs_G0_over_B0) * d_d_zeta + diag(-  (12*I2*Y1c)/Bbar + 6*Y1c*torsion - (3*d_X1c_d_zeta)/abs_G0_over_B0)
+     matrix(index_mixedPartialsEquation_c,index_Y3c1) = diag(- (Y1s)/abs_G0_over_B0) * d_d_zeta + diag((d_Y1s_d_zeta)/abs_G0_over_B0)
+     matrix(index_mixedPartialsEquation_c,index_Y3c3) = diag(- (3*Y1s)/abs_G0_over_B0) * d_d_zeta + diag(- (12*iota_N*Y1c)/abs_G0_over_B0 + (3*d_Y1s_d_zeta)/abs_G0_over_B0)
+     matrix(index_mixedPartialsEquation_c,index_Y3s1) = diag(- (Y1c)/abs_G0_over_B0) * d_d_zeta * diag(- (4*I2*X1c)/Bbar + 2*X1c*torsion + (d_Y1c_d_zeta)/abs_G0_over_B0)
+     matrix(index_mixedPartialsEquation_c,index_Y3s3) = diag((3*Y1c)/abs_G0_over_B0) * d_d_zeta + diag((12*I2*X1c)/Bbar - (12*iota_N*Y1s)/abs_G0_over_B0 - 6*X1c*torsion - (3*d_Y1c_d_zeta)/abs_G0_over_B0)
+     matrix(index_mixedPartialsEquation_c,index_iota2) = (X1c**2/abs_G0_over_B0 + Y1c**2/abs_G0_over_B0 - Y1s**2/abs_G0_over_B0)
+     
+     ! cos(0 theta) part of the mixed-partials equation:
+     right_hand_side(index_mixedPartialsEquation_0:(index_mixedPartialsEquation_0+N_phi-1)) = -((-8*iota_N*X2c**2)/abs_G0_over_B0 - (8*iota_N*X2s**2)/abs_G0_over_B0   + (4*I4*X1c*Y1s)/Bbar    - (16*I2*X2s*Y2c)/Bbar - &
+          (8*iota_N*Y2c**2)/abs_G0_over_B0 + (16*I2*X2c*Y2s)/Bbar - (8*iota_N*Y2s**2)/abs_G0_over_B0    + &
+          (4*iota_N**2*Y1c*Y1s*Z2c)/abs_G0_over_B0**2 - (2*iota_N**2*X1c**2*Z2s)/abs_G0_over_B0**2 - &
+          (2*iota_N**2*Y1c**2*Z2s)/abs_G0_over_B0**2 + (2*iota_N**2*Y1s**2*Z2s)/abs_G0_over_B0**2 - &
+          (2*iota_N*X1c**2*X20*curvature)/abs_G0_over_B0 - (3*iota_N*X1c**2*X2c*curvature)/abs_G0_over_B0 - &
+          (2*iota_N*X20*Y1c**2*curvature)/abs_G0_over_B0 + (iota_N*X2c*Y1c**2*curvature)/abs_G0_over_B0 + &
+          (2*iota_N*X2s*Y1c*Y1s*curvature)/abs_G0_over_B0 - (2*iota_N*X20*Y1s**2*curvature)/abs_G0_over_B0 - &
+          (iota_N*X2c*Y1s**2*curvature)/abs_G0_over_B0 - (4*iota_N*X1c*Y1c*Y2c*curvature)/abs_G0_over_B0 - &
+          (4*iota_N*X1c*Y1s*Y2s*curvature)/abs_G0_over_B0 - 4*X2s*Z2c*curvature + 4*X2c*Z2s*curvature + &
+          2*X1c*Z3s1*curvature - (iota_N*X1c**4*curvature**2)/(2*abs_G0_over_B0) - &
+          (iota_N*X1c**2*Y1c**2*curvature**2)/(2*abs_G0_over_B0) - (3*iota_N*X1c**2*Y1s**2*curvature**2)/(2*abs_G0_over_B0) + &
+          X1c**2*Z2s*curvature**2 + (I2*iota_N*X1c**4*torsion)/(2*Bbar*abs_G0_over_B0)  + &
+          (I2*iota_N*X1c**2*Y1c**2*torsion)/(Bbar*abs_G0_over_B0) + (I2*iota_N*Y1c**4*torsion)/(2*Bbar*abs_G0_over_B0) - &
+          (2*I2**2*X1c**3*Y1s*torsion)/Bbar**2  - &
+          (2*I2**2*X1c*Y1c**2*Y1s*torsion)/Bbar**2 + (3*I2*iota_N*X1c**2*Y1s**2*torsion)/(Bbar*abs_G0_over_B0) + &
+          (I2*iota_N*Y1c**2*Y1s**2*torsion)/(Bbar*abs_G0_over_B0) - (2*I2**2*X1c*Y1s**3*torsion)/Bbar**2 + &
+          (I2*iota_N*Y1s**4*torsion)/(2*Bbar*abs_G0_over_B0) + 8*X2s*Y2c*torsion - 8*X2c*Y2s*torsion  + (4*I2*Y1c*Y1s*Z2c*torsion)/Bbar - (2*I2*X1c**2*Z2s*torsion)/Bbar - &
+          (2*I2*Y1c**2*Z2s*torsion)/Bbar + (2*I2*Y1s**2*Z2s*torsion)/Bbar + &
+          3*X1c*X2s*Y1c*curvature*torsion - 6*X1c*X20*Y1s*curvature*torsion - &
+          3*X1c*X2c*Y1s*curvature*torsion - 3*X1c**2*Y2s*curvature*torsion - 2*X1c**3*Y1s*curvature**2*torsion + &
+          (2*I2*X1c**3*Y1s*torsion**2)/Bbar + (2*I2*X1c*Y1c**2*Y1s*torsion**2)/Bbar + &
+          (2*I2*X1c*Y1s**3*torsion**2)/Bbar  - &
+          (I2*iota_N*X1c**2*Y1c*d_X1c_d_zeta)/(2*Bbar*abs_G0_over_B0**2) - &
+          (I2*iota_N*Y1c**3*d_X1c_d_zeta)/(2*Bbar*abs_G0_over_B0**2) + &
+          (2*I2**2*X1c*Y1c*Y1s*d_X1c_d_zeta)/(Bbar**2*abs_G0_over_B0) - &
+          (I2*iota_N*Y1c*Y1s**2*d_X1c_d_zeta)/(2*Bbar*abs_G0_over_B0**2) - &
+          (4*I2*Y1s*Z20*d_X1c_d_zeta)/(Bbar*abs_G0_over_B0) + &
+          (2*iota_N*X1c*Z2c*d_X1c_d_zeta)/abs_G0_over_B0**2 - &
+          (2*I2*Y1s*Z2c*d_X1c_d_zeta)/(Bbar*abs_G0_over_B0) + &
+          (2*I2*Y1c*Z2s*d_X1c_d_zeta)/(Bbar*abs_G0_over_B0) - &
+          (X1c*X2s*curvature*d_X1c_d_zeta)/abs_G0_over_B0 - &
+          (3*I2*X1c*Y1c*Y1s*torsion*d_X1c_d_zeta)/(Bbar*abs_G0_over_B0) + &
+          (I2*X1c*Y1s*d_X1c_d_zeta**2)/(2*Bbar*abs_G0_over_B0**2) - &
+          (4*X2s*d_X2c_d_zeta)/abs_G0_over_B0 + (4*X2c*d_X2s_d_zeta)/abs_G0_over_B0 + &
+          (X1c**2*curvature*d_X2s_d_zeta)/abs_G0_over_B0  + &
+          (I2*iota_N*X1c**3*d_Y1c_d_zeta)/(2*Bbar*abs_G0_over_B0**2) + &
+          (I2*iota_N*X1c*Y1c**2*d_Y1c_d_zeta)/(2*Bbar*abs_G0_over_B0**2) - &
+          (2*I2**2*X1c**2*Y1s*d_Y1c_d_zeta)/(Bbar**2*abs_G0_over_B0) + &
+          (3*I2*iota_N*X1c*Y1s**2*d_Y1c_d_zeta)/(2*Bbar*abs_G0_over_B0**2)  + (2*iota_N*Y1c*Z2c*d_Y1c_d_zeta)/abs_G0_over_B0**2 - &
+          (2*I2*X1c*Z2s*d_Y1c_d_zeta)/(Bbar*abs_G0_over_B0) + &
+          (2*iota_N*Y1s*Z2s*d_Y1c_d_zeta)/abs_G0_over_B0**2 + &
+          (X2s*Y1c*curvature*d_Y1c_d_zeta)/abs_G0_over_B0 - (2*X20*Y1s*curvature*d_Y1c_d_zeta)/abs_G0_over_B0 - &
+          (X2c*Y1s*curvature*d_Y1c_d_zeta)/abs_G0_over_B0 - (2*X1c*Y2s*curvature*d_Y1c_d_zeta)/abs_G0_over_B0 - &
+          (3*X1c**2*Y1s*curvature**2*d_Y1c_d_zeta)/(2*abs_G0_over_B0) + &
+          (7*I2*X1c**2*Y1s*torsion*d_Y1c_d_zeta)/(2*Bbar*abs_G0_over_B0) + &
+          (I2*Y1c**2*Y1s*torsion*d_Y1c_d_zeta)/(2*Bbar*abs_G0_over_B0) + &
+          (I2*Y1s**3*torsion*d_Y1c_d_zeta)/(2*Bbar*abs_G0_over_B0) - &
+          (I2*Y1c*Y1s*d_X1c_d_zeta*d_Y1c_d_zeta)/(Bbar*abs_G0_over_B0**2) + &
+          (3*I2*X1c*Y1s*d_Y1c_d_zeta**2)/(2*Bbar*abs_G0_over_B0**2) - &
+          (I2*iota_N*X1c*Y1c*Y1s*d_Y1s_d_zeta)/(Bbar*abs_G0_over_B0**2)  - (4*I2*X1c*Z20*d_Y1s_d_zeta)/(Bbar*abs_G0_over_B0) + &
+          (2*I2*X1c*Z2c*d_Y1s_d_zeta)/(Bbar*abs_G0_over_B0) - &
+          (2*iota_N*Y1s*Z2c*d_Y1s_d_zeta)/abs_G0_over_B0**2 + &
+          (2*iota_N*Y1c*Z2s*d_Y1s_d_zeta)/abs_G0_over_B0**2 + &
+          (2*X20*Y1c*curvature*d_Y1s_d_zeta)/abs_G0_over_B0 - (X2c*Y1c*curvature*d_Y1s_d_zeta)/abs_G0_over_B0 - &
+          (X2s*Y1s*curvature*d_Y1s_d_zeta)/abs_G0_over_B0 + (2*X1c*Y2c*curvature*d_Y1s_d_zeta)/abs_G0_over_B0 + &
+          (X1c**2*Y1c*curvature**2*d_Y1s_d_zeta)/(2*abs_G0_over_B0) - &
+          (I2*X1c**2*Y1c*torsion*d_Y1s_d_zeta)/(2*Bbar*abs_G0_over_B0) - &
+          (I2*Y1c**3*torsion*d_Y1s_d_zeta)/(2*Bbar*abs_G0_over_B0) - &
+          (I2*Y1c*Y1s**2*torsion*d_Y1s_d_zeta)/(2*Bbar*abs_G0_over_B0) - &
+          (I2*X1c**2*d_X1c_d_zeta*d_Y1s_d_zeta)/(2*Bbar*abs_G0_over_B0**2) + &
+          (I2*Y1c**2*d_X1c_d_zeta*d_Y1s_d_zeta)/(2*Bbar*abs_G0_over_B0**2) - &
+          (I2*Y1s**2*d_X1c_d_zeta*d_Y1s_d_zeta)/(2*Bbar*abs_G0_over_B0**2) - &
+          (I2*X1c*Y1c*d_Y1c_d_zeta*d_Y1s_d_zeta)/(Bbar*abs_G0_over_B0**2) + &
+          (I2*X1c*Y1s*d_Y1s_d_zeta**2)/(2*Bbar*abs_G0_over_B0**2) - &
+          (2*X1c*Y1s*curvature*d_Y20_d_zeta)/abs_G0_over_B0 - (4*Y2s*d_Y2c_d_zeta)/abs_G0_over_B0 - &
+          (X1c*Y1s*curvature*d_Y2c_d_zeta)/abs_G0_over_B0 + (4*Y2c*d_Y2s_d_zeta)/abs_G0_over_B0 + &
+          (X1c*Y1c*curvature*d_Y2s_d_zeta)/abs_G0_over_B0   + (2*iota_N*X1c**2*d_Z20_d_zeta)/abs_G0_over_B0**2 + &
+          (2*iota_N*Y1c**2*d_Z20_d_zeta)/abs_G0_over_B0**2 + (2*iota_N*Y1s**2*d_Z20_d_zeta)/abs_G0_over_B0**2 + &
+          (4*X1c*Y1s*torsion*d_Z20_d_zeta)/abs_G0_over_B0 + &
+          (2*Y1s*d_Y1c_d_zeta*d_Z20_d_zeta)/abs_G0_over_B0**2 - &
+          (2*Y1c*d_Y1s_d_zeta*d_Z20_d_zeta)/abs_G0_over_B0**2 - &
+          (iota_N*X1c**2*d_Z2c_d_zeta)/abs_G0_over_B0**2 - (iota_N*Y1c**2*d_Z2c_d_zeta)/abs_G0_over_B0**2 + &
+          (iota_N*Y1s**2*d_Z2c_d_zeta)/abs_G0_over_B0**2 + &
+          (Y1s*d_Y1c_d_zeta*d_Z2c_d_zeta)/abs_G0_over_B0**2 + &
+          (Y1c*d_Y1s_d_zeta*d_Z2c_d_zeta)/abs_G0_over_B0**2 - &
+          (2*iota_N*Y1c*Y1s*d_Z2s_d_zeta)/abs_G0_over_B0**2 - &
+          (X1c*d_X1c_d_zeta*d_Z2s_d_zeta)/abs_G0_over_B0**2 - &
+          (Y1c*d_Y1c_d_zeta*d_Z2s_d_zeta)/abs_G0_over_B0**2 + &
+          (Y1s*d_Y1s_d_zeta*d_Z2s_d_zeta)/abs_G0_over_B0**2)
+     matrix(index_mixedPartialsEquation_0,index_X3c1) = diag(- (4*iota_N*X1c)/abs_G0_over_B0 - 4*Y1s*torsion + (8*I2*Y1s)/Bbar)
+     matrix(index_mixedPartialsEquation_0,index_X3s1) = diag((2*X1c)/abs_G0_over_B0) * d_d_zeta + diag(- (8*I2*Y1c)/Bbar + 4*Y1c*torsion - (2*d_X1c_d_zeta)/abs_G0_over_B0)
+     matrix(index_mixedPartialsEquation_0,index_Y3c1) = diag(- (2*Y1s)/abs_G0_over_B0) * d_d_zeta + diag(- (4*iota_N*Y1c)/abs_G0_over_B0 + (2*d_Y1s_d_zeta)/abs_G0_over_B0)
+     matrix(index_mixedPartialsEquation_0,index_Y3s1) = diag(+ (2*Y1c)/abs_G0_over_B0) * d_d_zeta + diag( (8*I2*X1c)/Bbar - (4*iota_N*Y1s)/abs_G0_over_B0 - 4*X1c*torsion - (2*d_Y1c_d_zeta)/abs_G0_over_B0)
+     matrix(index_mixedPartialsEquation_0,index_iota2) = ((-2*X1c**2)/abs_G0_over_B0 - (2*Y1c**2)/abs_G0_over_B0 - (2*Y1s**2)/abs_G0_over_B0)
+     
+     
+     ! Lots more here
+
+
+
+     ! Now that we have X3, compute B3.
+
+     B3s1 = -(B0**3*((-3*G0**2*B1c*B2s)/B0**4 + 2*iota_N**2*X1c*X2s - 2*iota_N**2*Y1s*Y2c + &
+            2*iota_N**2*Y1c*Y2s - 2*abs_G0_over_B0*iota_N*Z3c1 - 2*abs_G0_over_B0**2*X3s1*curvature - &
+            2*abs_G0_over_B0*iota_N*X1c*Z20*curvature + 3*abs_G0_over_B0*iota_N*X1c*Z2c*curvature + abs_G0_over_B0**2*X1c*X2s*curvature**2 - &
+            2*abs_G0_over_B0*iota_N*X20*Y1c*torsion + 3*abs_G0_over_B0*iota_N*X2c*Y1c*torsion + 3*abs_G0_over_B0*iota_N*X2s*Y1s*torsion + &
+            2*abs_G0_over_B0*iota_N*X1c*Y20*torsion - 3*abs_G0_over_B0*iota_N*X1c*Y2c*torsion - &
+            2*abs_G0_over_B0**2*Y1s*Z20*curvature*torsion + abs_G0_over_B0**2*Y1s*Z2c*curvature*torsion - &
+            abs_G0_over_B0**2*Y1c*Z2s*curvature*torsion + abs_G0_over_B0**2*X1c*X2s*torsion**2 + &
+            2*abs_G0_over_B0**2*Y1s*Y20*torsion**2 - abs_G0_over_B0**2*Y1s*Y2c*torsion**2 + abs_G0_over_B0**2*Y1c*Y2s*torsion**2 - &
+            2*iota_N*X2c*d_X1c_d_zeta + abs_G0_over_B0*Z2s*curvature*d_X1c_d_zeta - &
+            abs_G0_over_B0*Y2s*torsion*d_X1c_d_zeta - 2*iota_N*X1c*d_X20_d_zeta - &
+            2*abs_G0_over_B0*Y1s*torsion*d_X20_d_zeta + iota_N*X1c*d_X2c_d_zeta + &
+            abs_G0_over_B0*Y1s*torsion*d_X2c_d_zeta - abs_G0_over_B0*Y1c*torsion*d_X2s_d_zeta + &
+            d_X1c_d_zeta*d_X2s_d_zeta - 2*iota_N*Y2c*d_Y1c_d_zeta + &
+            abs_G0_over_B0*X2s*torsion*d_Y1c_d_zeta - 2*iota_N*Y2s*d_Y1s_d_zeta + &
+            2*abs_G0_over_B0*X20*torsion*d_Y1s_d_zeta - abs_G0_over_B0*X2c*torsion*d_Y1s_d_zeta - &
+            2*iota_N*Y1c*d_Y20_d_zeta + 2*d_Y1s_d_zeta*d_Y20_d_zeta + &
+            iota_N*Y1c*d_Y2c_d_zeta - d_Y1s_d_zeta*d_Y2c_d_zeta + &
+            iota_N*Y1s*d_Y2s_d_zeta + abs_G0_over_B0*X1c*torsion*d_Y2s_d_zeta + &
+            d_Y1c_d_zeta*d_Y2s_d_zeta - abs_G0_over_B0*X1c*curvature*d_Z2s_d_zeta + &
+            2*abs_G0_over_B0*d_Z3s1_d_zeta))/(2*G0**2)
+
+     B3c1 = -(B0**3*((4*G0*G2*B1c)/B0**3 + (4*G0*I2*NN*B1c)/B0**3 + (4*G0*I2*iota_N*B1c)/B0**3 + &
+            (3*G0**2*B1c**3)/B0**5 - (6*G0**2*B1c*B20)/B0**4 - (3*G0**2*B1c*B2c)/B0**4 + &
+            2*iota_N**2*X1c*X2c + 2*iota_N**2*Y1c*Y2c + 2*iota_N**2*Y1s*Y2s + 2*abs_G0_over_B0*iota_N*Z3s1 - &
+            2*abs_G0_over_B0**2*X3c1*curvature - 3*abs_G0_over_B0*iota_N*X1c*Z2s*curvature + 2*abs_G0_over_B0**2*X1c*X20*curvature**2 + &
+            abs_G0_over_B0**2*X1c*X2c*curvature**2 - 3*abs_G0_over_B0*iota_N*X2s*Y1c*torsion + 2*abs_G0_over_B0*iota_N*X20*Y1s*torsion + &
+            3*abs_G0_over_B0*iota_N*X2c*Y1s*torsion + 3*abs_G0_over_B0*iota_N*X1c*Y2s*torsion - &
+            2*abs_G0_over_B0**2*Y1c*Z20*curvature*torsion - abs_G0_over_B0**2*Y1c*Z2c*curvature*torsion - &
+            abs_G0_over_B0**2*Y1s*Z2s*curvature*torsion + 2*abs_G0_over_B0**2*X1c*X20*torsion**2 + &
+            abs_G0_over_B0**2*X1c*X2c*torsion**2 + 2*abs_G0_over_B0**2*Y1c*Y20*torsion**2 + abs_G0_over_B0**2*Y1c*Y2c*torsion**2 + &
+            abs_G0_over_B0**2*Y1s*Y2s*torsion**2 + 2*iota_N*X2s*d_X1c_d_zeta + &
+            2*abs_G0_over_B0*Z20*curvature*d_X1c_d_zeta + abs_G0_over_B0*Z2c*curvature*d_X1c_d_zeta - &
+            2*abs_G0_over_B0*Y20*torsion*d_X1c_d_zeta - abs_G0_over_B0*Y2c*torsion*d_X1c_d_zeta - &
+            2*abs_G0_over_B0*Y1c*torsion*d_X20_d_zeta + 2*d_X1c_d_zeta*d_X20_d_zeta - &
+            abs_G0_over_B0*Y1c*torsion*d_X2c_d_zeta + d_X1c_d_zeta*d_X2c_d_zeta - &
+            iota_N*X1c*d_X2s_d_zeta - abs_G0_over_B0*Y1s*torsion*d_X2s_d_zeta + &
+            2*iota_N*Y2s*d_Y1c_d_zeta + 2*abs_G0_over_B0*X20*torsion*d_Y1c_d_zeta + &
+            abs_G0_over_B0*X2c*torsion*d_Y1c_d_zeta - 2*iota_N*Y2c*d_Y1s_d_zeta + &
+            abs_G0_over_B0*X2s*torsion*d_Y1s_d_zeta + 2*iota_N*Y1s*d_Y20_d_zeta + &
+            2*abs_G0_over_B0*X1c*torsion*d_Y20_d_zeta + 2*d_Y1c_d_zeta*d_Y20_d_zeta + &
+            iota_N*Y1s*d_Y2c_d_zeta + abs_G0_over_B0*X1c*torsion*d_Y2c_d_zeta + &
+            d_Y1c_d_zeta*d_Y2c_d_zeta - iota_N*Y1c*d_Y2s_d_zeta + &
+            d_Y1s_d_zeta*d_Y2s_d_zeta - 2*abs_G0_over_B0*X1c*curvature*d_Z20_d_zeta - &
+            abs_G0_over_B0*X1c*curvature*d_Z2c_d_zeta + 2*abs_G0_over_B0*d_Z3c1_d_zeta))/(2*G0**2)
+
+     B3s3 = -(B0**3*((-3*G0**2*B1c*B2s)/B0**4 - 2*iota_N**2*X1c*X2s - 2*iota_N**2*Y1s*Y2c - &
+            2*iota_N**2*Y1c*Y2s - 6*abs_G0_over_B0*iota_N*Z3c3 - 2*abs_G0_over_B0**2*X3s3*curvature + &
+            abs_G0_over_B0*iota_N*X1c*Z2c*curvature + abs_G0_over_B0**2*X1c*X2s*curvature**2 + abs_G0_over_B0*iota_N*X2c*Y1c*torsion - &
+            abs_G0_over_B0*iota_N*X2s*Y1s*torsion - abs_G0_over_B0*iota_N*X1c*Y2c*torsion - abs_G0_over_B0**2*Y1s*Z2c*curvature*torsion - &
+            abs_G0_over_B0**2*Y1c*Z2s*curvature*torsion + abs_G0_over_B0**2*X1c*X2s*torsion**2 + abs_G0_over_B0**2*Y1s*Y2c*torsion**2 + &
+            abs_G0_over_B0**2*Y1c*Y2s*torsion**2 - 2*iota_N*X2c*d_X1c_d_zeta + &
+            abs_G0_over_B0*Z2s*curvature*d_X1c_d_zeta - abs_G0_over_B0*Y2s*torsion*d_X1c_d_zeta - &
+            iota_N*X1c*d_X2c_d_zeta - abs_G0_over_B0*Y1s*torsion*d_X2c_d_zeta - &
+            abs_G0_over_B0*Y1c*torsion*d_X2s_d_zeta + d_X1c_d_zeta*d_X2s_d_zeta - &
+            2*iota_N*Y2c*d_Y1c_d_zeta + abs_G0_over_B0*X2s*torsion*d_Y1c_d_zeta + &
+            2*iota_N*Y2s*d_Y1s_d_zeta + abs_G0_over_B0*X2c*torsion*d_Y1s_d_zeta - &
+            iota_N*Y1c*d_Y2c_d_zeta + d_Y1s_d_zeta*d_Y2c_d_zeta + &
+            iota_N*Y1s*d_Y2s_d_zeta + abs_G0_over_B0*X1c*torsion*d_Y2s_d_zeta + &
+            d_Y1c_d_zeta*d_Y2s_d_zeta - abs_G0_over_B0*X1c*curvature*d_Z2s_d_zeta + &
+            2*abs_G0_over_B0*d_Z3s3_d_zeta))/(2*G0**2)
+
+     B3c3 = -(B0**3*((G0**2*B1c**3)/B0**5 - (3*G0**2*B1c*B2c)/B0**4 - 2*iota_N**2*X1c*X2c - &
+            2*iota_N**2*Y1c*Y2c + 2*iota_N**2*Y1s*Y2s + 6*abs_G0_over_B0*iota_N*Z3s3 - 2*abs_G0_over_B0**2*X3c3*curvature - &
+            abs_G0_over_B0*iota_N*X1c*Z2s*curvature + abs_G0_over_B0**2*X1c*X2c*curvature**2 - abs_G0_over_B0*iota_N*X2s*Y1c*torsion - &
+            abs_G0_over_B0*iota_N*X2c*Y1s*torsion + abs_G0_over_B0*iota_N*X1c*Y2s*torsion - abs_G0_over_B0**2*Y1c*Z2c*curvature*torsion + &
+            abs_G0_over_B0**2*Y1s*Z2s*curvature*torsion + abs_G0_over_B0**2*X1c*X2c*torsion**2 + abs_G0_over_B0**2*Y1c*Y2c*torsion**2 - &
+            abs_G0_over_B0**2*Y1s*Y2s*torsion**2 + 2*iota_N*X2s*d_X1c_d_zeta + &
+            abs_G0_over_B0*Z2c*curvature*d_X1c_d_zeta - abs_G0_over_B0*Y2c*torsion*d_X1c_d_zeta - &
+            abs_G0_over_B0*Y1c*torsion*d_X2c_d_zeta + d_X1c_d_zeta*d_X2c_d_zeta + &
+            iota_N*X1c*d_X2s_d_zeta + abs_G0_over_B0*Y1s*torsion*d_X2s_d_zeta + &
+            2*iota_N*Y2s*d_Y1c_d_zeta + abs_G0_over_B0*X2c*torsion*d_Y1c_d_zeta + &
+            2*iota_N*Y2c*d_Y1s_d_zeta - abs_G0_over_B0*X2s*torsion*d_Y1s_d_zeta + &
+            iota_N*Y1s*d_Y2c_d_zeta + abs_G0_over_B0*X1c*torsion*d_Y2c_d_zeta + &
+            d_Y1c_d_zeta*d_Y2c_d_zeta + iota_N*Y1c*d_Y2s_d_zeta - &
+            d_Y1s_d_zeta*d_Y2s_d_zeta - abs_G0_over_B0*X1c*curvature*d_Z2c_d_zeta + &
+            2*abs_G0_over_B0*d_Z3c3_d_zeta))/(2*G0**2)
 
   end if
+
+  if(allocated(d_X20_d_zeta)) deallocate(d_X20_d_zeta)
+  if(allocated(d_X2s_d_zeta)) deallocate(d_X2s_d_zeta)
+  if(allocated(d_X2c_d_zeta)) deallocate(d_X2c_d_zeta)
+  if(allocated(d_Y20_d_zeta)) deallocate(d_Y20_d_zeta)
+  if(allocated(d_Y2s_d_zeta)) deallocate(d_Y2s_d_zeta)
+  if(allocated(d_Y2c_d_zeta)) deallocate(d_Y2c_d_zeta)
+  if(allocated(d_Z20_d_zeta)) deallocate(d_Z20_d_zeta)
+  if(allocated(d_Z2s_d_zeta)) deallocate(d_Z2s_d_zeta)
+  if(allocated(d_Z2c_d_zeta)) deallocate(d_Z2c_d_zeta)
 
 end subroutine quasisymmetry_higher_order_in_r

@@ -50,6 +50,8 @@ order_r_option = order_r_option.strip()
 print "order_r_option:",order_r_option
 order_r_squared = (order_r_option != 'r1')
 print "order_r_squared:",order_r_squared
+order_r_cubed = (order_r_option != 'r1' and order_r_option != 'r2')
+print "order_r_cubed:",order_r_cubed
 
 if order_r_squared:
     B2s = f.variables['B2s'][()]
@@ -66,6 +68,23 @@ if order_r_squared:
     Z2s = f.variables['Z2s'][()]
     Z2c = f.variables['Z2c'][()]
     
+if order_r_cubed:
+    X3s1 = f.variables['X3s1'][()]
+    X3c1 = f.variables['X3c1'][()]
+    X3s3 = f.variables['X3s3'][()]
+    X3c3 = f.variables['X3c3'][()]
+    Y3s1 = f.variables['Y3s1'][()]
+    Y3c1 = f.variables['Y3c1'][()]
+    Y3s3 = f.variables['Y3s3'][()]
+    Y3c3 = f.variables['Y3c3'][()]
+    Z3s1 = f.variables['Z3s1'][()]
+    Z3c1 = f.variables['Z3c1'][()]
+    Z3s3 = f.variables['Z3s3'][()]
+    Z3c3 = f.variables['Z3c3'][()]
+    B3s1 = f.variables['B3s1'][()]
+    B3c1 = f.variables['B3c1'][()]
+    B3s3 = f.variables['B3s3'][()]
+    B3c3 = f.variables['B3c3'][()]
 
 f.close()
 
@@ -99,7 +118,10 @@ import matplotlib.pyplot as plt
 fig = plt.figure(figsize=(16,7))
 fig.patch.set_facecolor('white')
 
-if order_r_squared:
+if order_r_cubed:
+    numRows = 4
+    numCols = 6
+elif order_r_squared:
     numRows = 4
     numCols = 5
 else:
@@ -233,6 +255,119 @@ if order_r_squared:
     plotNum += 1
     plt.plot(phi,B20)
     plt.title('B20')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
+
+if order_r_cubed:
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,X3s1)
+    plt.title('X3s1')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
+
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,X3c1)
+    plt.title('X3c1')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
+
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,X3s3)
+    plt.title('X3s3')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
+
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,X3c3)
+    plt.title('X3c3')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
+
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,Y3s1)
+    plt.title('Y3s1')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
+
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,Y3c1)
+    plt.title('Y3c1')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
+
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,Y3s3)
+    plt.title('Y3s3')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
+
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,Y3c3)
+    plt.title('Y3c3')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
+
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,Z3s1)
+    plt.title('Z3s1')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
+
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,Z3c1)
+    plt.title('Z3c1')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
+
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,Z3s3)
+    plt.title('Z3s3')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
+
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,Z3c3)
+    plt.title('Z3c3')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
+
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,B3s1)
+    plt.title('B3s1')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
+
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,B3c1)
+    plt.title('B3c1')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
+
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,B3s3)
+    plt.title('B3s3')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
+
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,B3c3)
+    plt.title('B3c3')
     plt.xlabel('$\phi$')
     plt.xlim(my_xlim)
 

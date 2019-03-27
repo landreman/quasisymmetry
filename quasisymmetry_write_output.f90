@@ -63,7 +63,10 @@ subroutine quasisymmetry_write_output
        vn_B2c = "B2c", &
        vn_p2 = "p2", &
        vn_B20_mean = "B20_mean", &
-       vn_B20_residual = "B20_residual"
+       vn_B20_residual = "B20_residual", &
+       vn_B3s3_input = "B3s3_input", &
+       vn_B3c3_input = "B3c3_input", &
+       vn_Y3c1_initial = "Y3c1_initial"
 
   ! Arrays with dimension 1
   character(len=*), parameter :: &
@@ -160,6 +163,10 @@ subroutine quasisymmetry_write_output
        vn_Z3s3 = "Z3s3", &
        vn_Z3c1 = "Z3c1", &
        vn_Z3c3 = "Z3c3", &
+       vn_B3s1 = "B3s1", &
+       vn_B3s3 = "B3s3", &
+       vn_B3c1 = "B3c1", &
+       vn_B3c3 = "B3c3", &
        vn_X3s1_untwisted = "X3s1_untwisted", &
        vn_X3s3_untwisted = "X3s3_untwisted", &
        vn_X3c1_untwisted = "X3c1_untwisted", &
@@ -286,6 +293,15 @@ subroutine quasisymmetry_write_output
         call cdf_define(ncid, vn_B20_mean, B20_mean)
         call cdf_define(ncid, vn_B20_residual, B20_residual)
      end if
+     if (trim(order_r_option) == order_r_option_B3) then
+        call cdf_define(ncid, vn_B3c3_input, B3c3_input)
+        call cdf_define(ncid, vn_B3s3_input, B3s3_input)
+     end if
+     if (trim(order_r_option)==order_r_option_B3 .or. trim(order_r_option)==order_r_option_X3s3_X3c3 &
+          .or. trim(order_r_option)==order_r_option_X3s3_Y3s3 trim(order_r_option)==order_r_option_X3c3_Y3c3 &
+          .or. trim(order_r_option)==order_r_option_Y3s3_Y3c3) then
+        call cdf_define(ncid, vn_Y3c1_initial, Y3c1_initial)
+     end if
   case (general_option_scan)
      call cdf_define(ncid, vn_sigma_initial_min, sigma_initial_min)
      call cdf_define(ncid, vn_sigma_initial_max, sigma_initial_max)
@@ -395,6 +411,14 @@ subroutine quasisymmetry_write_output
         call cdf_define(ncid, vn_z3c1_cylindrical, z3c1_cylindrical, dimname=N_phi_dim)
         call cdf_define(ncid, vn_z3c3_cylindrical, z3c3_cylindrical, dimname=N_phi_dim)
      end if
+     if (trim(order_r_option)==order_r_option_B3 .or. trim(order_r_option)==order_r_option_X3s3_X3c3 &
+          .or. trim(order_r_option)==order_r_option_X3s3_Y3s3 trim(order_r_option)==order_r_option_X3c3_Y3c3 &
+          .or. trim(order_r_option)==order_r_option_Y3s3_Y3c3) then
+        call cdf_define(ncid, vn_B3s1, B3s1, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_B3c1, B3c1, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_B3s3, B3s3, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_B3c3, B3c3, dimname=N_phi_dim)
+     end if
   case (general_option_scan)
      call cdf_define(ncid, vn_iotas, iotas, dimname=N_scan_dim)
      call cdf_define(ncid, vn_max_elongations, max_elongations, dimname=N_scan_dim)
@@ -495,6 +519,15 @@ subroutine quasisymmetry_write_output
         call cdf_write(ncid, vn_p2, p2)
         call cdf_write(ncid, vn_B20_mean, B20_mean)
         call cdf_write(ncid, vn_B20_residual, B20_residual)
+     end if
+     if (trim(order_r_option) == order_r_option_B3) then
+        call cdf_write(ncid, vn_B3c3_input, B3c3_input)
+        call cdf_write(ncid, vn_B3s3_input, B3s3_input)
+     end if
+     if (trim(order_r_option)==order_r_option_B3 .or. trim(order_r_option)==order_r_option_X3s3_X3c3 &
+          .or. trim(order_r_option)==order_r_option_X3s3_Y3s3 trim(order_r_option)==order_r_option_X3c3_Y3c3 &
+          .or. trim(order_r_option)==order_r_option_Y3s3_Y3c3) then
+        call cdf_write(ncid, vn_Y3c1_initial, Y3c1_initial)
      end if
   case (general_option_scan)
      call cdf_write(ncid, vn_sigma_initial_min, sigma_initial_min)
@@ -604,6 +637,14 @@ subroutine quasisymmetry_write_output
         call cdf_write(ncid, vn_z3s3_cylindrical, z3s3_cylindrical)
         call cdf_write(ncid, vn_z3c1_cylindrical, z3c1_cylindrical)
         call cdf_write(ncid, vn_z3c3_cylindrical, z3c3_cylindrical)
+     end if
+     if (trim(order_r_option)==order_r_option_B3 .or. trim(order_r_option)==order_r_option_X3s3_X3c3 &
+          .or. trim(order_r_option)==order_r_option_X3s3_Y3s3 trim(order_r_option)==order_r_option_X3c3_Y3c3 &
+          .or. trim(order_r_option)==order_r_option_Y3s3_Y3c3) then
+        call cdf_write(ncid, vn_B3s1, B3s1)
+        call cdf_write(ncid, vn_B3c1, B3c1)
+        call cdf_write(ncid, vn_B3s3, B3s3)
+        call cdf_write(ncid, vn_B3c3, B3c3)
      end if
   case (general_option_scan)
      call cdf_write(ncid, vn_iotas, iotas)
