@@ -85,9 +85,9 @@ subroutine quasisymmetry_validate_input
   case (order_r_option_r3_flux_constraint)
   case (order_r_option_r3_B3)
   case (order_r_option_r3_X3s3_X3c3)
-  case (order_r_option_r3_X3s3_Y3s3)
-  case (order_r_option_r3_X3c3_Y3c3)
-  case (order_r_option_r3_Y3s3_Y3c3)
+  !case (order_r_option_r3_X3s3_Y3s3)
+  !case (order_r_option_r3_X3c3_Y3c3)
+  !case (order_r_option_r3_Y3s3_Y3c3)
   case default
      print *,"Error! Invalid order_r_option:",order_r_option
      stop
