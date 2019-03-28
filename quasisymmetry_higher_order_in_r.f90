@@ -21,6 +21,7 @@ subroutine quasisymmetry_higher_order_in_r
   real(dp), dimension(:), allocatable :: d_Y20_d_zeta, d_Y2s_d_zeta, d_Y2c_d_zeta
   real(dp), dimension(:), allocatable :: d_Z20_d_zeta, d_Z2s_d_zeta, d_Z2c_d_zeta, d_X3c3_d_zeta, d_X3s3_d_zeta
   real(dp), dimension(:), allocatable :: d_X3c1_d_zeta, d_X3s1_d_zeta, d_Y3c1_d_zeta, d_Y3s1_d_zeta, d_Y3c3_d_zeta, d_Y3s3_d_zeta
+  real(dp), dimension(:), allocatable :: d_Z3c1_d_zeta, d_Z3s1_d_zeta, d_Z3c3_d_zeta, d_Z3s3_d_zeta
   real(dp), dimension(:), allocatable :: flux_constraint_coefficient
   integer :: N_helicity
   integer :: vector_size, index_mixedPartialsEquation_0, index_mixedPartialsEquation_s, index_mixedPartialsEquation_c
@@ -404,7 +405,9 @@ subroutine quasisymmetry_higher_order_in_r
   deallocate(fYs_from_X20, fYs_from_Y20, fYs_inhomogeneous)
   deallocate(fYc_from_X20, fYc_from_Y20, fYc_inhomogeneous)
 
+  print *,"AAA"
   if (trim(order_r_option) == order_r_option_r2) return
+  print *,"BBB"
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Beginning of O(r^3) calculation
@@ -496,7 +499,7 @@ subroutine quasisymmetry_higher_order_in_r
   G0 = sign_G * abs_G0_over_B0 * B0
   Bbar = sign_psi * B0
   G2 = -mu0 * p2 * G0 / (B0 * B0) - iota * I2
-
+  print *,"DDD"
   if (trim(order_r_option) == order_r_option_r3_flux_constraint) then
      X3s1 = 0
      X3s3 = 0
@@ -539,7 +542,7 @@ subroutine quasisymmetry_higher_order_in_r
 
      deallocate(flux_constraint_coefficient)
   end if
-
+  print *,"FFF"
   if (trim(order_r_option) == order_r_option_r3_simplified .or. trim(order_r_option) == order_r_option_r3_simplified_with_Z3) then
      X3s1 = 0
      X3s3 = 0
@@ -574,7 +577,7 @@ subroutine quasisymmetry_higher_order_in_r
           - 4 * B0 * abs_G0_over_B0 * sign_psi * X2c * curvature + abs_G0_over_B0 * I2 * X1c**2 * torsion + abs_G0_over_B0 * I2 * Y1c**2 * torsion - &
           3 * abs_G0_over_B0 * I2 * Y1s**2 * torsion - I2 * Y1c * d_X1c_d_zeta + I2 * X1c * d_Y1c_d_zeta - 2 * B0 * sign_psi * d_Z20_d_zeta + 4 * B0 * sign_psi * d_Z2c_d_zeta)
   end if
-
+  print *,"HHH"
   if (trim(order_r_option) == order_r_option_r3_simplified_with_Z3 &
        .or. trim(order_r_option) == order_r_option_r3_B3 &
        .or. trim(order_r_option) == order_r_option_r3_X3s3_X3c3 &
@@ -634,18 +637,25 @@ subroutine quasisymmetry_higher_order_in_r
           2*Y1c*d_Y2c_d_zeta + 2*Y1s*d_Y2s_d_zeta)/(12*abs_G0_over_B0)
 
   end if
-
+  print *,"JJJ"
   if (trim(order_r_option) == order_r_option_r3_B3 &
        .or. trim(order_r_option) == order_r_option_r3_X3s3_X3c3 &
        .or. trim(order_r_option) == order_r_option_r3_X3s3_Y3s3 &
        .or. trim(order_r_option) == order_r_option_r3_X3c3_Y3c3 &
        .or. trim(order_r_option) == order_r_option_r3_Y3s3_Y3c3) then
+
+     allocate(d_X3c3_d_zeta(N_phi))
+     allocate(d_X3s3_d_zeta(N_phi))
+     allocate(d_Z3c1_d_zeta(N_phi))
+     allocate(d_Z3s1_d_zeta(N_phi))
+     allocate(d_Z3c3_d_zeta(N_phi))
+     allocate(d_Z3s3_d_zeta(N_phi))
      d_Z3c1_d_zeta = matmul(d_d_zeta,Z3c1)
      d_Z3s1_d_zeta = matmul(d_d_zeta,Z3s1)
      d_Z3c3_d_zeta = matmul(d_d_zeta,Z3c3)
      d_Z3s3_d_zeta = matmul(d_d_zeta,Z3s3)
   end if
-
+  print *,"LLL"
   if (trim(order_r_option) == order_r_option_r3_B3) then
      ! Compute X3s3 and X3c3 from B3s3 and B3c3
  
@@ -683,13 +693,13 @@ subroutine quasisymmetry_higher_order_in_r
 
      d_X3s3_d_zeta = matmul(d_d_zeta, X3s3)
      d_X3c3_d_zeta = matmul(d_d_zeta, X3c3)
-  else
+  elseif (trim(order_r_option) == order_r_option_r3_X3s3_X3c3) then
      X3c3 = 0
      X3s3 = 0
      d_X3s3_d_zeta = 0
      d_X3c3_d_zeta = 0
   end if
-
+  print *,"NNN"
   if (trim(order_r_option) == order_r_option_r3_B3 &
        .or. trim(order_r_option) == order_r_option_r3_X3s3_X3c3 &
        .or. trim(order_r_option) == order_r_option_r3_X3s3_Y3s3 &
@@ -778,7 +788,7 @@ subroutine quasisymmetry_higher_order_in_r
      end do
 
      ! cos(0 theta) part of the XY equation:
-     right_hand_side(index_XYEquation_0:(index_XYEquation_0+N_phi-1)) = -((Bbar*abs_G0_over_B0*G2)/(G0*G0) + (Bbar*abs_G0_over_B0*I2*NN)/(G0*G0) - &
+     right_hand_side(index_XYEquation_0:(index_XYEquation_0+N_phi-1)) = -((Bbar*abs_G0_over_B0*G2)/(G0*G0) + (Bbar*abs_G0_over_B0*I2*N_helicity)/(G0*G0) - &
           4*X2s*Y2c + 4*X2c*Y2s + (Bbar*abs_G0_over_B0*X20*curvature)/G0 - &
           (abs_G0_over_B0*I2*X1c*X1c*torsion)/(2*G0) - (abs_G0_over_B0*I2*Y1c*Y1c*torsion)/(2*G0) - &
           (abs_G0_over_B0*I2*Y1s*Y1s*torsion)/(2*G0) + (I2*Y1c*d_X1c_d_zeta)/(2*G0) - &
@@ -1090,7 +1100,7 @@ subroutine quasisymmetry_higher_order_in_r
         matrix(index_mixedPartialsEquation_0+j-1,index_X3c1+j-1) = - (4*iota_N*X1c(j))/abs_G0_over_B0 - 4*Y1s(j)*torsion(j) + (8*I2*Y1s(j))/Bbar
         matrix(index_mixedPartialsEquation_0+j-1,index_X3s1+j-1) = - (8*I2*Y1c(j))/Bbar + 4*Y1c(j)*torsion(j) - (2*d_X1c_d_zeta(j))/abs_G0_over_B0
         matrix(index_mixedPartialsEquation_0+j-1,index_Y3c1+j-1) = - (4*iota_N*Y1c(j))/abs_G0_over_B0 + (2*d_Y1s_d_zeta(j))/abs_G0_over_B0
-        matrix(index_mixedPartialsEquation_0+j-1,index_Y3s1+j-1) = (8*I2*X1c(j))/Bbar - (4*iota_N*Y1s(j))/abs_G0_over_B0 - 4*X1c(j)*torsion(j) - (2*d_Y1c_d_zeta(j))/abs_G0_over_B0)
+        matrix(index_mixedPartialsEquation_0+j-1,index_Y3s1+j-1) = (8*I2*X1c(j))/Bbar - (4*iota_N*Y1s(j))/abs_G0_over_B0 - 4*X1c(j)*torsion(j) - (2*d_Y1c_d_zeta(j))/abs_G0_over_B0
      end do
 !!$     matrix(index_mixedPartialsEquation_0,index_X3c1) = diag(- (4*iota_N*X1c)/abs_G0_over_B0 - 4*Y1s*torsion + (8*I2*Y1s)/Bbar)
 !!$     matrix(index_mixedPartialsEquation_0,index_X3s1) = diag((2*X1c)/abs_G0_over_B0) * d_d_zeta + diag(- (8*I2*Y1c)/Bbar + 4*Y1c*torsion - (2*d_X1c_d_zeta)/abs_G0_over_B0)
@@ -1161,7 +1171,7 @@ subroutine quasisymmetry_higher_order_in_r
         if (max_eq1residual > 1e-8) stop "Residual is large !!!"
 
         ! cos(0*theta) component of the XY equation: 
-        eq1residual = (Bbar*abs_G0_over_B0*G2)/G0**2 + (Bbar*abs_G0_over_B0*I2*NN)/G0**2 - 2*X3s1*Y1c + 2*X3c1*Y1s - &
+        eq1residual = (Bbar*abs_G0_over_B0*G2)/G0**2 + (Bbar*abs_G0_over_B0*I2*N_helicity)/G0**2 - 2*X3s1*Y1c + 2*X3c1*Y1s - &
              4*X2s*Y2c + 4*X2c*Y2s + 2*X1c*Y3s1 + (Bbar*abs_G0_over_B0*X20*curvature)/G0 - &
              (abs_G0_over_B0*I2*X1c**2*torsion)/(2*G0) - (abs_G0_over_B0*I2*Y1c**2*torsion)/(2*G0) - &
              (abs_G0_over_B0*I2*Y1s**2*torsion)/(2*G0) + (I2*Y1c*d_X1c_d_zeta)/(2*G0) - &
@@ -1469,7 +1479,7 @@ subroutine quasisymmetry_higher_order_in_r
             d_Y1c_d_zeta*d_Y2s_d_zeta - abs_G0_over_B0*X1c*curvature*d_Z2s_d_zeta + &
             2*abs_G0_over_B0*d_Z3s1_d_zeta))/(2*G0**2)
 
-     B3c1 = -(B0**3*((4*G0*G2*B1c)/B0**3 + (4*G0*I2*NN*B1c)/B0**3 + (4*G0*I2*iota_N*B1c)/B0**3 + &
+     B3c1 = -(B0**3*((4*G0*G2*B1c)/B0**3 + (4*G0*I2*N_helicity*B1c)/B0**3 + (4*G0*I2*iota_N*B1c)/B0**3 + &
             (3*G0**2*B1c**3)/B0**5 - (6*G0**2*B1c*B20)/B0**4 - (3*G0**2*B1c*B2c)/B0**4 + &
             2*iota_N**2*X1c*X2c + 2*iota_N**2*Y1c*Y2c + 2*iota_N**2*Y1s*Y2s + 2*abs_G0_over_B0*iota_N*Z3s1 - &
             2*abs_G0_over_B0**2*X3c1*curvature - 3*abs_G0_over_B0*iota_N*X1c*Z2s*curvature + 2*abs_G0_over_B0**2*X1c*X20*curvature**2 + &
@@ -1525,8 +1535,10 @@ subroutine quasisymmetry_higher_order_in_r
             d_Y1s_d_zeta*d_Y2s_d_zeta - abs_G0_over_B0*X1c*curvature*d_Z2c_d_zeta + &
             2*abs_G0_over_B0*d_Z3c3_d_zeta))/(2*G0**2)
 
+     deallocate(d_Z3s1_d_zeta, d_Z3c1_d_zeta, d_Z3s3_d_zeta, d_Z3c3_d_zeta)
+     deallocate(d_X3s3_d_zeta, d_X3c3_d_zeta)
   end if
-
+  print *,"QQQ"
   if(trim(order_r_option)==order_r_option_r3_B3) then
      ! Sanity test: we got back the B3 we requested:
 

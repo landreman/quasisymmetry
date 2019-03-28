@@ -293,13 +293,13 @@ subroutine quasisymmetry_write_output
         call cdf_define(ncid, vn_B20_mean, B20_mean)
         call cdf_define(ncid, vn_B20_residual, B20_residual)
      end if
-     if (trim(order_r_option) == order_r_option_B3) then
+     if (trim(order_r_option) == order_r_option_r3_B3) then
         call cdf_define(ncid, vn_B3c3_input, B3c3_input)
         call cdf_define(ncid, vn_B3s3_input, B3s3_input)
      end if
-     if (trim(order_r_option)==order_r_option_B3 .or. trim(order_r_option)==order_r_option_X3s3_X3c3 &
-          .or. trim(order_r_option)==order_r_option_X3s3_Y3s3 trim(order_r_option)==order_r_option_X3c3_Y3c3 &
-          .or. trim(order_r_option)==order_r_option_Y3s3_Y3c3) then
+     if (trim(order_r_option)==order_r_option_r3_B3 .or. trim(order_r_option)==order_r_option_r3_X3s3_X3c3 &
+          .or. trim(order_r_option)==order_r_option_r3_X3s3_Y3s3 .or. trim(order_r_option)==order_r_option_r3_X3c3_Y3c3 &
+          .or. trim(order_r_option)==order_r_option_r3_Y3s3_Y3c3) then
         call cdf_define(ncid, vn_Y3c1_initial, Y3c1_initial)
      end if
   case (general_option_scan)
@@ -411,9 +411,9 @@ subroutine quasisymmetry_write_output
         call cdf_define(ncid, vn_z3c1_cylindrical, z3c1_cylindrical, dimname=N_phi_dim)
         call cdf_define(ncid, vn_z3c3_cylindrical, z3c3_cylindrical, dimname=N_phi_dim)
      end if
-     if (trim(order_r_option)==order_r_option_B3 .or. trim(order_r_option)==order_r_option_X3s3_X3c3 &
-          .or. trim(order_r_option)==order_r_option_X3s3_Y3s3 trim(order_r_option)==order_r_option_X3c3_Y3c3 &
-          .or. trim(order_r_option)==order_r_option_Y3s3_Y3c3) then
+     if (trim(order_r_option)==order_r_option_r3_B3 .or. trim(order_r_option)==order_r_option_r3_X3s3_X3c3 &
+          .or. trim(order_r_option)==order_r_option_r3_X3s3_Y3s3 .or. trim(order_r_option)==order_r_option_r3_X3c3_Y3c3 &
+          .or. trim(order_r_option)==order_r_option_r3_Y3s3_Y3c3) then
         call cdf_define(ncid, vn_B3s1, B3s1, dimname=N_phi_dim)
         call cdf_define(ncid, vn_B3c1, B3c1, dimname=N_phi_dim)
         call cdf_define(ncid, vn_B3s3, B3s3, dimname=N_phi_dim)
@@ -520,13 +520,13 @@ subroutine quasisymmetry_write_output
         call cdf_write(ncid, vn_B20_mean, B20_mean)
         call cdf_write(ncid, vn_B20_residual, B20_residual)
      end if
-     if (trim(order_r_option) == order_r_option_B3) then
+     if (trim(order_r_option) == order_r_option_r3_B3) then
         call cdf_write(ncid, vn_B3c3_input, B3c3_input)
         call cdf_write(ncid, vn_B3s3_input, B3s3_input)
      end if
-     if (trim(order_r_option)==order_r_option_B3 .or. trim(order_r_option)==order_r_option_X3s3_X3c3 &
-          .or. trim(order_r_option)==order_r_option_X3s3_Y3s3 trim(order_r_option)==order_r_option_X3c3_Y3c3 &
-          .or. trim(order_r_option)==order_r_option_Y3s3_Y3c3) then
+     if (trim(order_r_option)==order_r_option_r3_B3 .or. trim(order_r_option)==order_r_option_r3_X3s3_X3c3 &
+          .or. trim(order_r_option)==order_r_option_r3_X3s3_Y3s3 .or. trim(order_r_option)==order_r_option_r3_X3c3_Y3c3 &
+          .or. trim(order_r_option)==order_r_option_r3_Y3s3_Y3c3) then
         call cdf_write(ncid, vn_Y3c1_initial, Y3c1_initial)
      end if
   case (general_option_scan)
@@ -638,9 +638,9 @@ subroutine quasisymmetry_write_output
         call cdf_write(ncid, vn_z3c1_cylindrical, z3c1_cylindrical)
         call cdf_write(ncid, vn_z3c3_cylindrical, z3c3_cylindrical)
      end if
-     if (trim(order_r_option)==order_r_option_B3 .or. trim(order_r_option)==order_r_option_X3s3_X3c3 &
-          .or. trim(order_r_option)==order_r_option_X3s3_Y3s3 trim(order_r_option)==order_r_option_X3c3_Y3c3 &
-          .or. trim(order_r_option)==order_r_option_Y3s3_Y3c3) then
+     if (trim(order_r_option)==order_r_option_r3_B3 .or. trim(order_r_option)==order_r_option_r3_X3s3_X3c3 &
+          .or. trim(order_r_option)==order_r_option_r3_X3s3_Y3s3 .or. trim(order_r_option)==order_r_option_r3_X3c3_Y3c3 &
+          .or. trim(order_r_option)==order_r_option_r3_Y3s3_Y3c3) then
         call cdf_write(ncid, vn_B3s1, B3s1)
         call cdf_write(ncid, vn_B3c1, B3c1)
         call cdf_write(ncid, vn_B3s3, B3s3)

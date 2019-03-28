@@ -119,8 +119,8 @@ fig = plt.figure(figsize=(16,7))
 fig.patch.set_facecolor('white')
 
 if order_r_cubed:
-    numRows = 4
-    numCols = 6
+    numRows = 5
+    numCols = 7
 elif order_r_squared:
     numRows = 4
     numCols = 5
@@ -183,7 +183,8 @@ plt.xlim(my_xlim)
 plt.subplot(numRows,numCols,plotNum)
 plotNum += 1
 plt.plot(phi,modBinv_sqrt_half_grad_B_colon_grad_B)
-plt.title('modBinv_sqrt_half_grad_B_colon_grad_B')
+#plt.title('modBinv_sqrt_half_grad_B_colon_grad_B')
+plt.title('Frobenius')
 plt.xlabel('$\phi$')
 plt.xlim(my_xlim)
 
