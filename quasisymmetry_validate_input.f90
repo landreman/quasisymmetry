@@ -83,6 +83,7 @@ subroutine quasisymmetry_validate_input
   case (order_r_option_r3_simplified)
   case (order_r_option_r3_simplified_with_Z3)
   case (order_r_option_r3_flux_constraint)
+  case (order_r_option_r3_flux_constraint_const_B20)
   case (order_r_option_r3_B3)
   case (order_r_option_r3_X3s3_X3c3)
   !case (order_r_option_r3_X3s3_Y3s3)

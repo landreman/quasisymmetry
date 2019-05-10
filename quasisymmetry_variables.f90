@@ -53,6 +53,7 @@ module quasisymmetry_variables
        order_r_option_r3_simplified = "r3_simplified", &
        order_r_option_r3_simplified_with_Z3 = "r3_simplified_with_Z3", &
        order_r_option_r3_flux_constraint = "r3_flux_constraint", &
+       order_r_option_r3_flux_constraint_const_B20 = "r3_flux_constraint_const_B20", &
        order_r_option_r3_B3 = "r3_B3", &
        order_r_option_r3_X3s3_X3c3 = "r3_X3s3_X3c3", &
        order_r_option_r3_X3s3_Y3s3 = "r3_X3s3_Y3s3", &
@@ -78,7 +79,7 @@ module quasisymmetry_variables
   integer :: N_phi_original
   integer :: max_N_phi = 500
 
-  integer, parameter :: max_axis_nmax = 20
+  integer, parameter :: max_axis_nmax = 100
   integer :: axis_nmax = 1
   real(dp), dimension(max_axis_nmax + 1) :: R0s, R0c, Z0s, Z0c ! Fourier coefficients for the magnetic axis
   real(dp) :: eta_bar
@@ -128,6 +129,7 @@ module quasisymmetry_variables
   logical :: untwist = .true.
   real(dp), dimension(:), allocatable :: modBinv_sqrt_half_grad_B_colon_grad_B
   real(dp) :: max_modBinv_sqrt_half_grad_B_colon_grad_B
+  real(dp), dimension(:), allocatable :: B0_order_a_squared_to_cancel
 
   real(dp), dimension(:), allocatable :: scan_eta_bar, scan_sigma_initial
   real(dp), dimension(:,:), allocatable :: scan_R0c, scan_R0s, scan_Z0c, scan_Z0s
@@ -155,6 +157,8 @@ module quasisymmetry_variables
   real(dp), dimension(:), allocatable :: X3s1_untwisted, X3s3_untwisted, X3c1_untwisted, X3c3_untwisted
   real(dp), dimension(:), allocatable :: Y3s1_untwisted, Y3s3_untwisted, Y3c1_untwisted, Y3c3_untwisted
   real(dp), dimension(:), allocatable :: Z3s1_untwisted, Z3s3_untwisted, Z3c1_untwisted, Z3c3_untwisted
+  real(dp) :: iota_from_torsion
+  logical :: circular_cross_section_surface = .false.
 
   integer :: N_procs, mpi_rank
   logical :: proc0, verbose = .true.
@@ -164,7 +168,8 @@ module quasisymmetry_variables
        R0s, R0c, Z0s, Z0c, eta_bar, sigma_initial, eta_bar_scan_option, sigma_initial_scan_option, Fourier_scan_option, consider_only_nfp, &
        R0s_min, R0s_max, R0s_N_scan, R0c_min, R0c_max, R0c_N_scan, Z0s_min, Z0s_max, Z0s_N_scan, Z0c_min, Z0c_max, Z0c_N_scan, &
        eta_bar_min, eta_bar_max, eta_bar_N_scan, sigma_initial_min, sigma_initial_max, sigma_initial_N_scan, max_max_curvature_to_keep, min_iota_to_keep, &
-       finite_r_option, order_r_option, B0, B2s, B2c, p2, untwist, max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep, B3s3_input, B3c3_input, Y3c1_initial
+       finite_r_option, order_r_option, B0, B2s, B2c, p2, untwist, max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep, B3s3_input, B3c3_input, Y3c1_initial, &
+       circular_cross_section_surface
 
 end module quasisymmetry_variables
 

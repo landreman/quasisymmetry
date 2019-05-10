@@ -81,10 +81,16 @@ if order_r_cubed:
     Z3c1 = f.variables['Z3c1'][()]
     Z3s3 = f.variables['Z3s3'][()]
     Z3c3 = f.variables['Z3c3'][()]
-    B3s1 = f.variables['B3s1'][()]
-    B3c1 = f.variables['B3c1'][()]
-    B3s3 = f.variables['B3s3'][()]
-    B3c3 = f.variables['B3c3'][()]
+    try:
+        B3s1 = f.variables['B3s1'][()]
+        B3c1 = f.variables['B3c1'][()]
+        B3s3 = f.variables['B3s3'][()]
+        B3c3 = f.variables['B3c3'][()]
+    except:
+        B3s1 = phi * 0
+        B3s3 = phi * 0
+        B3c1 = phi * 0
+        B3c3 = phi * 0
 
 f.close()
 

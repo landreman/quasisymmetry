@@ -237,64 +237,64 @@ subroutine quasisymmetry_higher_order_in_r
   right_hand_side(1:N_phi) = -(X1c * fXs_inhomogeneous - Y1s * fY0_inhomogeneous + Y1c * fYs_inhomogeneous - Y1s * fYc_inhomogeneous)
   right_hand_side((N_phi+1):(2*N_phi)) = -(- X1c * fX0_inhomogeneous + X1c * fXc_inhomogeneous - Y1c * fY0_inhomogeneous + Y1s * fYs_inhomogeneous + Y1c * fYc_inhomogeneous)
 
-  print *,"Here comes abs_G0_over_B0:",abs_G0_over_B0
-  print *,"Here comes X1c:"
-  print *,X1c
-  print *,"Here comes X1s:"
-  print *,X1s
-  print *,"Here comes Y1c:"
-  print *,Y1c
-  print *,"Here comes Y1s:"
-  print *,Y1s
-  print *,"Here comes torsion:"
-  print *,torsion
-
-  print *,"Here comes Z20:"
-  print *,Z20
-  print *,"Here comes Z2s:"
-  print *,Z2s
-  print *,"Here comes Z2c:"
-  print *,Z2c
-
-  print *,"Here comes qs:"
-  print *,qs
-  print *,"Here comes qc:"
-  print *,qc
-  print *,"Here comes rs:"
-  print *,rs
-  print *,"Here comes rc:"
-  print *,rc
-
-  print *,"Here comes X2c:"
-  print *,X2c
-  print *,"Here comes X2s:"
-  print *,X2s
-  print *,"Here comes Y2c_inhomogeneous:"
-  print *,Y2c_inhomogeneous
-  print *,"Here comes Y2s_inhomogeneous:"
-  print *,Y2s_inhomogeneous
-  print *," "
-  print *,"Here comes fX0_inhomogeneous:"
-  print *,fX0_inhomogeneous
-  print *,"Here comes fXs_inhomogeneous:"
-  print *,fXs_inhomogeneous
-  print *,"Here comes fXc_inhomogeneous:"
-  print *,fXc_inhomogeneous
-  print *,"Here comes fY0_inhomogeneous:"
-  print *,fY0_inhomogeneous
-  print *,"Here comes fYs_inhomogeneous:"
-  print *,fYs_inhomogeneous
-  print *,"Here comes fYc_inhomogeneous:"
-  print *,fYc_inhomogeneous
-
-  print *,"Here comes right_hand_side:"
-  print *,right_hand_side
-
-  open(unit=iunit,file="matrix.dat")
-  do j = 1, N_phi*2
-     write(iunit, "(*(es24.15))") matrix(j,:)
-  end do
-  close(iunit)
+!!$  print *,"Here comes abs_G0_over_B0:",abs_G0_over_B0
+!!$  print *,"Here comes X1c:"
+!!$  print *,X1c
+!!$  print *,"Here comes X1s:"
+!!$  print *,X1s
+!!$  print *,"Here comes Y1c:"
+!!$  print *,Y1c
+!!$  print *,"Here comes Y1s:"
+!!$  print *,Y1s
+!!$  print *,"Here comes torsion:"
+!!$  print *,torsion
+!!$
+!!$  print *,"Here comes Z20:"
+!!$  print *,Z20
+!!$  print *,"Here comes Z2s:"
+!!$  print *,Z2s
+!!$  print *,"Here comes Z2c:"
+!!$  print *,Z2c
+!!$
+!!$  print *,"Here comes qs:"
+!!$  print *,qs
+!!$  print *,"Here comes qc:"
+!!$  print *,qc
+!!$  print *,"Here comes rs:"
+!!$  print *,rs
+!!$  print *,"Here comes rc:"
+!!$  print *,rc
+!!$
+!!$  print *,"Here comes X2c:"
+!!$  print *,X2c
+!!$  print *,"Here comes X2s:"
+!!$  print *,X2s
+!!$  print *,"Here comes Y2c_inhomogeneous:"
+!!$  print *,Y2c_inhomogeneous
+!!$  print *,"Here comes Y2s_inhomogeneous:"
+!!$  print *,Y2s_inhomogeneous
+!!$  print *," "
+!!$  print *,"Here comes fX0_inhomogeneous:"
+!!$  print *,fX0_inhomogeneous
+!!$  print *,"Here comes fXs_inhomogeneous:"
+!!$  print *,fXs_inhomogeneous
+!!$  print *,"Here comes fXc_inhomogeneous:"
+!!$  print *,fXc_inhomogeneous
+!!$  print *,"Here comes fY0_inhomogeneous:"
+!!$  print *,fY0_inhomogeneous
+!!$  print *,"Here comes fYs_inhomogeneous:"
+!!$  print *,fYs_inhomogeneous
+!!$  print *,"Here comes fYc_inhomogeneous:"
+!!$  print *,fYc_inhomogeneous
+!!$
+!!$  print *,"Here comes right_hand_side:"
+!!$  print *,right_hand_side
+!!$
+!!$  open(unit=iunit,file="matrix.dat")
+!!$  do j = 1, N_phi*2
+!!$     write(iunit, "(*(es24.15))") matrix(j,:)
+!!$  end do
+!!$  close(iunit)
 
   ! We will use the LAPACK subroutine DGESV to solve a general (asymmetric) linear system
   ! solution = matrix \ right_hand_side
@@ -317,18 +317,19 @@ subroutine quasisymmetry_higher_order_in_r
   B20 = B0 * (curvature * X20 - B0_over_abs_G0 * matmul(d_d_zeta,Z20) + (0.5d+0) * eta_bar * eta_bar - mu0 * p2 / (B0 * B0) &
        - (0.25d+0) * B0_over_abs_G0 * B0_over_abs_G0 * (qc * qc + qs * qs + rc * rc + rs * rs))
 
-  print *,"Here comes X20:"
-  print *,X20
-  print *,"Here comes Y20:"
-  print *,Y20
-  print *,"Here comes Y2s:"
-  print *,Y2s
-  print *,"Here comes Y2c:"
-  print *,Y2c
-  print *,"Here comes B20:"
-  print *,B20
+!!$  print *,"Here comes X20:"
+!!$  print *,X20
+!!$  print *,"Here comes Y20:"
+!!$  print *,Y20
+!!$  print *,"Here comes Y2s:"
+!!$  print *,Y2s
+!!$  print *,"Here comes Y2c:"
+!!$  print *,Y2c
+!!$  print *,"Here comes B20:"
+!!$  print *,B20
 
-  if (.true.) then
+!  if (.true.) then
+  if (.false.) then
      ! For a sanity test, compute the residuals of two equations in a more direct way (now that X20 and Y20 are available explicitly) to make sure we get 0.
      allocate(fX0(N_phi))
      allocate(fXs(N_phi))
@@ -405,9 +406,27 @@ subroutine quasisymmetry_higher_order_in_r
   deallocate(fYs_from_X20, fYs_from_Y20, fYs_inhomogeneous)
   deallocate(fYc_from_X20, fYc_from_Y20, fYc_inhomogeneous)
 
-  print *,"AAA"
-  if (trim(order_r_option) == order_r_option_r2) return
-  print *,"BBB"
+  N_helicity = - axis_helicity*nfp
+  I2 = I2_over_B0 * B0
+  G0 = sign_G * abs_G0_over_B0 * B0
+  Bbar = sign_psi * B0
+  G2 = -mu0 * p2 * G0 / (B0 * B0) - iota * I2
+  allocate(d_Z20_d_zeta(N_phi))
+  d_Z20_d_zeta = matmul(d_d_zeta,Z20)
+  if (allocated(B0_order_a_squared_to_cancel)) deallocate(B0_order_a_squared_to_cancel)
+  allocate(B0_order_a_squared_to_cancel(N_phi))
+  B0_order_a_squared_to_cancel = -sign_G * B0 * B0 * (G2 + I2 * N_helicity) * abs_G0_over_B0 / (2*G0*G0) &
+       -sign_G * sign_psi * B0 * 2 * (X2c * Y2s - X2s * Y2c) &
+       -sign_G * B0 * B0 / (2*G0) * (abs_G0_over_B0 * X20 * curvature - d_Z20_d_zeta) &
+       -sign_G * sign_psi * B0 * I2 / (4*G0) * (-abs_G0_over_B0 * torsion * (X1c*X1c + Y1c*Y1c + Y1s*Y1s) + Y1c * d_X1c_d_zeta - X1c * d_Y1c_d_zeta)
+
+
+!  print *,"AAA"
+  if (trim(order_r_option) == order_r_option_r2) then
+     deallocate(d_Z20_d_zeta)
+     return
+  end if
+!  print *,"BBB"
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Beginning of O(r^3) calculation
@@ -487,20 +506,13 @@ subroutine quasisymmetry_higher_order_in_r
   allocate(Z3c3_untwisted(N_phi))
 
   ! Derivatives of Z20, Z2c, and Z2s are needed to compute (X3,Y3).
-  allocate(d_Z20_d_zeta(N_phi))
   allocate(d_Z2c_d_zeta(N_phi))
   allocate(d_Z2s_d_zeta(N_phi))
-  d_Z20_d_zeta = matmul(d_d_zeta,Z20)
   d_Z2c_d_zeta = matmul(d_d_zeta,Z2c)
   d_Z2s_d_zeta = matmul(d_d_zeta,Z2s)
 
-  N_helicity = - axis_helicity*nfp
-  I2 = I2_over_B0 * B0
-  G0 = sign_G * abs_G0_over_B0 * B0
-  Bbar = sign_psi * B0
-  G2 = -mu0 * p2 * G0 / (B0 * B0) - iota * I2
-  print *,"DDD"
-  if (trim(order_r_option) == order_r_option_r3_flux_constraint) then
+ ! print *,"DDD"
+  if (trim(order_r_option) == order_r_option_r3_flux_constraint .or. trim(order_r_option) == order_r_option_r3_flux_constraint_const_B20) then
      X3s1 = 0
      X3s3 = 0
      X3c3 = 0
@@ -536,13 +548,22 @@ subroutine quasisymmetry_higher_order_in_r
            B0**2*abs_G0_over_B0*I2*X1c*Y1s**3*torsion - B0**2*I2*X1c*Y1c*Y1s*d_X1c_d_zeta + &
            B0**2*I2*X1c**2*Y1s*d_Y1c_d_zeta)/(16*B0**2*G0*X1c**2*Y1s**2)
 
+!!$     print *,"flux_constraint_coefficient:"
+!!$     print *,flux_constraint_coefficient
+!!$     print *,"flux_constraint_coefficient - predicted_flux_constraint_coefficient:"
+!!$     print *,flux_constraint_coefficient - B0_order_a_squared_to_cancel/(2*B0)
+
+     if (trim(order_r_option) == order_r_option_r3_flux_constraint_const_B20) then
+        flux_constraint_coefficient = flux_constraint_coefficient + (B20 - B20_mean) / (2 * B0)
+     end if
+
      X3c1 = X1c * flux_constraint_coefficient
      Y3c1 = Y1c * flux_constraint_coefficient
      Y3s1 = Y1s * flux_constraint_coefficient
 
      deallocate(flux_constraint_coefficient)
   end if
-  print *,"FFF"
+!  print *,"FFF"
   if (trim(order_r_option) == order_r_option_r3_simplified .or. trim(order_r_option) == order_r_option_r3_simplified_with_Z3) then
      X3s1 = 0
      X3s3 = 0
@@ -577,7 +598,7 @@ subroutine quasisymmetry_higher_order_in_r
           - 4 * B0 * abs_G0_over_B0 * sign_psi * X2c * curvature + abs_G0_over_B0 * I2 * X1c**2 * torsion + abs_G0_over_B0 * I2 * Y1c**2 * torsion - &
           3 * abs_G0_over_B0 * I2 * Y1s**2 * torsion - I2 * Y1c * d_X1c_d_zeta + I2 * X1c * d_Y1c_d_zeta - 2 * B0 * sign_psi * d_Z20_d_zeta + 4 * B0 * sign_psi * d_Z2c_d_zeta)
   end if
-  print *,"HHH"
+ ! print *,"HHH"
   if (trim(order_r_option) == order_r_option_r3_simplified_with_Z3 &
        .or. trim(order_r_option) == order_r_option_r3_B3 &
        .or. trim(order_r_option) == order_r_option_r3_X3s3_X3c3 &
@@ -637,7 +658,7 @@ subroutine quasisymmetry_higher_order_in_r
           2*Y1c*d_Y2c_d_zeta + 2*Y1s*d_Y2s_d_zeta)/(12*abs_G0_over_B0)
 
   end if
-  print *,"JJJ"
+  !print *,"JJJ"
   if (trim(order_r_option) == order_r_option_r3_B3 &
        .or. trim(order_r_option) == order_r_option_r3_X3s3_X3c3 &
        .or. trim(order_r_option) == order_r_option_r3_X3s3_Y3s3 &
@@ -655,7 +676,7 @@ subroutine quasisymmetry_higher_order_in_r
      d_Z3c3_d_zeta = matmul(d_d_zeta,Z3c3)
      d_Z3s3_d_zeta = matmul(d_d_zeta,Z3s3)
   end if
-  print *,"LLL"
+  !print *,"LLL"
   if (trim(order_r_option) == order_r_option_r3_B3) then
      ! Compute X3s3 and X3c3 from B3s3 and B3c3
  
@@ -699,7 +720,7 @@ subroutine quasisymmetry_higher_order_in_r
      d_X3s3_d_zeta = 0
      d_X3c3_d_zeta = 0
   end if
-  print *,"NNN"
+  !print *,"NNN"
   if (trim(order_r_option) == order_r_option_r3_B3 &
        .or. trim(order_r_option) == order_r_option_r3_X3s3_X3c3 &
        .or. trim(order_r_option) == order_r_option_r3_X3s3_Y3s3 &
@@ -1538,7 +1559,7 @@ subroutine quasisymmetry_higher_order_in_r
      deallocate(d_Z3s1_d_zeta, d_Z3c1_d_zeta, d_Z3s3_d_zeta, d_Z3c3_d_zeta)
      deallocate(d_X3s3_d_zeta, d_X3c3_d_zeta)
   end if
-  print *,"QQQ"
+  !print *,"QQQ"
   if(trim(order_r_option)==order_r_option_r3_B3) then
      ! Sanity test: we got back the B3 we requested:
 

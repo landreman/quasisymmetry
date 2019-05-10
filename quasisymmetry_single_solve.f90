@@ -7,6 +7,9 @@ subroutine quasisymmetry_single_solve
   real(dp) :: x
   integer :: iteration, new_N_phi
   real(dp), dimension(:), allocatable :: angle, sinangle, cosangle
+  real :: solve_start_time, solve_end_time
+
+  if (verbose) call cpu_time(solve_start_time)
 
   iota_tolerance_achieved = .false.
   elongation_tolerance_achieved = .false.
@@ -121,6 +124,20 @@ subroutine quasisymmetry_single_solve
 
   if (trim(order_r_option) .ne. order_r_option_r1) call quasisymmetry_higher_order_in_r()
 
+  if (verbose) then
+     call cpu_time(solve_end_time)
+     print *,"Time to solve equations, without diagnostics:",solve_end_time-solve_start_time
+  end if
+
+  iota_from_torsion = sum(torsion * d_l_d_phi) * d_phi * nfp / (2 * pi) + axis_helicity * nfp
+  if (verbose) print *,"Iota expected from integrated torsion:",iota_from_torsion
+
+  if (circular_cross_section_surface) then
+     X1c = 1
+     Y1s = 1
+     Y1c = 0
+  end if
+
   ! If helicity is nonzero, then the original X1s/X1c/Y1s/Y1c variables are defined with respect to a "poloidal" angle that
   ! is actually helical, with the theta=0 curve wrapping around the magnetic axis as you follow phi around toroidally. Therefore
   ! here we convert to an untwisted poloidal angle, such that the theta=0 curve does not wrap around the axis.
@@ -208,5 +225,10 @@ subroutine quasisymmetry_single_solve
   call quasisymmetry_determine_B_helicity()
 
   call quasisymmetry_grad_B_tensor()
+
+  if (verbose) then
+     call cpu_time(solve_end_time)
+     print *,"Time to solve equations and compute diagnostics:",solve_end_time-solve_start_time
+  end if
 
 end subroutine quasisymmetry_single_solve

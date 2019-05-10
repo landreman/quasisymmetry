@@ -37,6 +37,7 @@ subroutine quasisymmetry_write_output
        vn_sigma_initial = "sigma_initial", &
        vn_I2_over_B0 = "I2_over_B0", &
        vn_iota = "iota", &
+       vn_iota_from_torsion = "iota_from_torsion", &
        vn_max_elongation = "max_elongation", &
        vn_rms_curvature = "rms_curvature", &
        vn_max_curvature = "max_curvature", &
@@ -186,7 +187,8 @@ subroutine quasisymmetry_write_output
        vn_z3s1_cylindrical = "z3s1_cylindrical", &
        vn_z3s3_cylindrical = "z3s3_cylindrical", &
        vn_z3c1_cylindrical = "z3c1_cylindrical", &
-       vn_z3c3_cylindrical = "z3c3_cylindrical"
+       vn_z3c3_cylindrical = "z3c3_cylindrical", &
+       vn_B0_order_a_squared_to_cancel = "B0_order_a_squared_to_cancel"
 
   ! Arrays with dimension 2
   character(len=*), parameter :: &
@@ -265,6 +267,7 @@ subroutine quasisymmetry_write_output
      call cdf_define(ncid, vn_sigma_initial, sigma_initial)
      call cdf_define(ncid, vn_I2_over_B0, I2_over_B0)
      call cdf_define(ncid, vn_iota, iota)
+     call cdf_define(ncid, vn_iota_from_torsion, iota_from_torsion)
      call cdf_define(ncid, vn_max_elongation, max_elongation)
      call cdf_define(ncid, vn_rms_curvature, rms_curvature)
      call cdf_define(ncid, vn_max_curvature, max_curvature)
@@ -375,6 +378,7 @@ subroutine quasisymmetry_write_output
         call cdf_define(ncid, vn_z20_cylindrical, z20_cylindrical, dimname=N_phi_dim)
         call cdf_define(ncid, vn_z2s_cylindrical, z2s_cylindrical, dimname=N_phi_dim)
         call cdf_define(ncid, vn_z2c_cylindrical, z2c_cylindrical, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_B0_order_a_squared_to_cancel, B0_order_a_squared_to_cancel, dimname=N_phi_dim)
      end if
      if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option).ne.order_r_option_r2) then
         ! O(r^3) quantities
@@ -492,6 +496,7 @@ subroutine quasisymmetry_write_output
      call cdf_write(ncid, vn_sigma_initial, sigma_initial)
      call cdf_write(ncid, vn_I2_over_B0, I2_over_B0)
      call cdf_write(ncid, vn_iota, iota)
+     call cdf_write(ncid, vn_iota_from_torsion, iota_from_torsion)
      call cdf_write(ncid, vn_max_elongation, max_elongation)
      call cdf_write(ncid, vn_rms_curvature, rms_curvature)
      call cdf_write(ncid, vn_max_curvature, max_curvature)
@@ -602,6 +607,7 @@ subroutine quasisymmetry_write_output
         call cdf_write(ncid, vn_z20_cylindrical, z20_cylindrical)
         call cdf_write(ncid, vn_z2s_cylindrical, z2s_cylindrical)
         call cdf_write(ncid, vn_z2c_cylindrical, z2c_cylindrical)
+        call cdf_write(ncid, vn_B0_order_a_squared_to_cancel, B0_order_a_squared_to_cancel)
      end if
      if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option).ne.order_r_option_r2) then
         ! O(r^3) quantities
