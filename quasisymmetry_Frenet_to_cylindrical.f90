@@ -261,7 +261,7 @@ contains
 
     !----------------------------------------------
 
-    N_theta = 20 ! Probably other values would work
+    N_theta = finite_r_nonlinear_N_theta
     N_phi_conversion = N_phi
     allocate(theta(N_theta))
     allocate(phi_conversion(N_phi_conversion))

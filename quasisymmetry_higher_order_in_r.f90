@@ -23,6 +23,7 @@ subroutine quasisymmetry_higher_order_in_r
   real(dp), dimension(:), allocatable :: d_X3c1_d_zeta, d_X3s1_d_zeta, d_Y3c1_d_zeta, d_Y3s1_d_zeta, d_Y3c3_d_zeta, d_Y3s3_d_zeta
   real(dp), dimension(:), allocatable :: d_Z3c1_d_zeta, d_Z3s1_d_zeta, d_Z3c3_d_zeta, d_Z3s3_d_zeta
   real(dp), dimension(:), allocatable :: flux_constraint_coefficient
+  real(dp), dimension(:), allocatable :: Q, predicted_flux_constraint_coefficient
   integer :: N_helicity
   integer :: vector_size, index_mixedPartialsEquation_0, index_mixedPartialsEquation_s, index_mixedPartialsEquation_c
   integer :: index_XYEquation_0, index_XYEquation_s, index_XYEquation_c, index_initialCondition
@@ -548,10 +549,24 @@ subroutine quasisymmetry_higher_order_in_r
            B0**2*abs_G0_over_B0*I2*X1c*Y1s**3*torsion - B0**2*I2*X1c*Y1c*Y1s*d_X1c_d_zeta + &
            B0**2*I2*X1c**2*Y1s*d_Y1c_d_zeta)/(16*B0**2*G0*X1c**2*Y1s**2)
 
+     if (.true.) then
+        ! Check equations from paper:
+        allocate(Q(N_phi))
+        allocate(predicted_flux_constraint_coefficient(N_phi))
+        
+        Q = sign_psi * B0 * abs_G0_over_B0 / (2*G0*G0) * (iota_N * I2 + mu0 * p2 * G0 / (B0 * B0)) + 2 * (X2c * Y2s - X2s * Y2c) &
+             + sign_psi * B0 / (2*G0) * (abs_G0_over_B0 * X20 * curvature - d_Z20_d_zeta) &
+             + I2 / (4 * G0) * (-abs_G0_over_B0 * torsion * (X1c*X1c + Y1s*Y1s + Y1c*Y1c) + Y1c * d_X1c_d_zeta - X1c * d_Y1c_d_zeta)
+        predicted_flux_constraint_coefficient = - Q / (2 * sign_G * sign_psi)
 !!$     print *,"flux_constraint_coefficient:"
 !!$     print *,flux_constraint_coefficient
-!!$     print *,"flux_constraint_coefficient - predicted_flux_constraint_coefficient:"
+        print *,"flux_constraint_coefficient - predicted_flux_constraint_coefficient:"
+        print *,flux_constraint_coefficient - predicted_flux_constraint_coefficient
+        
 !!$     print *,flux_constraint_coefficient - B0_order_a_squared_to_cancel/(2*B0)
+
+        deallocate(Q,predicted_flux_constraint_coefficient)
+     end if
 
      if (trim(order_r_option) == order_r_option_r3_flux_constraint_const_B20) then
         flux_constraint_coefficient = flux_constraint_coefficient + (B20 - B20_mean) / (2 * B0)

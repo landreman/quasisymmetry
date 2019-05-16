@@ -159,6 +159,7 @@ module quasisymmetry_variables
   real(dp), dimension(:), allocatable :: Z3s1_untwisted, Z3s3_untwisted, Z3c1_untwisted, Z3c3_untwisted
   real(dp) :: iota_from_torsion
   logical :: circular_cross_section_surface = .false.
+  integer :: finite_r_nonlinear_N_theta = 20
 
   integer :: N_procs, mpi_rank
   logical :: proc0, verbose = .true.
@@ -169,7 +170,7 @@ module quasisymmetry_variables
        R0s_min, R0s_max, R0s_N_scan, R0c_min, R0c_max, R0c_N_scan, Z0s_min, Z0s_max, Z0s_N_scan, Z0c_min, Z0c_max, Z0c_N_scan, &
        eta_bar_min, eta_bar_max, eta_bar_N_scan, sigma_initial_min, sigma_initial_max, sigma_initial_N_scan, max_max_curvature_to_keep, min_iota_to_keep, &
        finite_r_option, order_r_option, B0, B2s, B2c, p2, untwist, max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep, B3s3_input, B3c3_input, Y3c1_initial, &
-       circular_cross_section_surface
+       circular_cross_section_surface, finite_r_nonlinear_N_theta
 
 end module quasisymmetry_variables
 

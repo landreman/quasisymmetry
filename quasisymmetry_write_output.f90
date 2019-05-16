@@ -106,7 +106,7 @@ subroutine quasisymmetry_write_output
        vn_Z0c = "Z0c", &
        vn_Z0s = "Z0s", &
        vn_phi = "phi", &
-       vn_Boozer_toroidal_angle = "Boozer_toriodal_angle", &
+       vn_Boozer_toroidal_angle = "Boozer_toroidal_angle", &
        vn_R0 = "R0", &
        vn_z0 = "z0", &
        vn_curvature = "curvature", &
