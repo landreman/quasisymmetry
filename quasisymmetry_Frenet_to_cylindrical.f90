@@ -289,8 +289,10 @@ contains
        call new_periodic_spline(N_phi, phi, tangent_cylindrical(:,3), 2*pi/nfp, tangent_z_spline)
     end if
 
-    rootSolve_abserr = 1.0e-10_dp
-    rootSolve_relerr = 1.0e-10_dp
+!    rootSolve_abserr = 1.0e-10_dp
+!    rootSolve_relerr = 1.0e-10_dp
+    rootSolve_abserr = 1.0e-30_dp
+    rootSolve_relerr = 1.0e-30_dp
 
     do j_theta = 1, N_theta
        costheta = cos(theta(j_theta))

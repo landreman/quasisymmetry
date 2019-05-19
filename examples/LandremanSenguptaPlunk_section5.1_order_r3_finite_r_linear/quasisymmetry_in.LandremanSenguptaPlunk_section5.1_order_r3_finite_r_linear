@@ -27,7 +27,7 @@ r = 0.025d+0
  finite_r_option = 'linear'
  !finite_r_option = 'nonlinear'
 
- order_r_option = "r3_simplified"
+ order_r_option = "r3_flux_constraint"
 
  B2c = 6
  B0 = 1.0
