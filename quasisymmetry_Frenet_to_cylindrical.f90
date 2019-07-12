@@ -310,9 +310,9 @@ contains
              ! We need O(r^3) terms:
              cos3theta = cos(3*theta(j_theta))
              sin3theta = sin(3*theta(j_theta))
-             X_at_this_theta = X_at_this_theta + r*r*r*(X3c1*costheta + X3c3*cos3theta + X3s1*sintheta + X3s3*sin3theta)
-             Y_at_this_theta = Y_at_this_theta + r*r*r*(Y3c1*costheta + Y3c3*cos3theta + Y3s1*sintheta + Y3s3*sin3theta)
-             Z_at_this_theta = Z_at_this_theta + r*r*r*(Z3c1*costheta + Z3c3*cos3theta + Z3s1*sintheta + Z3s3*sin3theta)
+             X_at_this_theta = X_at_this_theta + r*r*r*(X3c1_untwisted*costheta + X3c3_untwisted*cos3theta + X3s1_untwisted*sintheta + X3s3_untwisted*sin3theta)
+             Y_at_this_theta = Y_at_this_theta + r*r*r*(Y3c1_untwisted*costheta + Y3c3_untwisted*cos3theta + Y3s1_untwisted*sintheta + Y3s3_untwisted*sin3theta)
+             Z_at_this_theta = Z_at_this_theta + r*r*r*(Z3c1_untwisted*costheta + Z3c3_untwisted*cos3theta + Z3s1_untwisted*sintheta + Z3s3_untwisted*sin3theta)
           end if
           call new_periodic_spline(N_phi, phi, Z_at_this_theta, 2*pi/nfp, Z_spline)
        end if

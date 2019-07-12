@@ -11,10 +11,14 @@ quasisymmetry_temp_files_directory = '/Users/mattland/quasisymmetry/matlab/';
 sign_G = 1;
 sign_psi = 1;
 
-
+%{
 nfp = 3;
 R0c1 = 0.045;
 Z0s1 = 0.045;
+R0c2 = 0.0;
+Z0s2 = 0.0;
+R0c3 = 0.0;
+Z0s3 = 0.0;
 eta_bar = 1;
 sigma = 0;
 I2 = 0;
@@ -22,6 +26,24 @@ minus_mu0_p2 = 0;
 B2c=0;
 B2s=0;
 r0 = 0.1;
+%}
+
+nfp = 3;
+R0c1 = 0.045;
+Z0s1 = 0.045;
+R0c2 = 0.0;
+Z0s2 = 0.0;
+R0c3 = 0.0;
+Z0s3 = 0.0;
+eta_bar = 1;
+sigma = 0;
+I2 = 0;
+minus_mu0_p2 = 0;
+B2c=0;
+B2s=0;
+r0 = 0.1;
+
+mu0 = 4*pi*(1e-7);
 
 X1c = 0;
 Y1s = 0;
@@ -37,7 +59,7 @@ Y2s = 0;
 Y2c = 0;
 
 Ntheta = 40;
-Nphi = 150;
+Nphi = 450;
 theta = linspace(0,2*pi,Ntheta);
 phi = linspace(0,2*pi,Nphi);
 [phi2D, theta2D] = meshgrid(phi,theta);
@@ -60,9 +82,10 @@ f = figure('Visible','off','Units','pixels','Position',[0,0,1600,800]);
 
 ax = axes('Units','pixels','Position',[300,32,950,600]);
 
-label_margin=25;
-margin = 45;
-height=615;
+%label_margin=25;
+label_margin=20;
+margin = 42;
+height=630;
 label_left = 30;
 label_width=200;
 text_left = 100;
@@ -84,17 +107,41 @@ text_nfp = uicontrol('Style','edit','Units','pixels','Position',[text_left,heigh
 
 height = height - margin;
 %slider_R0c1 = uicontrol('Style','slider','Min',0.1,'Max',2,'Value',R0c1,'Units','pixels','Position',[30,height,200,20],'Callback',@slider_R0c1_callback);
-slider_R0c1 = uicontrol('Style','slider','Min',-0.3,'Max',0.3,'Value',R0c1,'Units','pixels','Position',[30,height,200,20]);
+slider_R0c1 = uicontrol('Style','slider','Min',-0.8,'Max',0.8,'Value',R0c1,'Units','pixels','Position',[30,height,200,20]);
 addlistener(slider_R0c1,'Value',eventName,@slider_R0c1_callback);
 label_R0c1 = uicontrol('Style','text','Units','pixels','Position',[label_left,height+label_margin,label_width,20],'String','R0c1','horizontalalignment','left');
 text_R0c1 = uicontrol('Style','edit','Units','pixels','Position',[text_left,height+label_margin,text_width,20],'Callback',@text_R0c1_callback);
 
 height = height - margin;
 %slider_Z0s1 = uicontrol('Style','slider','Min',0.1,'Max',3,'Value',Z0s1,'Units','pixels','Position',[30,height,200,20],'Callback',@slider_Z0s1_callback);
-slider_Z0s1 = uicontrol('Style','slider','Min',-0.3,'Max',0.3,'Value',Z0s1,'Units','pixels','Position',[30,height,200,20]);
+slider_Z0s1 = uicontrol('Style','slider','Min',-0.8,'Max',0.8,'Value',Z0s1,'Units','pixels','Position',[30,height,200,20]);
 addlistener(slider_Z0s1,'Value',eventName,@slider_Z0s1_callback);
 label_Z0s1 = uicontrol('Style','text','Units','pixels','Position',[label_left,height+label_margin,label_width,20],'String','Z0s1','horizontalalignment','left');
 text_Z0s1 = uicontrol('Style','edit','Units','pixels','Position',[text_left,height+label_margin,text_width,20],'Callback',@text_Z0s1_callback);
+
+height = height - margin;
+slider_R0c2 = uicontrol('Style','slider','Min',-0.06,'Max',0.06,'Value',R0c2,'Units','pixels','Position',[30,height,200,20]);
+addlistener(slider_R0c2,'Value',eventName,@slider_R0c2_callback);
+label_R0c2 = uicontrol('Style','text','Units','pixels','Position',[label_left,height+label_margin,label_width,20],'String','R0c2','horizontalalignment','left');
+text_R0c2 = uicontrol('Style','edit','Units','pixels','Position',[text_left,height+label_margin,text_width,20],'Callback',@text_R0c2_callback);
+
+height = height - margin;
+slider_Z0s2 = uicontrol('Style','slider','Min',-0.06,'Max',0.06,'Value',Z0s2,'Units','pixels','Position',[30,height,200,20]);
+addlistener(slider_Z0s2,'Value',eventName,@slider_Z0s2_callback);
+label_Z0s2 = uicontrol('Style','text','Units','pixels','Position',[label_left,height+label_margin,label_width,20],'String','Z0s2','horizontalalignment','left');
+text_Z0s2 = uicontrol('Style','edit','Units','pixels','Position',[text_left,height+label_margin,text_width,20],'Callback',@text_Z0s2_callback);
+
+height = height - margin;
+slider_R0c3 = uicontrol('Style','slider','Min',-0.06,'Max',0.06,'Value',R0c3,'Units','pixels','Position',[30,height,200,20]);
+addlistener(slider_R0c3,'Value',eventName,@slider_R0c3_callback);
+label_R0c3 = uicontrol('Style','text','Units','pixels','Position',[label_left,height+label_margin,label_width,20],'String','R0c3','horizontalalignment','left');
+text_R0c3 = uicontrol('Style','edit','Units','pixels','Position',[text_left,height+label_margin,text_width,20],'Callback',@text_R0c3_callback);
+
+height = height - margin;
+slider_Z0s3 = uicontrol('Style','slider','Min',-0.06,'Max',0.06,'Value',Z0s3,'Units','pixels','Position',[30,height,200,20]);
+addlistener(slider_Z0s3,'Value',eventName,@slider_Z0s3_callback);
+label_Z0s3 = uicontrol('Style','text','Units','pixels','Position',[label_left,height+label_margin,label_width,20],'String','Z0s3','horizontalalignment','left');
+text_Z0s3 = uicontrol('Style','edit','Units','pixels','Position',[text_left,height+label_margin,text_width,20],'Callback',@text_Z0s3_callback);
 
 height = height - margin;
 %slider_eta_bar = uicontrol('Style','slider','Min',0.1,'Max',3,'Value',eta_bar,'Units','pixels','Position',[30,height,200,20],'Callback',@slider_eta_bar_callback);
@@ -148,19 +195,23 @@ text_r0 = uicontrol('Style','edit','Units','pixels','Position',[text_left,height
 height = height - margin;
 finite_r_nonlinear_button = uicontrol('Style','checkbox','Units','pixels','Position',[label_left,height+label_margin,button_width,button_height],'String','Use nonlinear finite-r method','Callback',@finite_r_nonlinear_callback,'fontsize',12);
 
-height = height - 110;
+%height = height - 110;
+height = height - 65;
 %order_r_squared_button = uicontrol('Style','checkbox','Units','pixels','Position',[label_left,height+label_margin,button_width,button_height],'String','Include O(r^2) terms','Callback',@order_r_squared_callback,'fontsize',12);
-order_r_option_button_group = uibuttongroup('Units','pixels','Position',[label_left,height+label_margin,button_width,105],'SelectionChangedFcn',@order_r_option_callback);
+%order_r_option_button_group = uibuttongroup('Units','pixels','Position',[label_left,height+label_margin,button_width,105],'SelectionChangedFcn',@order_r_option_callback);
+order_r_option_button_group = uibuttongroup('Units','pixels','Position',[label_left,height+label_margin,button_width,65],'SelectionChangedFcn',@order_r_option_callback);
 spacing=20;
-order_r_option_r1_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^1)','position',[10,5+4*spacing,200,15]);
-order_r_option_r2_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^2)','position',[10,5+3*spacing,200,15]);
-order_r_option_r3_flux_constraint_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^3), flux constraint','position',[10,5+2*spacing,200,15]);
+order_r_option_r1_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^1)','position',[10,5+2*spacing,200,15]);
+order_r_option_r2_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^2)','position',[10,5+1*spacing,200,15]);
+order_r_option_r3_flux_constraint_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^3), flux constraint','position',[10,5+0*spacing,200,15]);
 %order_r_option_r3_simplified_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^3), simplified','position',[10,5+1*spacing,200,15]);
 %order_r_option_r3_simplified_with_Z3_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^3), simplified, with Z3','position',[10,5+0*spacing,200,15]);
-order_r_option_r3_B3_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^3), specified B3s3 and B3c3','position',[10,5+1*spacing,200,15]);
-order_r_option_r3_X3s3_X3c3_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^3), X3s3=0, X3c3=0','position',[10,5+0*spacing,200,15]);
+%order_r_option_r3_B3_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^3), specified B3s3 and B3c3','position',[10,5+1*spacing,200,15]);
+%order_r_option_r3_X3s3_X3c3_button = uicontrol(order_r_option_button_group,'style','radiobutton','String','O(r^3), X3s3=0, X3c3=0','position',[10,5+0*spacing,200,15]);
 
-height = height - margin/2;
+%height = height - margin/2;
+height = 628;
+label_left = 250;
 label_iota = uicontrol('Style','text','Units','pixels','Position',[label_left,height+label_margin,label_width,20],'String','Iota: ','horizontalalignment','left','fontsize',15);
 
 height = height - margin/2;
@@ -179,6 +230,10 @@ label_B20 = uicontrol('Style','text','Units','pixels','Position',[label_left,hei
 set_text_nfp()
 set_text_R0c1()
 set_text_Z0s1()
+set_text_R0c2()
+set_text_Z0s2()
+set_text_R0c3()
+set_text_Z0s3()
 set_text_eta_bar()
 set_text_sigma()
 set_text_I2()
@@ -212,6 +267,26 @@ set(f,'Visible','on')
     function slider_Z0s1_callback(source,callbackdata)
         Z0s1 = slider_Z0s1.Value;
         set_text_Z0s1()
+        update()
+    end
+    function slider_R0c2_callback(source,callbackdata)
+        R0c2 = slider_R0c2.Value;
+        set_text_R0c2()
+        update()
+    end
+    function slider_Z0s2_callback(source,callbackdata)
+        Z0s2 = slider_Z0s2.Value;
+        set_text_Z0s2()
+        update()
+    end
+    function slider_R0c3_callback(source,callbackdata)
+        R0c3 = slider_R0c3.Value;
+        set_text_R0c3()
+        update()
+    end
+    function slider_Z0s3_callback(source,callbackdata)
+        Z0s3 = slider_Z0s3.Value;
+        set_text_Z0s3()
         update()
     end
     function slider_eta_bar_callback(source,callbackdata)
@@ -288,6 +363,58 @@ set(f,'Visible','on')
             update()
         else
             set_text_Z0s1()
+        end
+    end
+    function text_R0c2_callback(source,callbackdata)
+        [val,count] = sscanf(source.String,'%g');
+        if count==1
+            val = max([min([val,slider_R0c2.Max]),slider_R0c2.Min]);
+            R0c2 = val;
+            slider_R0c2.Value = R0c2;
+            % The above line does not cause the slider callback to be called.
+            set_text_R0c2()
+            update()
+        else
+            set_text_R0c2()
+        end
+    end
+    function text_Z0s2_callback(source,callbackdata)
+        [val,count] = sscanf(source.String,'%g');
+        if count==1
+            val = max([min([val,slider_Z0s2.Max]),slider_Z0s2.Min]);
+            Z0s2 = val;
+            slider_Z0s2.Value = Z0s2;
+            % The above line does not cause the slider callback to be called.
+            set_text_Z0s2()
+            update()
+        else
+            set_text_Z0s2()
+        end
+    end
+    function text_R0c3_callback(source,callbackdata)
+        [val,count] = sscanf(source.String,'%g');
+        if count==1
+            val = max([min([val,slider_R0c3.Max]),slider_R0c3.Min]);
+            R0c3 = val;
+            slider_R0c3.Value = R0c3;
+            % The above line does not cause the slider callback to be called.
+            set_text_R0c3()
+            update()
+        else
+            set_text_R0c3()
+        end
+    end
+    function text_Z0s3_callback(source,callbackdata)
+        [val,count] = sscanf(source.String,'%g');
+        if count==1
+            val = max([min([val,slider_Z0s3.Max]),slider_Z0s3.Min]);
+            Z0s3 = val;
+            slider_Z0s3.Value = Z0s3;
+            % The above line does not cause the slider callback to be called.
+            set_text_Z0s3()
+            update()
+        else
+            set_text_Z0s3()
         end
     end
     function text_eta_bar_callback(source,callbackdata)
@@ -391,6 +518,18 @@ set(f,'Visible','on')
     function set_text_Z0s1
         text_Z0s1.String = sprintf('%g',Z0s1);
     end
+    function set_text_R0c2
+        text_R0c2.String = sprintf('%g',R0c2);
+    end
+    function set_text_Z0s2
+        text_Z0s2.String = sprintf('%g',Z0s2);
+    end
+    function set_text_R0c3
+        text_R0c3.String = sprintf('%g',R0c3);
+    end
+    function set_text_Z0s3
+        text_Z0s3.String = sprintf('%g',Z0s3);
+    end
     function set_text_eta_bar
         text_eta_bar.String = sprintf('%g',eta_bar);
     end
@@ -446,22 +585,23 @@ set(f,'Visible','on')
         %    fprintf(fid,' order_r_option="r3_simplified"\n');
         %elseif order_r_option == order_r_option_r3_simplified_with_Z3_button
         %    fprintf(fid,' order_r_option="r3_simplified_with_Z3"\n');
-        elseif order_r_option == order_r_option_r3_B3_button
-            fprintf(fid,' order_r_option="r3_B3"\n');
-        elseif order_r_option == order_r_option_r3_X3s3_X3c3_button
-            fprintf(fid,' order_r_option="r3_X3s3_X3c3"\n');
+        %elseif order_r_option == order_r_option_r3_B3_button
+        %    fprintf(fid,' order_r_option="r3_B3"\n');
+        %elseif order_r_option == order_r_option_r3_X3s3_X3c3_button
+        %    fprintf(fid,' order_r_option="r3_X3s3_X3c3"\n');
         else
             error('Should not get here!')
         end
-        fprintf(fid,' N_phi=101\n');
+        fprintf(fid,' N_phi=301\n');
         fprintf(fid,' nfp = %d\n',round(nfp));
         fprintf(fid,' eta_bar = %.15g\n',eta_bar);
         fprintf(fid,' sigma_initial = %.15g\n',sigma);
         fprintf(fid,' I2_over_B0 = %.15g\n',I2);
-        fprintf(fid,' R0c = 1, %.15g\n',R0c1);
-        fprintf(fid,' Z0s = 0, %.15g\n',Z0s1);
+        fprintf(fid,' R0c = 1, %.15g, %.15g, %.15g\n',R0c1, R0c2, R0c3);
+        fprintf(fid,' Z0s = 0, %.15g, %.15g, %.15g\n',Z0s1, Z0s2, Z0s3);
         fprintf(fid,' B2s = %.15g\n',B2s);
         fprintf(fid,' B2c = %.15g\n',B2c);
+        fprintf(fid,' p2 = %.15g\n',-minus_mu0_p2 / mu0);
         fprintf(fid,' r = %.15g\n',r0);
         fprintf(fid,[' vmec_template_filename = "',quasisymmetry_executable_directory,'input.li383_vacuum"\n']);
         fprintf(fid,'/\n');
