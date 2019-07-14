@@ -530,9 +530,11 @@ subroutine quasisymmetry_higher_order_in_r
 
      ! The formula below is copied from "20190305-01 GarrenBoozer r2 corrected radius.nb"
      B1c = B0 * eta_bar
+     ! The expression below is computed in "20190305-01 GarrenBoozer r2 corrected radius.nb" in the section "Approach of adding r^3 terms, assuming quasisymmetry"
+     ! 20190714: To account for QH cases, changed iota -> iota_N where it occurs 3 lines below:
      flux_constraint_coefficient = (-4*B0**2*G0*X20**2*Y1c**2 + 8*B0**2*G0*X20*X2c*Y1c**2 - 4*B0**2*G0*X2c**2*Y1c**2 - &
            4*B0**2*G0*X2s**2*Y1c**2 + 8*B0*G0*B1c*X1c*X2s*Y1c*Y1s + 16*B0**2*G0*X20*X2s*Y1c*Y1s + &
-           2*B0**2*I2*iota*X1c**2*Y1s**2 - G0*B1c**2*X1c**2*Y1s**2 - 4*B0*G0*B20*X1c**2*Y1s**2 - &
+           2*B0**2*I2*iota_N*X1c**2*Y1s**2 - G0*B1c**2*X1c**2*Y1s**2 - 4*B0*G0*B20*X1c**2*Y1s**2 - &
            8*B0*G0*B1c*X1c*X20*Y1s**2 - 4*B0**2*G0*X20**2*Y1s**2 - 8*B0*G0*B1c*X1c*X2c*Y1s**2 - &
            8*B0**2*G0*X20*X2c*Y1s**2 - 4*B0**2*G0*X2c**2*Y1s**2 - 4*B0**2*G0*X2s**2*Y1s**2 + &
            8*B0**2*G0*X1c*X20*Y1c*Y20 - 8*B0**2*G0*X1c*X2c*Y1c*Y20 - 8*B0**2*G0*X1c*X2s*Y1s*Y20 - &
@@ -554,16 +556,33 @@ subroutine quasisymmetry_higher_order_in_r
         allocate(Q(N_phi))
         allocate(predicted_flux_constraint_coefficient(N_phi))
         
-        Q = sign_psi * B0 * abs_G0_over_B0 / (2*G0*G0) * (iota_N * I2 + mu0 * p2 * G0 / (B0 * B0)) + 2 * (X2c * Y2s - X2s * Y2c) &
+        ! The expression below is derived in the O(r^2) paper, and in "20190318-01 Wrick's streamlined Garren-Boozer method, MHD.nb" in the section "Not assuming quasisymmetry".
+        ! Note Q = (1/2) * (XYEquation0 without X3 and Y3 terms) where XYEquation0 is the quantity in the above notebook.
+        Q = -sign_psi * B0 * abs_G0_over_B0 / (2*G0*G0) * (iota_N * I2 + mu0 * p2 * G0 / (B0 * B0)) + 2 * (X2c * Y2s - X2s * Y2c) &
              + sign_psi * B0 / (2*G0) * (abs_G0_over_B0 * X20 * curvature - d_Z20_d_zeta) &
              + I2 / (4 * G0) * (-abs_G0_over_B0 * torsion * (X1c*X1c + Y1s*Y1s + Y1c*Y1c) + Y1c * d_X1c_d_zeta - X1c * d_Y1c_d_zeta)
         predicted_flux_constraint_coefficient = - Q / (2 * sign_G * sign_psi)
 !!$     print *,"flux_constraint_coefficient:"
 !!$     print *,flux_constraint_coefficient
-        print *,"flux_constraint_coefficient - predicted_flux_constraint_coefficient:"
-        print *,flux_constraint_coefficient - predicted_flux_constraint_coefficient
+        print "(a,es22.14)"," max|flux_constraint_coefficient - predicted_flux_constraint_coefficient|:",maxval(abs(flux_constraint_coefficient - predicted_flux_constraint_coefficient))
+
+        if (maxval(abs(flux_constraint_coefficient - predicted_flux_constraint_coefficient)) > 1e-11) then
+           print *,flux_constraint_coefficient - predicted_flux_constraint_coefficient
+           print *,"WARNING!!! 2 methods of computing lambda disagree!!"
+           stop
+        end if
         
 !!$     print *,flux_constraint_coefficient - B0_order_a_squared_to_cancel/(2*B0)
+
+        print *,"Using first-principles lambda from paper"
+        flux_constraint_coefficient = predicted_flux_constraint_coefficient
+
+!!$        print *,"abs_G0_over_B0:",abs_G0_over_B0
+!!$        print *,"sign_psi * B0 * abs_G0_over_B0 / (2*G0*G0) * (iota_N * I2):",sign_psi * B0 * abs_G0_over_B0 / (2*G0*G0) * (iota_N * I2)
+!!$        print *,"sign_psi * B0 * abs_G0_over_B0 / (2*G0*G0) * (iota * I2):",sign_psi * B0 * abs_G0_over_B0 / (2*G0*G0) * (iota * I2)
+!!$        print *,"sign_psi * B0 * abs_G0_over_B0 / (2*G0*G0) * (N_helicity * I2):",sign_psi * B0 * abs_G0_over_B0 / (2*G0*G0) * (N_helicity * I2)
+!!$        print *,"sign_psi * B0 * abs_G0_over_B0 / (2*G0*G0) * (mu0 * p2 * G0 / (B0 * B0)):",sign_psi * B0 * abs_G0_over_B0 / (2*G0*G0) * (mu0 * p2 * G0 / (B0 * B0))
+!!$        print *,"I2 / (4 * G0) * (-abs_G0_over_B0 * torsion * (X1c*X1c + Y1s*Y1s + Y1c*Y1c) + Y1c * d_X1c_d_zeta - X1c * d_Y1c_d_zeta):",I2 / (4 * G0) * (-abs_G0_over_B0 * torsion * (X1c*X1c + Y1s*Y1s + Y1c*Y1c) + Y1c * d_X1c_d_zeta - X1c * d_Y1c_d_zeta)
 
         deallocate(Q,predicted_flux_constraint_coefficient)
      end if
