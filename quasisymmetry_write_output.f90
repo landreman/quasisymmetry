@@ -67,7 +67,8 @@ subroutine quasisymmetry_write_output
        vn_B20_residual = "B20_residual", &
        vn_B3s3_input = "B3s3_input", &
        vn_B3c3_input = "B3c3_input", &
-       vn_Y3c1_initial = "Y3c1_initial"
+       vn_Y3c1_initial = "Y3c1_initial", &
+       vn_d2_volume_d_psi2 = "d2_volume_d_psi2"
 
   ! Arrays with dimension 1
   character(len=*), parameter :: &
@@ -295,6 +296,8 @@ subroutine quasisymmetry_write_output
         call cdf_define(ncid, vn_p2, p2)
         call cdf_define(ncid, vn_B20_mean, B20_mean)
         call cdf_define(ncid, vn_B20_residual, B20_residual)
+        call cdf_define(ncid, vn_d2_volume_d_psi2, d2_volume_d_psi2)
+        call cdf_setatt(ncid, vn_d2_volume_d_psi2, 'Magnetic well parameter. The quantity saved is the second derivative of the volume of the flux surfaces with respect to psi, where 2*pi*psi is the toroidal flux. Negative values of this quantity are favorable for stability.')
      end if
      if (trim(order_r_option) == order_r_option_r3_B3) then
         call cdf_define(ncid, vn_B3c3_input, B3c3_input)
@@ -524,6 +527,7 @@ subroutine quasisymmetry_write_output
         call cdf_write(ncid, vn_p2, p2)
         call cdf_write(ncid, vn_B20_mean, B20_mean)
         call cdf_write(ncid, vn_B20_residual, B20_residual)
+        call cdf_write(ncid, vn_d2_volume_d_psi2, d2_volume_d_psi2)
      end if
      if (trim(order_r_option) == order_r_option_r3_B3) then
         call cdf_write(ncid, vn_B3c3_input, B3c3_input)

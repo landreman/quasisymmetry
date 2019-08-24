@@ -157,7 +157,7 @@ module quasisymmetry_variables
   real(dp), dimension(:), allocatable :: X3s1_untwisted, X3s3_untwisted, X3c1_untwisted, X3c3_untwisted
   real(dp), dimension(:), allocatable :: Y3s1_untwisted, Y3s3_untwisted, Y3c1_untwisted, Y3c3_untwisted
   real(dp), dimension(:), allocatable :: Z3s1_untwisted, Z3s3_untwisted, Z3c1_untwisted, Z3c3_untwisted
-  real(dp) :: iota_from_torsion
+  real(dp) :: iota_from_torsion, d2_volume_d_psi2 = 0
   logical :: circular_cross_section_surface = .false.
   integer :: finite_r_nonlinear_N_theta = 20
 
