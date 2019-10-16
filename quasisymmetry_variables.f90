@@ -97,7 +97,7 @@ module quasisymmetry_variables
   real(dp), dimension(:,:), allocatable :: tangent_Cartesian, normal_Cartesian, binormal_Cartesian
   real(dp), dimension(:), allocatable :: sigma, X1s, X1c, Y1s, Y1c, R1s, R1c, Z1s, Z1c, elongation, elongation_in_Rz_plane
   real(dp), dimension(:), allocatable :: X1s_untwisted, X1c_untwisted, Y1s_untwisted, Y1c_untwisted
-  real(dp) :: B0_over_abs_G0, abs_G0_over_B0, iota, max_elongation, rms_curvature, max_curvature, axis_length
+  real(dp) :: B0_over_abs_G0, abs_G0_over_B0, iota, max_elongation, mean_elongation, rms_curvature, max_curvature, axis_length
   real(dp) :: max_precise_elongation = 10 ! Above this value, we won't do a precise solve, just take maxval over the phi grid.
   real(dp) :: max_elongation_to_keep = 10 ! Discard solutions with max(elongation) higher than this value. Set to e.g. 1.0e200 to keep all solutions.
   real(dp), dimension(:,:), allocatable :: Jacobian
@@ -118,7 +118,7 @@ module quasisymmetry_variables
   integer, dimension(max_axis_nmax+1) :: R0s_N_scan=0, R0c_N_scan=0, Z0s_N_scan=0, Z0c_N_scan=0
   integer :: eta_bar_N_scan=0, sigma_initial_N_scan=0
   integer*8 :: N_scan
-  real(dp), dimension(:), allocatable :: iotas, max_elongations, rms_curvatures, max_curvatures, axis_lengths, eta_bar_values, sigma_initial_values
+  real(dp), dimension(:), allocatable :: iotas, max_elongations, mean_elongations, rms_curvatures, max_curvatures, axis_lengths, eta_bar_values, sigma_initial_values
   real(dp), dimension(:), allocatable :: max_modBinv_sqrt_half_grad_B_colon_grad_Bs
   real(dp), dimension(:), allocatable :: standard_deviations_of_R, standard_deviations_of_Z
   real(dp) :: standard_deviation_of_R, standard_deviation_of_Z

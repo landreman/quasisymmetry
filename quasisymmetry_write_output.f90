@@ -39,6 +39,7 @@ subroutine quasisymmetry_write_output
        vn_iota = "iota", &
        vn_iota_from_torsion = "iota_from_torsion", &
        vn_max_elongation = "max_elongation", &
+       vn_mean_elongation = "mean_elongation", &
        vn_rms_curvature = "rms_curvature", &
        vn_max_curvature = "max_curvature", &
        vn_max_modBinv_sqrt_half_grad_B_colon_grad_B = "max_modBinv_sqrt_half_grad_B_colon_grad_B", &
@@ -74,6 +75,7 @@ subroutine quasisymmetry_write_output
   character(len=*), parameter :: &
        vn_iotas = "iotas", &
        vn_max_elongations = "max_elongations", &
+       vn_mean_elongations = "mean_elongations", &
        vn_rms_curvatures = "rms_curvatures", &
        vn_max_curvatures = "max_curvatures", &
        vn_max_modBinv_sqrt_half_grad_B_colon_grad_Bs = "max_modBinv_sqrt_half_grad_B_colon_grad_Bs", &
@@ -270,6 +272,7 @@ subroutine quasisymmetry_write_output
      call cdf_define(ncid, vn_iota, iota)
      call cdf_define(ncid, vn_iota_from_torsion, iota_from_torsion)
      call cdf_define(ncid, vn_max_elongation, max_elongation)
+     call cdf_define(ncid, vn_mean_elongation, mean_elongation)
      call cdf_define(ncid, vn_rms_curvature, rms_curvature)
      call cdf_define(ncid, vn_max_curvature, max_curvature)
      call cdf_define(ncid, vn_max_modBinv_sqrt_half_grad_B_colon_grad_B, max_modBinv_sqrt_half_grad_B_colon_grad_B)
@@ -429,6 +432,7 @@ subroutine quasisymmetry_write_output
   case (general_option_scan)
      call cdf_define(ncid, vn_iotas, iotas, dimname=N_scan_dim)
      call cdf_define(ncid, vn_max_elongations, max_elongations, dimname=N_scan_dim)
+     call cdf_define(ncid, vn_mean_elongations, mean_elongations, dimname=N_scan_dim)
      call cdf_define(ncid, vn_rms_curvatures, rms_curvatures, dimname=N_scan_dim)
      call cdf_define(ncid, vn_max_curvatures, max_curvatures, dimname=N_scan_dim)
      call cdf_define(ncid, vn_max_modBinv_sqrt_half_grad_B_colon_grad_Bs, max_modBinv_sqrt_half_grad_B_colon_grad_Bs, dimname=N_scan_dim)
@@ -501,6 +505,7 @@ subroutine quasisymmetry_write_output
      call cdf_write(ncid, vn_iota, iota)
      call cdf_write(ncid, vn_iota_from_torsion, iota_from_torsion)
      call cdf_write(ncid, vn_max_elongation, max_elongation)
+     call cdf_write(ncid, vn_mean_elongation, mean_elongation)
      call cdf_write(ncid, vn_rms_curvature, rms_curvature)
      call cdf_write(ncid, vn_max_curvature, max_curvature)
      call cdf_write(ncid, vn_max_modBinv_sqrt_half_grad_B_colon_grad_B, max_modBinv_sqrt_half_grad_B_colon_grad_B)
@@ -659,6 +664,7 @@ subroutine quasisymmetry_write_output
   case (general_option_scan)
      call cdf_write(ncid, vn_iotas, iotas)
      call cdf_write(ncid, vn_max_elongations, max_elongations)
+     call cdf_write(ncid, vn_mean_elongations, mean_elongations)
      call cdf_write(ncid, vn_rms_curvatures, rms_curvatures)
      call cdf_write(ncid, vn_max_curvatures, max_curvatures)
      call cdf_write(ncid, vn_max_modBinv_sqrt_half_grad_B_colon_grad_Bs, max_modBinv_sqrt_half_grad_B_colon_grad_Bs)

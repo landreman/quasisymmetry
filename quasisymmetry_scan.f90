@@ -14,7 +14,7 @@ subroutine quasisymmetry_scan
   integer :: mpi_status(MPI_STATUS_SIZE)
   integer, parameter :: buffer_length = 100
   character(len=buffer_length) :: proc_assignments_string
-  real(dp), dimension(:), allocatable :: iotas_local, max_elongations_local, rms_curvatures_local, max_curvatures_local, axis_lengths_local
+  real(dp), dimension(:), allocatable :: iotas_local, max_elongations_local, mean_elongations_local, rms_curvatures_local, max_curvatures_local, axis_lengths_local
   real(dp), dimension(:), allocatable :: standard_deviations_of_R_local, standard_deviations_of_Z_local, max_modBinv_sqrt_half_grad_B_colon_grad_Bs_local
   integer, dimension(:), allocatable :: axis_helicities_local, B_helicities_local, effective_nfps_local
   logical, dimension(:), allocatable :: iota_tolerance_achieveds_local, elongation_tolerance_achieveds_local, Newton_tolerance_achieveds_local
@@ -142,6 +142,7 @@ subroutine quasisymmetry_scan
 
   allocate(iotas_local(N_scan_local))
   allocate(max_elongations_local(N_scan_local))
+  allocate(mean_elongations_local(N_scan_local))
   allocate(rms_curvatures_local(N_scan_local))
   allocate(max_curvatures_local(N_scan_local))
   allocate(max_modBinv_sqrt_half_grad_B_colon_grad_Bs_local(N_scan_local))
@@ -283,6 +284,7 @@ subroutine quasisymmetry_scan
            
            iotas_local(j_scan_local) = iota
            max_elongations_local(j_scan_local) = max_elongation
+           mean_elongations_local(j_scan_local) = mean_elongation
            rms_curvatures_local(j_scan_local) = rms_curvature
            max_curvatures_local(j_scan_local) = max_curvature
            max_modBinv_sqrt_half_grad_B_colon_grad_Bs_local(j_scan_local) = max_modBinv_sqrt_half_grad_B_colon_grad_B
@@ -347,6 +349,7 @@ subroutine quasisymmetry_scan
      ! Now that we know the total number of runs that were kept, we can allocate the arrays for the final results:
      allocate(iotas(N_scan))
      allocate(max_elongations(N_scan))
+     allocate(mean_elongations(N_scan))
      allocate(rms_curvatures(N_scan))
      allocate(max_curvatures(N_scan))
      allocate(max_modBinv_sqrt_half_grad_B_colon_grad_Bs(N_scan))
@@ -370,6 +373,7 @@ subroutine quasisymmetry_scan
      ! Store results from proc0 in the final arrays:
      iotas(1:N_solves_kept(1)) = iotas_local(1:N_solves_kept(1))
      max_elongations(1:N_solves_kept(1)) = max_elongations_local(1:N_solves_kept(1))
+     mean_elongations(1:N_solves_kept(1)) = mean_elongations_local(1:N_solves_kept(1))
      rms_curvatures(1:N_solves_kept(1)) = rms_curvatures_local(1:N_solves_kept(1))
      max_curvatures(1:N_solves_kept(1)) = max_curvatures_local(1:N_solves_kept(1))
      max_modBinv_sqrt_half_grad_B_colon_grad_Bs(1:N_solves_kept(1)) = max_modBinv_sqrt_half_grad_B_colon_grad_Bs_local(1:N_solves_kept(1))
@@ -395,6 +399,7 @@ subroutine quasisymmetry_scan
         print "(a,i20,a,i4)"," Proc 0 is receiving results from ",N_solves_kept(j+1)," solves on proc",j
         call mpi_recv(iotas(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(max_elongations(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(mean_elongations(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(rms_curvatures(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(max_curvatures(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(max_modBinv_sqrt_half_grad_B_colon_grad_Bs(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
@@ -431,6 +436,7 @@ subroutine quasisymmetry_scan
      ! Send the other results:
      call mpi_send(iotas_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(max_elongations_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(mean_elongations_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(rms_curvatures_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(max_curvatures_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(max_modBinv_sqrt_half_grad_B_colon_grad_Bs_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
