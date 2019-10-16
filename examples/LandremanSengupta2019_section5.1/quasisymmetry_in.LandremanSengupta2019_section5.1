@@ -1,0 +1,26 @@
+! This is an input file for the configuration of section 5.1 of
+! Landreman & Sengupta, Journal of Plasma Physics (2019)
+! It is partially quasi-axisymmetric, but with a significant toroidal variation of B_{20}.
+! This is a vacuum field.
+! The original input file for the paper can be found on Matt's laptop in
+! /Users/mattland/Box Sync/work19/20190516-01-rConvergenceOfQuasisymmetry_optimizedPartialQA/quasisymmetry_in.partialQA_r0.1_finiteRNonlinearAltSplines_nphi201_ntheta40_mpol12_ntor12_ns101
+
+&quasisymmetry
+ general_option="single"
+
+ finite_r_option="nonlinear"
+ order_r_option="r3_flux_constraint"
+
+ ! finite_r_nonlinear_N_theta = 40
+ N_phi=101
+
+ nfp = 2
+ eta_bar = 0.640
+ R0c = 1, 0.155, 0.0102
+ Z0s = 0, 0.154, 0.0111
+ B2c = -0.00322
+ r = 0.1
+ Newton_tolerance = 1e-30
+
+ vmec_template_filename = "../../input.li383_vacuum"
+/

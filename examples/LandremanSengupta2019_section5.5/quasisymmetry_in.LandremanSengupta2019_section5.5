@@ -1,0 +1,32 @@
+! This is an input file for the configuration of section 5.4 of
+! Landreman & Sengupta, Journal of Plasma Physics (2019)
+! It is a quasi-helically symmetric vacuum field.
+! The original input file for the paper can be found on the IPP cluster Draco in
+! /ptmp/mlan/20190728-01-betterGarrenBoozerRSquaredQHS/quasisymmetry_in.QHSmoothed7_4digits
+
+&quasisymmetry
+ general_option="single"
+
+ !untwist=.false.
+
+ finite_r_option="nonlinear"
+ order_r_option="r3_flux_constraint"
+
+ N_phi=101
+ !finite_r_nonlinear_N_theta = 80
+
+ nfp = 5
+
+ eta_bar = 2.5
+ sigma_initial = 0.3
+ I2_over_B0 = 1.6
+ R0c = 1, 0.3, 0, 0
+ Z0s = 0, 0.3, 0, 0
+ B2c = 1
+ B2s = 3
+ p2 = -0.5e7
+
+ r = 0.025
+
+ vmec_template_filename = "../../input.li383_vacuum"
+/
