@@ -7,18 +7,23 @@ subroutine quasisymmetry_compute_B2_for_r1
   use quasisymmetry_variables
 
   real(dp), dimension(:), allocatable :: V1, V2, V3, qs, qc, rs, rc
-  real(dp), dimension(:), allocatable :: Y2s_from_X20, Y2s_inhomogeneous, Y2c_from_X20, Y2c_inhomogeneous
   real(dp), dimension(:), allocatable :: fX0_from_X20, fX0_from_Y20, fX0_inhomogeneous
   real(dp), dimension(:), allocatable :: fXs_from_X20, fXs_from_Y20, fXs_inhomogeneous
   real(dp), dimension(:), allocatable :: fXc_from_X20, fXc_from_Y20, fXc_inhomogeneous
   real(dp), dimension(:), allocatable :: fY0_from_X20, fY0_from_Y20, fY0_inhomogeneous
   real(dp), dimension(:), allocatable :: fYs_from_X20, fYs_from_Y20, fYs_inhomogeneous
   real(dp), dimension(:), allocatable :: fYc_from_X20, fYc_from_Y20, fYc_inhomogeneous
+  real(dp), allocatable, dimension(:) :: fX0, fXs, fXc, fY0, fYs, fYc, eq1residual, eq2residual
   real(dp) :: factor, iota_N, beta_1s, max_eq1residual, max_eq2residual, temp
   integer :: j, row
   real(dp), allocatable :: factors(:), residuals(:), matrix(:,:), right_hand_side(:)
+  real(dp), allocatable :: matrix2(:,:), right_hand_side2(:)
   integer :: INFO
   integer, dimension(:), allocatable :: IPIV
+  real(dp), allocatable, dimension(:) :: X2s_from_X20, X2s_from_Y20
+  real(dp), allocatable, dimension(:) :: X2c_from_X20, X2c_inhomogeneous
+  real(dp), allocatable, dimension(:) :: Y2s_from_X20, Y2s_from_Y20, Y2s_inhomogeneous
+  real(dp), allocatable, dimension(:) :: Y2c_from_X20, Y2c_from_Y20, Y2c_inhomogeneous
 
 
   print "(a)", "Hello from quasisymmetry_compute_B2_for_r1"
@@ -75,7 +80,7 @@ subroutine quasisymmetry_compute_B2_for_r1
 
   ! If true, use the direct method involving a 6N * 6N linear system.
   ! If false, use the more complicated method involving only a 2N * 2N linear system.
-  if (.true.) then
+  if (.false.) then
      ! Method with a 6N * 6N linear system.
 
      allocate(matrix(N_phi*6, N_phi*6))
@@ -203,7 +208,7 @@ subroutine quasisymmetry_compute_B2_for_r1
      allocate(Y2c_inhomogeneous(N_phi))
      
      X2s_from_X20 =  Y1c / (2 * Y1s)
-     X2s_from_Y2s = -X1c / (2 * Y1s)
+     X2s_from_Y20 = -X1c / (2 * Y1s)
 
      X2c_from_X20 = -0.5d+0
      X2c_inhomogeneous = -sign_G * sign_psi * X1c * curvature / (4 * Y1s)
@@ -223,47 +228,45 @@ subroutine quasisymmetry_compute_B2_for_r1
      do j = 1, N_phi
         do k = 1, N_phi
            ! d/dphi terms
-           temp = (X1c(k) * X2s_from_X20(j) + Y1c(k) * Y2s_from_X20(j) - Y1s(k) * Y2c_from_X20(j)) * d_d_phi(k,j)
+           temp = (X1c(k) * X2s_from_X20(j) + Y1c(k) * Y2s_from_X20(j) - Y1s(k) * Y2c_from_X20(j)) * d_d_zeta(k,j)
            ! Terms that do not involve d/dphi
            if (j==k) then
               temp = temp &
-                   & ! X1c * fXs
-                   + X1c(k) * (-2 * iota_N * X2c_from_X20(k) - torsion(k) * d_l_d_phi * Y2s_from_X20 -4 * sign_G * sign_psi * abs_G0_over_B0 * (Y2c_from_X20(k) * Z20(k))&
-                   - I2 * sign_psi / B0 * (-2 * Y2s_from_X20(k)) * d_l_d_phi) &
-                   & ! - Y1s * fY0
-                   - Y1s(k) * (torsion(k) * d_l_d_phi - 4 * sign_G * sign_psi * abs_G0_over_B0 * (X2s_from_X20(k) * Z2c(k) - X2c_from_X20(k) * Z2s(k)) &
-                   - I2 * sign_psi / B0 * 2 * d_l_d_phi) &
-                   & ! + Y1c * fYs
-                   + Y1c(k) * (-2 * iota_N * Y2c_from_X20(k) + torsion(k) * d_l_d_phi * X2s_from_X20(k) - 4 * sign_G * sign_psi * abs_G0_over_B0 * (Z2c(k) - X2c_from_X20(k) * Z20(k)) &
-                   - I2 * sign_psi / B0 * 2 * X2s_from_X20(k) * d_l_d_phi) &
-                   & ! - Y1s * fYc
-                   - Y1s(k) * (2 * iota_N * Y2s_from_X20(k) + torsion(k) * d_l_d_phi * X2c_from_X20(k) - 4 * sign_G * sign_psi * abs_G0_over_B0 * (X2s_from_X20(k) * Z20(k) - Z2s(k)) &
-                   - I2 * sign_psi / B0 * 2 * X2c_from_X20(k) * d_l_d_phi)
+                   + 0 & ! X1c * fXs
+                   + X1c(k) * (-2 * iota_N * X2c_from_X20(k) - torsion(k) * abs_G0_over_B0 * Y2s_from_X20(k) -4 * sign_G * sign_psi * abs_G0_over_B0 * (Y2c_from_X20(k) * Z20(k))&
+                   - I2 * sign_psi / B0 * (-2 * Y2s_from_X20(k)) * abs_G0_over_B0) &
+                   + 0 & ! - Y1s * fY0
+                   - Y1s(k) * (torsion(k) * abs_G0_over_B0 - 4 * sign_G * sign_psi * abs_G0_over_B0 * (X2s_from_X20(k) * Z2c(k) - X2c_from_X20(k) * Z2s(k)) &
+                   - I2 * sign_psi / B0 * 2 * abs_G0_over_B0) &
+                   + 0 & ! + Y1c * fYs
+                   + Y1c(k) * (-2 * iota_N * Y2c_from_X20(k) + torsion(k) * abs_G0_over_B0 * X2s_from_X20(k) - 4 * sign_G * sign_psi * abs_G0_over_B0 * (Z2c(k) - X2c_from_X20(k) * Z20(k)) &
+                   - I2 * sign_psi / B0 * 2 * X2s_from_X20(k) * abs_G0_over_B0) &
+                   + 0 & ! - Y1s * fYc
+                   - Y1s(k) * (2 * iota_N * Y2s_from_X20(k) + torsion(k) * abs_G0_over_B0 * X2c_from_X20(k) - 4 * sign_G * sign_psi * abs_G0_over_B0 * (X2s_from_X20(k) * Z20(k) - Z2s(k)) &
+                   - I2 * sign_psi / B0 * 2 * X2c_from_X20(k) * abs_G0_over_B0)
            end if
            matrix(k,j) = temp
         end do
      end do
 
-     ! Part of this equation that depends on Y20
+     ! Part of this equation that depends on Y20. Note X2c does not depend on Y20.
      do j = 1, N_phi
         do k = 1, N_phi
            ! d/dphi terms
-           temp = (X1c(k) * X2s_from_Y20(j) - Y1s(k) + Y1c(k) * Y2s_from_Y20(j) - Y1s(k) * Y2c_from_Y20(j)) * d_d_phi(k,j)
+           temp = (X1c(k) * X2s_from_Y20(j) - Y1s(k) + Y1c(k) * Y2s_from_Y20(j) - Y1s(k) * Y2c_from_Y20(j)) * d_d_zeta(k,j)
            ! Terms that do not involve d/dphi
            if (j==k) then
               temp = temp &
-                   & ! X1c * fXs
-                   + X1c(k) * (-2 * iota_N * X2c_from_Y20(k) - torsion(k) * d_l_d_phi * Y2s_from_Y20 -4 * sign_G * sign_psi * abs_G0_over_B0 * (Y2c_from_Y20(k) * Z20(k))&
-                   - I2 * sign_psi / B0 * (-2 * Y2s_from_Y20(k)) * d_l_d_phi) &
-                   & ! - Y1s * fY0
-                   - Y1s(k) * (torsion(k) * d_l_d_phi - 4 * sign_G * sign_psi * abs_G0_over_B0 * (X2s_from_Y20(k) * Z2c(k) - X2c_from_Y20(k) * Z2s(k)) &
-                   - I2 * sign_psi / B0 * 2 * d_l_d_phi) &
-                   & ! + Y1c * fYs
-                   + Y1c(k) * (-2 * iota_N * Y2c_from_Y20(k) + torsion(k) * d_l_d_phi * X2s_from_Y20(k) - 4 * sign_G * sign_psi * abs_G0_over_B0 * (Z2c(k) - X2c_from_Y20(k) * Z20(k)) &
-                   - I2 * sign_psi / B0 * 2 * X2s_from_Y20(k) * d_l_d_phi) &
-                   & ! - Y1s * fYc
-                   - Y1s(k) * (2 * iota_N * Y2s_from_Y20(k) + torsion(k) * d_l_d_phi * X2c_from_Y20(k) - 4 * sign_G * sign_psi * abs_G0_over_B0 * (X2s_from_Y20(k) * Z20(k) - Z2s(k)) &
-                   - I2 * sign_psi / B0 * 2 * X2c_from_Y20(k) * d_l_d_phi)
+                   + 0 & ! X1c * fXs
+                   + X1c(k) * (- torsion(k) * abs_G0_over_B0 * Y2s_from_Y20(k) - 4 * sign_G * sign_psi * abs_G0_over_B0 * (-Z2c(k) + Y2c_from_Y20(k) * Z20(k)) &
+                   - I2 * sign_psi / B0 * (-2 * Y2s_from_Y20(k)) * abs_G0_over_B0) &
+                   + 0 & ! - Y1s * fY0
+                   - Y1s(k) * ( - 4 * sign_G * sign_psi * abs_G0_over_B0 * (X2s_from_Y20(k) * Z2c(k) )) &
+                   + 0 & ! + Y1c * fYs
+                   + Y1c(k) * (-2 * iota_N * Y2c_from_Y20(k) + torsion(k) * abs_G0_over_B0 * X2s_from_Y20(k) &
+                   - I2 * sign_psi / B0 * 2 * X2s_from_Y20(k) * abs_G0_over_B0) &
+                   + 0 & ! - Y1s * fYc
+                   - Y1s(k) * (2 * iota_N * Y2s_from_Y20(k) - 4 * sign_G * sign_psi * abs_G0_over_B0 * (X2s_from_Y20(k) * Z20(k)))
            end if
            matrix(k,j + N_phi) = temp
         end do
@@ -272,20 +275,102 @@ subroutine quasisymmetry_compute_B2_for_r1
      ! "Inhomogeneous" part of this term, i.e. the part that is independent of X20 and Y20
      ! Note X2s has no inhomogeneous term. The matmuls below could perhaps be sped up.
      right_hand_side(1:N_phi) = -(&
-          & !  X1c * fXs
-          X1c * (-2 * iota_N * X2c_inhomogeneous - torsion * d_l_d_phi * Y2s_inhomogeneous + curvature * d_l_d_phi * Z2s &
-          - 4 * sign_G * sign_psi * abs_G0_over_B0 * (Y2c_inhomogeneous * Z20) - I2 * sign_psi / B0 * (curvature * 0.5d+0 * X1c * Y1s - 2 * Y2s_inhomogeneous) * d_l_d_phi &
-           - 0.5d+0 * d_l_d_phi * beta_1s * Y1s) &
-          & ! -Y1s * fY0
-          - Y1s * (- 4 * sign_G * sign_psi * abs_G0_over_B0 * (-X2c_inhomogeneous * Z2s) - I2 * sign_psi / B0 * (-curvature * 0.5d+0 * X1c * X1c) * d_l_d_phi &
-          - 0.5d+0 * d_l_d_phi * beta_1s * X1c) &
-          & ! +Y1c * fYs
-          + Y1c * (matmul(d_d_phi,Y2s_inhomogeneous) - 2 * iota_N * Y2c_inhomogeneous &
+          0 & !  X1c * fXs
+          + X1c * (-2 * iota_N * X2c_inhomogeneous - torsion * abs_G0_over_B0 * Y2s_inhomogeneous + curvature * abs_G0_over_B0 * Z2s &
+          - 4 * sign_G * sign_psi * abs_G0_over_B0 * (Y2c_inhomogeneous * Z20) - I2 * sign_psi / B0 * (curvature * 0.5d+0 * X1c * Y1s - 2 * Y2s_inhomogeneous) * abs_G0_over_B0 &
+           - 0.5d+0 * abs_G0_over_B0 * beta_1s * Y1s) &
+          + 0 & ! -Y1s * fY0
+          - Y1s * (- 4 * sign_G * sign_psi * abs_G0_over_B0 * (-X2c_inhomogeneous * Z2s) - I2 * sign_psi / B0 * (-curvature * 0.5d+0 * X1c * X1c) * abs_G0_over_B0 &
+          - 0.5d+0 * abs_G0_over_B0 * beta_1s * X1c) &
+          + 0 & ! +Y1c * fYs
+          + Y1c * (matmul(d_d_zeta,Y2s_inhomogeneous) - 2 * iota_N * Y2c_inhomogeneous &
           - 4 * sign_G * sign_psi * abs_G0_over_B0 * (X2c_inhomogeneous * Z20)) &
-          & ! -Y1s * fYc
-          - Y1s * (matmul(d_d_phi,Y2c_inhomogeneous) + 2 * iota_N * Y2s_inhomogeneous + torsion * d_l_d_phi * X2c_inhomogeneous &
-          - I2 * sign_psi / B0 * (-curvature * 0.5d+0 * X1c * X1c + 2 * X2c_inhomogeneous) * d_l_d_phi + 0.5d+0 * d_l_d_phi * beta_1s * X1c) &
+          + 0 & ! -Y1s * fYc
+          - Y1s * (matmul(d_d_zeta,Y2c_inhomogeneous) + 2 * iota_N * Y2s_inhomogeneous + torsion * abs_G0_over_B0 * X2c_inhomogeneous &
+          - I2 * sign_psi / B0 * (-curvature * 0.5d+0 * X1c * X1c + 2 * X2c_inhomogeneous) * abs_G0_over_B0 + 0.5d+0 * abs_G0_over_B0 * beta_1s * X1c) &
           )
+
+     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     ! Eq (A42) of Landreman & Sengupta JPP (2019)
+     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     ! Part of this equation that depends on X20
+     do j = 1, N_phi
+        do k = 1, N_phi
+           ! d/dphi terms
+           temp = (-X1c(k) + X1c(k) * X2c_from_X20(j) + Y1s(k) * Y2s_from_X20(j) + Y1c(k) * Y2c_from_X20(j)) * d_d_zeta(k,j)
+           ! Terms that do not involve d/dphi
+           if (j==k) then
+              temp = temp &
+                   + 0 & ! -X1c * fX0
+                   - X1c(k) * (- 4 * sign_G * sign_psi * abs_G0_over_B0 * (Y2c_from_X20(k) * Z2s(k) - Y2s_from_X20(k) * Z2c(k))) &
+                   + 0 & ! +X1c * fXc
+                   + X1c(k) * (2 * iota_N * X2s_from_X20(k) - torsion(k) * abs_G0_over_B0 * Y2c_from_X20(k) - 4 * sign_G * sign_psi * abs_G0_over_B0 * (-Y2s_from_X20(k) * Z20(k)) &
+                   - I2 * sign_psi / B0 * (-2 * Y2c_from_X20(k)) * abs_G0_over_B0) &
+                   + 0 & ! -Y1c * fY0
+                   - Y1c(k) * (torsion(k) * abs_G0_over_B0 - 4 * sign_G * sign_psi * abs_G0_over_B0 * (X2s_from_X20(k) * Z2c(k) - X2c_from_X20(k) * Z2s(k)) &
+                   - I2 * sign_psi / B0 * 2 * abs_G0_over_B0) &
+                   + 0 & ! +Y1s * fYs
+                   + Y1s(k) * (-2 * iota_N * Y2c_from_X20(k) + torsion(k) * abs_G0_over_B0 * X2s_from_X20(k) - 4 * sign_G * sign_psi * abs_G0_over_B0 * (Z2c(k) - X2c_from_X20(k) * Z20(k)) &
+                   - I2 * sign_psi / B0 * 2 * X2s_from_X20(k) * abs_G0_over_B0) &
+                   + 0 & ! +Y1c * fYc
+                   + Y1c(k) * (2 * iota_N * Y2s_from_X20(k) + torsion(k) * abs_G0_over_B0 * X2c_from_X20(k) - 4 * sign_G * sign_psi * abs_G0_over_B0 * (X2s_from_X20(k) * Z20(k) - Z2s(k)) &
+                   - I2 * sign_psi / B0 * 2 * X2c_from_X20(k) * abs_G0_over_B0)
+           end if
+           matrix(k + N_phi, j) = temp
+        end do
+     end do
+
+     ! Part of this equation that depends on Y20. Note X2c does not depend on Y20.
+     do j = 1, N_phi
+        do k = 1, N_phi
+           ! d/dphi terms
+           temp = ( - Y1c(k) + Y1s(k) * Y2s_from_Y20(j) + Y1c(k) * Y2c_from_Y20(j)) * d_d_zeta(k,j)
+           ! Terms that do not involve d/dphi
+           if (j==k) then
+              temp = temp &
+                   + 0 & ! -X1c * fX0
+                   - X1c(k) * (- torsion(k) * abs_G0_over_B0 - 4 * sign_G * sign_psi * abs_G0_over_B0 * (Y2c_from_Y20(k) * Z2s(k) - Y2s_from_Y20(k) * Z2c(k)) &
+                   - I2 * sign_psi / B0 * (-2) * abs_G0_over_B0) &
+                   + 0 & ! +X1c * fXc
+                   + X1c(k) * (2 * iota_N * X2s_from_Y20(k) - torsion(k) * abs_G0_over_B0 * Y2c_from_Y20(k) - 4 * sign_G * sign_psi * abs_G0_over_B0 * (Z2s(k) - Y2s_from_Y20(k) * Z20(k)) &
+                   - I2 * sign_psi / B0 * (-2 * Y2c_from_Y20(k)) * abs_G0_over_B0) &
+                   + 0 & ! -Y1c * fY0
+                   - Y1c(k) * ( - 4 * sign_G * sign_psi * abs_G0_over_B0 * (X2s_from_Y20(k) * Z2c(k) )) &
+                   + 0 & ! +Y1s * fYs
+                   + Y1s(k) * (-2 * iota_N * Y2c_from_Y20(k) + torsion(k) * abs_G0_over_B0 * X2s_from_Y20(k) &
+                   - I2 * sign_psi / B0 * 2 * X2s_from_Y20(k) * abs_G0_over_B0) &
+                   + 0 & ! +Y1c * fYc
+                   + Y1c(k) * (2 * iota_N * Y2s_from_Y20(k) - 4 * sign_G * sign_psi * abs_G0_over_B0 * (X2s_from_Y20(k) * Z20(k)))
+           end if
+           matrix(k + N_phi, j + N_phi) = temp
+        end do
+     end do
+
+     ! "Inhomogeneous" part of this term, i.e. the part that is independent of X20 and Y20
+     ! Note X2s has no inhomogeneous term. The matmuls below could perhaps be sped up.
+     right_hand_side(N_phi + 1 : 2*N_phi) = -(&
+          0 & ! -X1c * fX0
+          - X1c * (curvature * abs_G0_over_B0 * Z20 - 4 * sign_G * sign_psi * abs_G0_over_B0 * (Y2c_inhomogeneous * Z2s - Y2s_homogeneous * Z2c) &
+          - I2 * sign_psi / B0 * (curvature * 0.5d+0 * X1c * Y1c) * abs_G0_over_B0 - 0.5d+0 * abs_G0_over_B0 * (-beta_1s * Y1c)) &
+          + 0 & ! +X1c * fXc
+          + X1c * (-torsion * abs_G0_over_B0 * Y2c_inhomogeneous + curvature * abs_G0_over_B0 * Z2c - 4 * sign_G * sign_psi * abs_G0_over_B0 * (-Y2s_inhomogeneous * Z20) &
+          - I2 * sign_psi / B0 * (curvature * 0.5d+0 * X1c * Y1c - 2 * Y2c_inhomogeneous) * abs_G0_over_B0 - 0.5d+0 * abs_G0_over_B0 * beta_1s * Y1c) &
+          + 0 & ! -Y1c * fY0
+          - Y1c * (- 4 * sign_G * sign_psi * abs_G0_over_B0 * (-X2c_inhomogeneous * Z2s) - I2 * sign_psi / B0 * (-curvature * 0.5d+0 * X1c * X1c) * abs_G0_over_B0 &
+          - 0.5d+0 * abs_G0_over_B0 * beta_1s * X1c) &
+          + 0 & ! +Y1s * fYs
+          + Y1s * (matmul(d_d_zeta,Y2s_inhomogeneous) - 2 * iota_N * Y2c_inhomogeneous &
+          - 4 * sign_G * sign_psi * abs_G0_over_B0 * (X2c_inhomogeneous * Z20)) &
+          + 0 & ! +Y1c * fYc
+          + Y1c * (matmul(d_d_zeta,Y2c_inhomogeneous) + 2 * iota_N * Y2s_inhomogeneous + torsion * abs_G0_over_B0 * X2c_inhomogeneous &
+          - I2 * sign_psi / B0 * (-curvature * 0.5d+0 * X1c * X1c + 2 * X2c_inhomogeneous) * abs_G0_over_B0 + 0.5d+0 * abs_G0_over_B0 * beta_1s * X1c) &
+          )
+
+     ! Done assembling the matrix and right-hand side.
+
+     allocate(right_hand_side2(2*N_phi))
+!     right_hand_side2(1:N_phi) = -( &
+!          0 & ! X1c * fXs
 
      ! We will use the LAPACK subroutine DGESV to solve a general (asymmetric) linear system
      ! solution = matrix \ right_hand_side
@@ -314,23 +399,25 @@ subroutine quasisymmetry_compute_B2_for_r1
 
   end if
 
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! At this point, we have completed solving for the tilde versions of
+  ! X20, X2s, X2c, Y20, Y2s, Y2c.
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
   if (.true.) then
      ! Verify that residuals in each equation are zero.
-     allocate(residual(N_phi))
+     allocate(eq1residual(N_phi))
+     allocate(eq2residual(N_phi))
 
-     ! First new equation
-     residual = (X2s * X1s + X2c * X1c) / (X1s * X1s + X1c * X1c) - (Y2s * Y1s + Y2c * Y1c) / (Y1s * Y1s + Y1c * Y1c)
-     if (maxval(abs(residual)) > 1e-12) then
-        print *,"Large residual in first equation:", maxval(abs(residual))
-        stop
-     end if
-
-     ! Second new equation
-     residual = (-X2c * X1s + X2s * X1c) / (X1s * X1s + X1c * X1c) - (-Y2c * Y1s + Y2s * Y1c) / (Y1s * Y1s + Y1c * Y1c)
-     if (maxval(abs(residual)) > 1e-12) then
-        print *,"Large residual in second equation:", maxval(abs(residual))
-        stop
-     end if
+     ! Pair of new equations from the tilde analysis
+     eq1residual = (X2s * X1s + X2c * X1c) / (X1s * X1s + X1c * X1c) - (Y2s * Y1s + Y2c * Y1c) / (Y1s * Y1s + Y1c * Y1c)
+     eq2residual = (-X2c * X1s + X2s * X1c) / (X1s * X1s + X1c * X1c) - (-Y2c * Y1s + Y2s * Y1c) / (Y1s * Y1s + Y1c * Y1c)
+     max_eq1residual = maxval(abs(eq1residual))
+     max_eq2residual = maxval(abs(eq2residual))
+     print *,"max(abs(residual)) for 1st equation from tilde analysis:",max_eq1residual
+     print *,"max(abs(residual)) for 2nd equation from tilde analysis:",max_eq2residual
+     if (max_eq1residual > 1e-12) stop "Large residual in 1st equation."
+     if (max_eq2residual > 1e-12) stop "Large residual in 2nd equation."
 
      allocate(fX0(N_phi))
      allocate(fXs(N_phi))
@@ -338,8 +425,6 @@ subroutine quasisymmetry_compute_B2_for_r1
      allocate(fY0(N_phi))
      allocate(fYs(N_phi))
      allocate(fYc(N_phi))
-     allocate(eq1residual(N_phi))
-     allocate(eq2residual(N_phi))
 
      fX0 = matmul(d_d_zeta,X20) - torsion * abs_G0_over_B0 * Y20 + curvature * abs_G0_over_B0 * Z20 &
           -4*sign_G*sign_psi*abs_G0_over_B0*(Y2c * Z2s - Y2s * Z2c) &
@@ -373,8 +458,8 @@ subroutine quasisymmetry_compute_B2_for_r1
      print *,"max(abs(eq1residual)):",max_eq1residual
      print *,"max(abs(eq2residual)):",max_eq2residual
 
-     if (max_eq1residual > 1e-8) stop "Equation 1 residual is large !!!"
-     if (max_eq2residual > 1e-8) stop "Equation 2 residual is large !!!"
+     !if (max_eq1residual > 1e-8) stop "Equation 1 residual is large !!!"
+     !if (max_eq2residual > 1e-8) stop "Equation 2 residual is large !!!"
 
      ! Now check the two equations that were used to determine Y2s and Y2c:
 
@@ -387,11 +472,10 @@ subroutine quasisymmetry_compute_B2_for_r1
      print *,"max(abs(Y2c eq residual)):",max_eq1residual
      print *,"max(abs(Y2s eq residual)):",max_eq2residual
 
-     if (max_eq1residual > 1e-8) stop "Y2c equation residual is large !!!"
-     if (max_eq2residual > 1e-8) stop "Y2s equation residual is large !!!"
+     !if (max_eq1residual > 1e-8) stop "Y2c equation residual is large !!!"
+     !if (max_eq2residual > 1e-8) stop "Y2s equation residual is large !!!"
 
      deallocate(fX0, fXs, fXc, fY0, fYs, fYc, eq1residual, eq2residual)
-     deallocate(residual)
   end if
 
   B20 = B0 * (curvature * X20 - B0_over_abs_G0 * matmul(d_d_zeta,Z20) + (0.5d+0) * eta_bar * eta_bar - mu0 * p2 / (B0 * B0) &
