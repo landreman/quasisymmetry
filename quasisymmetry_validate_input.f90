@@ -79,6 +79,7 @@ subroutine quasisymmetry_validate_input
 
   select case (trim(order_r_option))
   case (order_r_option_r1)
+  case (order_r_option_r1_compute_B2)
   case (order_r_option_r2)
   case (order_r_option_r3_simplified)
   case (order_r_option_r3_simplified_with_Z3)

@@ -93,6 +93,8 @@ subroutine quasisymmetry_single_solve
   ! Now evaluate diagnostics that need only be evaluated at the final N_phi resolution
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+  if (trim(order_r_option) == order_r_option_r1_compute_B2) call quasisymmetry_compute_B2_for_r1()
+
   if (allocated(X1s_untwisted)) deallocate(X1s_untwisted)
   if (allocated(X1c_untwisted)) deallocate(X1c_untwisted)
   if (allocated(Y1s_untwisted)) deallocate(Y1s_untwisted)
@@ -146,7 +148,7 @@ subroutine quasisymmetry_single_solve
      X1c_untwisted = X1c
      Y1s_untwisted = Y1s
      Y1c_untwisted = Y1c
-     if (trim(order_r_option) .ne. order_r_option_r1) then
+     if ((trim(order_r_option) .ne. order_r_option_r1) .and. (trim(order_r_option) .ne. order_r_option_r1_compute_B2)) then
         ! We have O(r^2) terms
         X20_untwisted = X20
         X2s_untwisted = X2s
@@ -158,7 +160,8 @@ subroutine quasisymmetry_single_solve
         Z2s_untwisted = Z2s
         Z2c_untwisted = Z2c
      end if
-     if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option).ne.order_r_option_r2) then
+     if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option).ne.order_r_option_r1_compute_B2 &
+          .and. trim(order_r_option).ne.order_r_option_r2) then
         ! We have O(r^3) terms
         X3s1_untwisted = X3s1
         X3s3_untwisted = X3s3
@@ -184,7 +187,8 @@ subroutine quasisymmetry_single_solve
      X1c_untwisted = X1s * (-sinangle) + X1c * cosangle
      Y1s_untwisted = Y1s *   cosangle  + Y1c * sinangle
      Y1c_untwisted = Y1s * (-sinangle) + Y1c * cosangle
-     if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option).ne.order_r_option_r2) then
+     if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option).ne.order_r_option_r1_compute_B2 &
+          .and. trim(order_r_option).ne.order_r_option_r2) then
         ! Then we have O(r^3) terms
         X3s1_untwisted = X3s1 *   cosangle  + X3c1 * sinangle
         X3c1_untwisted = X3s1 * (-sinangle) + X3c1 * cosangle
@@ -201,7 +205,7 @@ subroutine quasisymmetry_single_solve
         Z3s3_untwisted = Z3s3 *   cosangle  + Z3c3 * sinangle
         Z3c3_untwisted = Z3s3 * (-sinangle) + Z3c3 * cosangle
      end if
-     if (trim(order_r_option) .ne. order_r_option_r1) then
+     if (trim(order_r_option) .ne. order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2) then
         ! Then we have O(r^2) terms
         X20_untwisted = X20
         Y20_untwisted = Y20
