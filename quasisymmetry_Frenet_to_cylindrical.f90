@@ -16,7 +16,7 @@ subroutine quasisymmetry_Frenet_to_cylindrical_linear
   z1c = ( binormal_cylindrical(:,1) * X1c_untwisted - normal_cylindrical(:,1) * Y1c_untwisted) * d_l_d_phi / R0
   z1s = ( binormal_cylindrical(:,1) * X1s_untwisted - normal_cylindrical(:,1) * Y1s_untwisted) * d_l_d_phi / R0
 
-  if (trim(order_r_option)==order_r_option_r1) return
+  if (trim(order_r_option)==order_r_option_r1 .or. trim(order_r_option)==order_r_option_r1_compute_B2) return
 
   ! Now let us begin to handle the O(r^2) terms.
 
@@ -283,7 +283,7 @@ contains
     call new_periodic_spline(N_phi, phi, binormal_cylindrical(:,1), 2*pi/nfp, binormal_R_spline)
     call new_periodic_spline(N_phi, phi, binormal_cylindrical(:,2), 2*pi/nfp, binormal_phi_spline)
     call new_periodic_spline(N_phi, phi, binormal_cylindrical(:,3), 2*pi/nfp, binormal_z_spline)
-    if (trim(order_r_option) .ne. order_r_option_r1) then
+    if (trim(order_r_option) .ne. order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2) then
        call new_periodic_spline(N_phi, phi, tangent_cylindrical(:,1), 2*pi/nfp, tangent_R_spline)
        call new_periodic_spline(N_phi, phi, tangent_cylindrical(:,2), 2*pi/nfp, tangent_phi_spline)
        call new_periodic_spline(N_phi, phi, tangent_cylindrical(:,3), 2*pi/nfp, tangent_z_spline)
@@ -299,7 +299,7 @@ contains
        sintheta = sin(theta(j_theta))
        X_at_this_theta = r * (X1c_untwisted * costheta + X1s_untwisted * sintheta)
        Y_at_this_theta = r * (Y1c_untwisted * costheta + Y1s_untwisted * sintheta)
-       if (trim(order_r_option) .ne. order_r_option_r1) then
+       if (trim(order_r_option) .ne. order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2) then
           ! We need O(r^2) terms:
           cos2theta = cos(2*theta(j_theta))
           sin2theta = sin(2*theta(j_theta))
@@ -342,7 +342,7 @@ contains
        end do
        call delete_periodic_spline(X_spline)
        call delete_periodic_spline(Y_spline)
-       if (trim(order_r_option) .ne. order_r_option_r1) call delete_periodic_spline(Z_spline)
+       if (trim(order_r_option) .ne. order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2) call delete_periodic_spline(Z_spline)
     end do
     
 !!$    print *,"N_theta:"
@@ -373,7 +373,7 @@ contains
     call delete_periodic_spline(binormal_R_spline)
     call delete_periodic_spline(binormal_phi_spline)
     call delete_periodic_spline(binormal_z_spline)
-    if (trim(order_r_option).ne.order_r_option_r1) then
+    if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option).ne.order_r_option_r1_compute_B2) then
        call delete_periodic_spline(tangent_R_spline)
        call delete_periodic_spline(tangent_phi_spline)
        call delete_periodic_spline(tangent_z_spline)
@@ -454,7 +454,7 @@ contains
       total_x = R0_at_phi0 * cosphi0 + X_at_phi0 * normal_x + Y_at_phi0 * binormal_x
       total_y = R0_at_phi0 * sinphi0 + X_at_phi0 * normal_y + Y_at_phi0 * binormal_y
 
-      if (trim(order_r_option).ne.order_r_option_r1) then
+      if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option).ne.order_r_option_r1_compute_B2) then
          Z_at_phi0    = periodic_splint(phi0,Z_spline)
          tangent_R    = periodic_splint(phi0,tangent_R_spline)
          tangent_phi  = periodic_splint(phi0,tangent_phi_spline)
@@ -510,7 +510,7 @@ contains
       total_y = R0_at_phi0 * sinphi0 + X_at_phi0 * normal_y + Y_at_phi0 * binormal_y
       total_z = z0_at_phi0           + X_at_phi0 * normal_z + Y_at_phi0 * binormal_z
 
-      if (trim(order_r_option).ne.order_r_option_r1) then
+      if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option).ne.order_r_option_r1_compute_B2) then
          Z_at_phi0    = periodic_splint(phi0,Z_spline)
          tangent_R    = periodic_splint(phi0,tangent_R_spline)
          tangent_phi  = periodic_splint(phi0,tangent_phi_spline)

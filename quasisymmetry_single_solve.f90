@@ -124,7 +124,7 @@ subroutine quasisymmetry_single_solve
   d_Y1s_d_zeta = matmul(d_d_zeta,Y1s)
   d_X1c_d_zeta = matmul(d_d_zeta,X1c)
 
-  if (trim(order_r_option) .ne. order_r_option_r1) call quasisymmetry_higher_order_in_r()
+  if (trim(order_r_option) .ne. order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2) call quasisymmetry_higher_order_in_r()
 
   if (verbose) then
      call cpu_time(solve_end_time)
