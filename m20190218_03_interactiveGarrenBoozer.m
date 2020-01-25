@@ -48,15 +48,16 @@ mu0 = 4*pi*(1e-7);
 X1c = 0;
 Y1s = 0;
 Y1c = 0;
-B20 = 0;
 iota = 0;
-elongation = 0;
+max_elongation = 0;
+mean_elongation = 0;
 X20 = 0;
 X2s = 0;
 X2c = 0;
 Y20 = 0;
 Y2s = 0;
 Y2c = 0;
+ax3=0;
 
 Ntheta = 40;
 Nphi = 450;
@@ -215,7 +216,10 @@ label_left = 250;
 label_iota = uicontrol('Style','text','Units','pixels','Position',[label_left,height+label_margin,label_width,20],'String','Iota: ','horizontalalignment','left','fontsize',15);
 
 height = height - margin/2;
-label_elongation = uicontrol('Style','text','Units','pixels','Position',[label_left,height+label_margin,150,20],'String','Elongation: ','horizontalalignment','left','fontsize',15);
+label_max_elongation = uicontrol('Style','text','Units','pixels','Position',[label_left,height+label_margin,150,20],'String','Max elongation: ','horizontalalignment','left','fontsize',15);
+
+height = height - margin/2;
+label_mean_elongation = uicontrol('Style','text','Units','pixels','Position',[label_left,height+label_margin,250,20],'String','Mean elongation: ','horizontalalignment','left','fontsize',15);
 
 height = height - margin/2;
 label_helicity = uicontrol('Style','text','Units','pixels','Position',[label_left,height+label_margin,200,20],'String','Helicity: ','horizontalalignment','left','fontsize',15);
@@ -615,16 +619,24 @@ set(f,'Visible','on')
         output_filename = [quasisymmetry_temp_files_directory,'quasisymmetry_out.matlab.nc'];
         
         iota = ncread(output_filename,'iota');
-        elongation = ncread(output_filename,'max_elongation');
+        max_elongation = ncread(output_filename,'max_elongation');
+        mean_elongation = ncread(output_filename,'mean_elongation')
         helicity = ncread(output_filename,'axis_helicity');
         %B20_mean = ncread(output_filename,'B20_mean');
         RBC = ncread(output_filename,'RBC');
         RBS = ncread(output_filename,'RBS');
         ZBC = ncread(output_filename,'ZBC');
         ZBS = ncread(output_filename,'ZBS');
+        phi_fortran = ncread(output_filename,'phi');
+        if order_r_option == order_r_option_r1_button
+            B20 = phi_fortran * 0;
+        else
+            B20 = ncread(output_filename,'B20');
+        end
         
         label_iota.String = sprintf('Iota: %.4g',iota);
-        label_elongation.String = sprintf('Elongation: %.4g',elongation);
+        label_max_elongation.String = sprintf('Max elongation: %.4g',max_elongation);
+        label_mean_elongation.String = sprintf('Mean elongation: %.4g',mean_elongation);
         if helicity==0
             label_helicity.String = sprintf('Quasi-axisymmetry');
         else
@@ -669,6 +681,8 @@ set(f,'Visible','on')
         %Z_decimated = Z(:,1:Nphi_stride:(Nphi_stride*3+1));
         assignin('base','R_decimated',R_decimated)
         assignin('base','Z_decimated',Z_decimated)
+        assignin('base','phi_fortran',phi_fortran)
+        assignin('base','B20',B20)
         
         if first_update
             first_update = false;
@@ -686,10 +700,18 @@ set(f,'Visible','on')
             axis equal
             %xlabel('R')
             %ylabel('Z')
+            
+            ax3 = axes('Units','pixels','Position',[1070,35,200,170]);
+            B20_plot_handle = plot(phi_fortran,B20,'XDataSource','phi_fortran','YDataSource','B20');
+            title('B_{20}')
+            xlabel('\phi')
+            xlim([0,2*pi/nfp])
+            ylim([-5,40])
         else
             set(surf_handle,'XData',X,'YData',Y,'ZData',Z,'CData',B);
             %set(slices_plot_handle,'XData',R_decimated,'YData',Z_decimated);
-
+            set(ax3,'xlim',[0,2*pi/nfp])
+            
             refreshdata
         end
         

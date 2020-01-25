@@ -39,6 +39,7 @@ subroutine quasisymmetry_write_output
        vn_iota = "iota", &
        vn_iota_from_torsion = "iota_from_torsion", &
        vn_max_elongation = "max_elongation", &
+       vn_mean_elongation = "mean_elongation", &
        vn_rms_curvature = "rms_curvature", &
        vn_max_curvature = "max_curvature", &
        vn_max_modBinv_sqrt_half_grad_B_colon_grad_B = "max_modBinv_sqrt_half_grad_B_colon_grad_B", &
@@ -67,12 +68,14 @@ subroutine quasisymmetry_write_output
        vn_B20_residual = "B20_residual", &
        vn_B3s3_input = "B3s3_input", &
        vn_B3c3_input = "B3c3_input", &
-       vn_Y3c1_initial = "Y3c1_initial"
+       vn_Y3c1_initial = "Y3c1_initial", &
+       vn_d2_volume_d_psi2 = "d2_volume_d_psi2"
 
   ! Arrays with dimension 1
   character(len=*), parameter :: &
        vn_iotas = "iotas", &
        vn_max_elongations = "max_elongations", &
+       vn_mean_elongations = "mean_elongations", &
        vn_rms_curvatures = "rms_curvatures", &
        vn_max_curvatures = "max_curvatures", &
        vn_max_modBinv_sqrt_half_grad_B_colon_grad_Bs = "max_modBinv_sqrt_half_grad_B_colon_grad_Bs", &
@@ -269,6 +272,7 @@ subroutine quasisymmetry_write_output
      call cdf_define(ncid, vn_iota, iota)
      call cdf_define(ncid, vn_iota_from_torsion, iota_from_torsion)
      call cdf_define(ncid, vn_max_elongation, max_elongation)
+     call cdf_define(ncid, vn_mean_elongation, mean_elongation)
      call cdf_define(ncid, vn_rms_curvature, rms_curvature)
      call cdf_define(ncid, vn_max_curvature, max_curvature)
      call cdf_define(ncid, vn_max_modBinv_sqrt_half_grad_B_colon_grad_B, max_modBinv_sqrt_half_grad_B_colon_grad_B)
@@ -295,6 +299,8 @@ subroutine quasisymmetry_write_output
         call cdf_define(ncid, vn_p2, p2)
         call cdf_define(ncid, vn_B20_mean, B20_mean)
         call cdf_define(ncid, vn_B20_residual, B20_residual)
+        call cdf_define(ncid, vn_d2_volume_d_psi2, d2_volume_d_psi2)
+        call cdf_setatt(ncid, vn_d2_volume_d_psi2, 'Magnetic well parameter. The quantity saved is the second derivative of the volume of the flux surfaces with respect to psi, where 2*pi*psi is the toroidal flux. Negative values of this quantity are favorable for stability.')
      end if
      if (trim(order_r_option) == order_r_option_r3_B3) then
         call cdf_define(ncid, vn_B3c3_input, B3c3_input)
@@ -426,6 +432,7 @@ subroutine quasisymmetry_write_output
   case (general_option_scan)
      call cdf_define(ncid, vn_iotas, iotas, dimname=N_scan_dim)
      call cdf_define(ncid, vn_max_elongations, max_elongations, dimname=N_scan_dim)
+     call cdf_define(ncid, vn_mean_elongations, mean_elongations, dimname=N_scan_dim)
      call cdf_define(ncid, vn_rms_curvatures, rms_curvatures, dimname=N_scan_dim)
      call cdf_define(ncid, vn_max_curvatures, max_curvatures, dimname=N_scan_dim)
      call cdf_define(ncid, vn_max_modBinv_sqrt_half_grad_B_colon_grad_Bs, max_modBinv_sqrt_half_grad_B_colon_grad_Bs, dimname=N_scan_dim)
@@ -498,6 +505,7 @@ subroutine quasisymmetry_write_output
      call cdf_write(ncid, vn_iota, iota)
      call cdf_write(ncid, vn_iota_from_torsion, iota_from_torsion)
      call cdf_write(ncid, vn_max_elongation, max_elongation)
+     call cdf_write(ncid, vn_mean_elongation, mean_elongation)
      call cdf_write(ncid, vn_rms_curvature, rms_curvature)
      call cdf_write(ncid, vn_max_curvature, max_curvature)
      call cdf_write(ncid, vn_max_modBinv_sqrt_half_grad_B_colon_grad_B, max_modBinv_sqrt_half_grad_B_colon_grad_B)
@@ -524,6 +532,7 @@ subroutine quasisymmetry_write_output
         call cdf_write(ncid, vn_p2, p2)
         call cdf_write(ncid, vn_B20_mean, B20_mean)
         call cdf_write(ncid, vn_B20_residual, B20_residual)
+        call cdf_write(ncid, vn_d2_volume_d_psi2, d2_volume_d_psi2)
      end if
      if (trim(order_r_option) == order_r_option_r3_B3) then
         call cdf_write(ncid, vn_B3c3_input, B3c3_input)
@@ -655,6 +664,7 @@ subroutine quasisymmetry_write_output
   case (general_option_scan)
      call cdf_write(ncid, vn_iotas, iotas)
      call cdf_write(ncid, vn_max_elongations, max_elongations)
+     call cdf_write(ncid, vn_mean_elongations, mean_elongations)
      call cdf_write(ncid, vn_rms_curvatures, rms_curvatures)
      call cdf_write(ncid, vn_max_curvatures, max_curvatures)
      call cdf_write(ncid, vn_max_modBinv_sqrt_half_grad_B_colon_grad_Bs, max_modBinv_sqrt_half_grad_B_colon_grad_Bs)

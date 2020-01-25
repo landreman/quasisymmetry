@@ -1,0 +1,34 @@
+! This is an input file for the configuration of section 5.5 of
+! Landreman & Sengupta, Journal of Plasma Physics (2019)
+! It is a quasi-helically symmetric configuration with significant plasma current and pressure.
+! It is not stellarator-symmetric.
+! Since all terms in the Garren-Boozer equations are nonzero, this case is a challenging benchmark.
+! The original input file for the paper can be found on the IPP cluster Draco in
+! /ptmp/mlan/20190714-01-GarrenBoozerOrderRSquared_allTerms_afterBugfix/quasisymmetry_in.allTerms5
+
+&quasisymmetry
+ general_option="single"
+
+! untwist=.false.
+
+ finite_r_option="nonlinear"
+ order_r_option="r3_flux_constraint"
+
+ N_phi=101
+ ! finite_r_nonlinear_N_theta = 80
+
+ nfp = 4
+
+ eta_bar = 1.569
+ R0c = 1, 0.17, 0.01804, 0.001409, 5.877e-05
+ Z0s = 0, 0.1581, 0.01820, 0.001548, 7.772e-05
+ B2c = 0.1348
+
+ B2s = 0
+ sigma_initial = 0
+ I2_over_B0 = 0
+ p2 = 0
+
+ r = 0.125
+ vmec_template_filename = "../../input.li383_vacuum"
+/

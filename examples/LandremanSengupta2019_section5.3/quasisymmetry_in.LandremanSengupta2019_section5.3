@@ -1,0 +1,29 @@
+! This is an input file for the configuration of section 5.3 of
+! Landreman & Sengupta, Journal of Plasma Physics (2019)
+! It is quasi-axisymmetric, and has significant pressure and toroidal current,
+! representing a tokamak-stellarator hybrid.
+! The original input file for the paper can be found on the IPP cluster Draco in
+! /ptmp/mlan/20190708-02-GarrenBoozerTokamakStellaratorHybrid/quasisymmetry_in.tokamakStellaratorHybrid_config4
+
+&quasisymmetry
+ general_option="single"
+
+ finite_r_option="nonlinear"
+ order_r_option="r3_flux_constraint"
+
+ N_phi=101
+ ! finite_r_nonlinear_N_theta = 40
+
+ nfp = 2
+ eta_bar = 0.95
+ sigma_initial = 0
+ I2_over_B0 = 0.9
+ R0c = 1, 0.09
+ Z0s = 0, -0.09
+ B2s = 0
+ B2c = -0.7
+ p2 = -600000
+ r = 0.2
+
+ vmec_template_filename='../../input.li383_vacuum'
+/

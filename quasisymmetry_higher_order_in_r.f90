@@ -421,6 +421,8 @@ subroutine quasisymmetry_higher_order_in_r
        -sign_G * B0 * B0 / (2*G0) * (abs_G0_over_B0 * X20 * curvature - d_Z20_d_zeta) &
        -sign_G * sign_psi * B0 * I2 / (4*G0) * (-abs_G0_over_B0 * torsion * (X1c*X1c + Y1c*Y1c + Y1s*Y1s) + Y1c * d_X1c_d_zeta - X1c * d_Y1c_d_zeta)
 
+  d2_volume_d_psi2 = 4*pi*pi*G0*sign_psi/(B0*B0*B0)*(3*eta_bar*eta_bar - 4*B20_mean/B0 + 2*(G2+iota*I2)/G0)
+
 
 !  print *,"AAA"
   if (trim(order_r_option) == order_r_option_r2) then
@@ -566,7 +568,7 @@ subroutine quasisymmetry_higher_order_in_r
 !!$     print *,flux_constraint_coefficient
         print "(a,es22.14)"," max|flux_constraint_coefficient - predicted_flux_constraint_coefficient|:",maxval(abs(flux_constraint_coefficient - predicted_flux_constraint_coefficient))
 
-        if (maxval(abs(flux_constraint_coefficient - predicted_flux_constraint_coefficient)) > 1e-11) then
+        if (maxval(abs(flux_constraint_coefficient - predicted_flux_constraint_coefficient)) > 1e-7) then
            print *,flux_constraint_coefficient - predicted_flux_constraint_coefficient
            print *,"WARNING!!! 2 methods of computing lambda disagree!!"
            stop

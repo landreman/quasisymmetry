@@ -22,6 +22,7 @@ subroutine quasisymmetry_elongation
   ! See my note 20180329-03 for derivation of the formula below for elongation:
   !elongation = 2*abs(q) / (p - sqrt(p*p-4*q*q)) ! This version suffers precision loss for large elongation.
   elongation = (p + sqrt(p*p-4*q*q))/(2*abs(q)) ! This version is more stable numerically.
+  mean_elongation = sum(elongation * d_l_d_phi) / sum(d_l_d_phi)
 
   ! Search for maximum using Fourier interpolation...
   index_of_max = maxloc(elongation,1)
