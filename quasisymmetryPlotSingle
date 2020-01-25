@@ -29,6 +29,10 @@ RBC = f.variables['RBC'][()]
 RBS = f.variables['RBS'][()]
 ZBC = f.variables['ZBC'][()]
 ZBS = f.variables['ZBS'][()]
+R0c = f.variables['R0c'][()]
+R0s = f.variables['R0s'][()]
+Z0c = f.variables['Z0c'][()]
+Z0s = f.variables['Z0s'][()]
 print "RBC.shape:",RBC.shape
 
 phi = f.variables['phi'][()]
@@ -116,6 +120,15 @@ for m in range(mpol+1):
         cosangle = np.cos(angle)
         R += RBC[m,jn] * cosangle + RBS[m,jn] * sinangle
         z += ZBC[m,jn] * cosangle + ZBS[m,jn] * sinangle
+
+R0 = np.zeros(N_phi)
+z0 = np.zeros(N_phi)
+for n in range(len(R0c)):
+    angle = nfp * n * phi1D
+    sinangle = np.sin(angle)
+    cosangle = np.cos(angle)
+    R0 += R0c[n] * cosangle + R0s[n] * sinangle
+    z0 += Z0c[n] * cosangle + Z0s[n] * sinangle
 
 #exit(0)
 
@@ -401,7 +414,10 @@ plt.gca().set_aspect('equal',adjustable='box')
 
 for jphi in range(3):
     plt.subplot(numRows,numCols,jphi+2)
+    for k in range(N_theta):
+        plt.plot([R0[jphi],R[k,jphi]], [z0[jphi],z[k,jphi]],'-')
     plt.plot(R[:,jphi],z[:,jphi])
+    plt.plot(R0[jphi],z0[jphi],'o')
     plt.xlabel('R')
     plt.ylabel('z')
     plt.gca().set_aspect('equal',adjustable='box')
