@@ -58,7 +58,7 @@ subroutine quasisymmetry_write_vmec_input
 
   ! The output is not stellarator-symmetric if (1) R0s is nonzero, (2) Z0c is nonzero, or (3) sigma_initial is nonzero, or (4) B2s is nonzero:
   !lasym = (maxval(abs(R0s))>0 .or. maxval(abs(Z0c)) > 0 .or. abs(sigma_initial) > 0 .or. (order_r_squared .and. abs(B2s)>0))
-  lasym = (maxval(abs(R0s))>0 .or. maxval(abs(Z0c)) > 0 .or. abs(sigma_initial) > 0 .or. ((trim(order_r_option).ne.order_r_option_r1) .and. abs(B2s)>0))
+  lasym = (maxval(abs(R0s))>0 .or. maxval(abs(Z0c)) > 0 .or. abs(sigma_initial) > 0 .or. ((trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option).ne.order_r_option_r1_compute_B2) .and. abs(B2s)>0))
 
   ! We should be able to resolve (N_phi-1)/2 modes (note integer division!), but in case N_phi is very large, don't attempt more than the vmec arrays can handle.
   ntor = min((N_phi - 1) / 2, ntord)
@@ -96,7 +96,7 @@ subroutine quasisymmetry_write_vmec_input
      call quasisymmetry_Frenet_to_cylindrical_nonlinear()
 
   case (finite_r_option_linear)
-     if (trim(order_r_option)==order_r_option_r1) then
+     if (trim(order_r_option)==order_r_option_r1 .or. trim(order_r_option)==order_r_option_r1_compute_B2) then
         mpol_nonzero = 1
      elseif (trim(order_r_option)==order_r_option_r2) then
         mpol_nonzero = 2
@@ -143,7 +143,7 @@ subroutine quasisymmetry_write_vmec_input
         ZBS(-n,1) = half_sum - half_difference
      end do
      
-     if (trim(order_r_option) .ne. order_r_option_r1) then
+     if (trim(order_r_option) .ne. order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2) then
         ! Add O(r^2) terms.
         ! The transformation below can be verified using
         ! m20190215_03_checkFourierTransformInQuasisymmetryCode.m
@@ -195,7 +195,7 @@ subroutine quasisymmetry_write_vmec_input
         end do
      end if
 
-     if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option).ne.order_r_option_r2) then
+     if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2 .and. trim(order_r_option).ne.order_r_option_r2) then
         ! Add O(r^3) terms.
  
         ! Handle the n=0 m=1 modes:

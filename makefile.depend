@@ -1,6 +1,7 @@
 # -*- mode: makefile -*-
 
 OBJ_FILES = quasisymmetry.o \
+	quasisymmetry_compute_B2_for_r1.o \
 	quasisymmetry_fzero.o \
 	quasisymmetry_read_input.o \
 	quasisymmetry_init_phi.o \
@@ -27,6 +28,7 @@ OBJ_FILES = quasisymmetry.o \
 
 # Dependencies:
 quasisymmetry.o: quasisymmetry_variables.o
+quasisymmetry_compute_B2_for_r1.o: quasisymmetry_variables.o
 quasisymmetry_fzero.o:
 quasisymmetry_elongation.o: quasisymmetry_variables.o
 quasisymmetry_read_input.o: quasisymmetry_variables.o

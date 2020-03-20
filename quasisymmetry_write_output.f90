@@ -191,7 +191,10 @@ subroutine quasisymmetry_write_output
        vn_z3s3_cylindrical = "z3s3_cylindrical", &
        vn_z3c1_cylindrical = "z3c1_cylindrical", &
        vn_z3c3_cylindrical = "z3c3_cylindrical", &
-       vn_B0_order_a_squared_to_cancel = "B0_order_a_squared_to_cancel"
+       vn_B0_order_a_squared_to_cancel = "B0_order_a_squared_to_cancel", &
+       vn_B2s_array = "B2s_array", &
+       vn_B2c_array = "B2c_array", &
+       vn_B02 = "B02"
 
   ! Arrays with dimension 2
   character(len=*), parameter :: &
@@ -294,9 +297,12 @@ subroutine quasisymmetry_write_output
      call cdf_define(ncid, vn_lasym, lasym)
      call cdf_define(ncid, vn_untwist, untwist)
      if (trim(order_r_option) .ne. order_r_option_r1) then
+        ! Quantities that matter either for order_r_option_r1_compute_B2 or O(r^2) or O(r^3)
+        call cdf_define(ncid, vn_p2, p2)
+     end if
+     if (trim(order_r_option) .ne. order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2) then
         call cdf_define(ncid, vn_B2s, B2s)
         call cdf_define(ncid, vn_B2c, B2c)
-        call cdf_define(ncid, vn_p2, p2)
         call cdf_define(ncid, vn_B20_mean, B20_mean)
         call cdf_define(ncid, vn_B20_residual, B20_residual)
         call cdf_define(ncid, vn_d2_volume_d_psi2, d2_volume_d_psi2)
@@ -357,7 +363,13 @@ subroutine quasisymmetry_write_output
      call cdf_define(ncid, vn_elongation_in_Rz_plane, elongation_in_Rz_plane, dimname=N_phi_dim)
      call cdf_define(ncid, vn_d_l_d_phi, d_l_d_phi, dimname=N_phi_dim)
      call cdf_define(ncid, vn_modBinv_sqrt_half_grad_B_colon_grad_B, modBinv_sqrt_half_grad_B_colon_grad_B, dimname=N_phi_dim)
-     if (trim(order_r_option) .ne. order_r_option_r1) then
+     if (trim(order_r_option) == order_r_option_r1_compute_B2) then
+        call cdf_define(ncid, vn_B20, B20, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_B2s_array, B2s_array, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_B2c_array, B2c_array, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_B02, B02, dimname=N_phi_dim)
+     end if
+     if (trim(order_r_option) .ne. order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2) then
         ! O(r^2) quantities
         call cdf_define(ncid, vn_X20, X20, dimname=N_phi_dim)
         call cdf_define(ncid, vn_X2s, X2s, dimname=N_phi_dim)
@@ -386,7 +398,7 @@ subroutine quasisymmetry_write_output
         call cdf_define(ncid, vn_z2c_cylindrical, z2c_cylindrical, dimname=N_phi_dim)
         call cdf_define(ncid, vn_B0_order_a_squared_to_cancel, B0_order_a_squared_to_cancel, dimname=N_phi_dim)
      end if
-     if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option).ne.order_r_option_r2) then
+     if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2 .and. trim(order_r_option).ne.order_r_option_r2) then
         ! O(r^3) quantities
         call cdf_define(ncid, vn_X3s1, X3s1, dimname=N_phi_dim)
         call cdf_define(ncid, vn_X3s3, X3s3, dimname=N_phi_dim)
@@ -527,9 +539,12 @@ subroutine quasisymmetry_write_output
      call cdf_write(ncid, vn_lasym, lasym)
      call cdf_write(ncid, vn_untwist, untwist)
      if (trim(order_r_option) .ne. order_r_option_r1) then
+        ! Quantities that matter either for order_r_option_r1_compute_B2 or O(r^2) or O(r^3)
+        call cdf_write(ncid, vn_p2, p2)
+     end if
+     if (trim(order_r_option) .ne. order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2) then
         call cdf_write(ncid, vn_B2s, B2s)
         call cdf_write(ncid, vn_B2c, B2c)
-        call cdf_write(ncid, vn_p2, p2)
         call cdf_write(ncid, vn_B20_mean, B20_mean)
         call cdf_write(ncid, vn_B20_residual, B20_residual)
         call cdf_write(ncid, vn_d2_volume_d_psi2, d2_volume_d_psi2)
@@ -589,7 +604,13 @@ subroutine quasisymmetry_write_output
      call cdf_write(ncid, vn_elongation_in_Rz_plane, elongation_in_Rz_plane)
      call cdf_write(ncid, vn_d_l_d_phi, d_l_d_phi)
      call cdf_write(ncid, vn_modBinv_sqrt_half_grad_B_colon_grad_B, modBinv_sqrt_half_grad_B_colon_grad_B)
-     if (trim(order_r_option) .ne. order_r_option_r1) then
+     if (trim(order_r_option) == order_r_option_r1_compute_B2) then
+        call cdf_write(ncid, vn_B20, B20)
+        call cdf_write(ncid, vn_B2s_array, B2s_array)
+        call cdf_write(ncid, vn_B2c_array, B2c_array)
+        call cdf_write(ncid, vn_B02, B02)
+     end if
+     if (trim(order_r_option) .ne. order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2) then
         ! O(r^2) quantities
         call cdf_write(ncid, vn_X20, X20)
         call cdf_write(ncid, vn_X2s, X2s)
@@ -618,7 +639,7 @@ subroutine quasisymmetry_write_output
         call cdf_write(ncid, vn_z2c_cylindrical, z2c_cylindrical)
         call cdf_write(ncid, vn_B0_order_a_squared_to_cancel, B0_order_a_squared_to_cancel)
      end if
-     if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option).ne.order_r_option_r2) then
+     if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2 .and. trim(order_r_option).ne.order_r_option_r2) then
         ! O(r^3) quantities
         call cdf_write(ncid, vn_X3s1, X3s1)
         call cdf_write(ncid, vn_X3s3, X3s3)

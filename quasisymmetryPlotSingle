@@ -52,10 +52,17 @@ order_r_option = ''.join(f.variables["order_r_option"][()])
 print "order_r_option:",order_r_option
 order_r_option = order_r_option.strip()
 print "order_r_option:",order_r_option
-order_r_squared = (order_r_option != 'r1')
+order_r_squared = (order_r_option != 'r1' and order_r_option != 'r1_compute_B2')
 print "order_r_squared:",order_r_squared
-order_r_cubed = (order_r_option != 'r1' and order_r_option != 'r2')
+order_r_cubed = (order_r_option != 'r1' and order_r_option != 'r1_compute_B2' and order_r_option != 'r2')
 print "order_r_cubed:",order_r_cubed
+order_r1_compute_B2 = order_r_option == 'r1_compute_B2'
+
+if order_r1_compute_B2:
+    B20 = f.variables['B20'][()]
+    B2s_array = f.variables['B2s_array'][()]
+    B2c_array = f.variables['B2c_array'][()]
+    B02 = f.variables['B02'][()]
 
 if order_r_squared:
     B2s = f.variables['B2s'][()]
@@ -143,6 +150,9 @@ if order_r_cubed:
 elif order_r_squared:
     numRows = 4
     numCols = 5
+elif order_r1_compute_B2:
+    numRows = 3
+    numCols = 4
 else:
     numRows = 2
     numCols = 4
@@ -206,6 +216,35 @@ plt.plot(phi,modBinv_sqrt_half_grad_B_colon_grad_B)
 plt.title('Frobenius')
 plt.xlabel('$\phi$')
 plt.xlim(my_xlim)
+
+if order_r1_compute_B2:
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,B20)
+    plt.title('B20')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
+
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,B2s_array)
+    plt.title('B2s_array')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
+
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,B2c_array)
+    plt.title('B2c_array')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
+
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,B02)
+    plt.title('B_0^{(2)}')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
 
 if order_r_squared:
     plt.subplot(numRows,numCols,plotNum)
