@@ -193,7 +193,8 @@ subroutine quasisymmetry_write_output
        vn_z3c3_cylindrical = "z3c3_cylindrical", &
        vn_B0_order_a_squared_to_cancel = "B0_order_a_squared_to_cancel", &
        vn_B2s_array = "B2s_array", &
-       vn_B2c_array = "B2c_array"
+       vn_B2c_array = "B2c_array", &
+       vn_B02 = "B02"
 
   ! Arrays with dimension 2
   character(len=*), parameter :: &
@@ -366,6 +367,7 @@ subroutine quasisymmetry_write_output
         call cdf_define(ncid, vn_B20, B20, dimname=N_phi_dim)
         call cdf_define(ncid, vn_B2s_array, B2s_array, dimname=N_phi_dim)
         call cdf_define(ncid, vn_B2c_array, B2c_array, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_B02, B02, dimname=N_phi_dim)
      end if
      if (trim(order_r_option) .ne. order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2) then
         ! O(r^2) quantities
@@ -606,6 +608,7 @@ subroutine quasisymmetry_write_output
         call cdf_write(ncid, vn_B20, B20)
         call cdf_write(ncid, vn_B2s_array, B2s_array)
         call cdf_write(ncid, vn_B2c_array, B2c_array)
+        call cdf_write(ncid, vn_B02, B02)
      end if
      if (trim(order_r_option) .ne. order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2) then
         ! O(r^2) quantities

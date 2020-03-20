@@ -58,6 +58,7 @@ if order_r1_compute_B2:
     B20 = f.variables['B20'][()]
     B2s_array = f.variables['B2s_array'][()]
     B2c_array = f.variables['B2c_array'][()]
+    B02 = f.variables['B02'][()]
 
 if order_r_squared:
     B2s = f.variables['B2s'][()]
@@ -222,6 +223,13 @@ if order_r1_compute_B2:
     plotNum += 1
     plt.plot(phi,B2c_array)
     plt.title('B2c_array')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
+
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,B02)
+    plt.title('B_0^{(2)}')
     plt.xlabel('$\phi$')
     plt.xlim(my_xlim)
 

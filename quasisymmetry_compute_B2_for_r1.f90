@@ -27,6 +27,9 @@ subroutine quasisymmetry_compute_B2_for_r1
   real(dp), allocatable, dimension(:) :: Y2s_from_X20, Y2s_from_Y20, Y2s_inhomogeneous
   real(dp), allocatable, dimension(:) :: Y2c_from_X20, Y2c_from_Y20, Y2c_inhomogeneous
   real(dp), allocatable, dimension(:) :: X2s_test, X2c_test
+  real(dp), dimension(:), allocatable :: d_Z20_d_zeta, d_Z2s_d_zeta, d_Z2c_d_zeta
+  real(dp), allocatable, dimension(:) :: Q, A, q_tilde
+  real(dp) :: I2, G0
 
 
   print "(a)", "Hello from quasisymmetry_compute_B2_for_r1"
@@ -65,6 +68,9 @@ subroutine quasisymmetry_compute_B2_for_r1
   allocate(rs(N_phi))
   allocate(rc(N_phi))
 
+  if (allocated(B02)) deallocate(B02)
+  allocate(B02(N_phi))
+
   allocate(factors(N_phi))
 
   iota_N = iota + axis_helicity*nfp
@@ -79,6 +85,13 @@ subroutine quasisymmetry_compute_B2_for_r1
   Z20 = factor*matmul(d_d_zeta,V1)
   Z2s = factor*(matmul(d_d_zeta,V2) - 2 * iota_N * V3)
   Z2c = factor*(matmul(d_d_zeta,V3) + 2 * iota_N * V2)
+
+  allocate(d_Z20_d_zeta(N_phi))
+  allocate(d_Z2s_d_zeta(N_phi))
+  allocate(d_Z2c_d_zeta(N_phi))
+  d_Z20_d_zeta = matmul(d_d_zeta, Z20)
+  d_Z2s_d_zeta = matmul(d_d_zeta, Z2s)
+  d_Z2c_d_zeta = matmul(d_d_zeta, Z2c)
 
   qs = -iota_N * X1c - Y1s * torsion * abs_G0_over_B0
   qc = matmul(d_d_zeta,X1c) - Y1c * torsion * abs_G0_over_B0
@@ -531,13 +544,13 @@ subroutine quasisymmetry_compute_B2_for_r1
 
   ! Now that we know the tilde versions of X20, X2s, and X2c, we can compute the tilde versions of B20, B2s, and B2c
 
-  B20       = B0 * (curvature * X20 - B0_over_abs_G0 * matmul(d_d_zeta,Z20) + (0.5d+0) * eta_bar * eta_bar - mu0 * p2 / (B0 * B0) &
+  B20       = B0 * (curvature * X20 - B0_over_abs_G0 * d_Z20_d_zeta + (0.5d+0) * eta_bar * eta_bar - mu0 * p2 / (B0 * B0) &
        - (0.25d+0) * B0_over_abs_G0 * B0_over_abs_G0 * (qc * qc + qs * qs + rc * rc + rs * rs))
 
-  B2s_array = B0 * (curvature * X2s - B0_over_abs_G0 * (matmul(d_d_zeta,Z2s) - 2 * iota_N * Z2c) &
+  B2s_array = B0 * (curvature * X2s - B0_over_abs_G0 * (d_Z2s_d_zeta - 2 * iota_N * Z2c) &
        - (0.25d+0) * B0_over_abs_G0 * B0_over_abs_G0 * 2 * (qc * qs + rc * rs))
 
-  B2c_array = B0 * (curvature * X2c - B0_over_abs_G0 * (matmul(d_d_zeta,Z2c) + 2 * iota_N * Z2s) + (0.5d+0) * eta_bar * eta_bar &
+  B2c_array = B0 * (curvature * X2c - B0_over_abs_G0 * (d_Z2c_d_zeta + 2 * iota_N * Z2s) + (0.5d+0) * eta_bar * eta_bar &
        - (0.25d+0) * B0_over_abs_G0 * B0_over_abs_G0 * (qc * qc - qs * qs + rc * rc - rs * rs))
 
 
@@ -545,9 +558,9 @@ subroutine quasisymmetry_compute_B2_for_r1
      ! Verify the B2s and B2c equations
      allocate(X2s_test(N_phi))
      allocate(X2c_test(N_phi))
-     X2s_test = B0_over_abs_G0 * (matmul(d_d_zeta,Z2s) - 2*iota_N*Z2c + B0_over_abs_G0 * ( abs_G0_over_B0*abs_G0_over_B0*B2s_array/B0 + (qc * qs + rc * rs)/2)) / curvature
+     X2s_test = B0_over_abs_G0 * (d_Z2s_d_zeta - 2*iota_N*Z2c + B0_over_abs_G0 * ( abs_G0_over_B0*abs_G0_over_B0*B2s_array/B0 + (qc * qs + rc * rs)/2)) / curvature
 
-     X2c_test = B0_over_abs_G0 * (matmul(d_d_zeta,Z2c) + 2*iota_N*Z2s - B0_over_abs_G0 * (-abs_G0_over_B0*abs_G0_over_B0*B2c_array/B0 &
+     X2c_test = B0_over_abs_G0 * (d_Z2c_d_zeta + 2*iota_N*Z2s - B0_over_abs_G0 * (-abs_G0_over_B0*abs_G0_over_B0*B2c_array/B0 &
           + abs_G0_over_B0*abs_G0_over_B0*eta_bar*eta_bar/2 - (qc * qc - qs * qs + rc * rc - rs * rs)/4)) / curvature
 
      max_eq1residual = maxval(abs(X2s - X2s_test))
@@ -558,7 +571,36 @@ subroutine quasisymmetry_compute_B2_for_r1
      deallocate(X2s_test, X2c_test)
   end if
 
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! Now compute \tilde{B}_0^{(2)}
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  allocate(Q(N_phi))
+  allocate(A(N_phi))
+  allocate(q_tilde(N_phi))
+
+  I2 = I2_over_B0 * B0
+  G0 = sign_G * abs_G0_over_B0 * B0
+
+  ! The expression below is derived in the O(r^2) paper, and in "20190318-01 Wrick's streamlined Garren-Boozer method, MHD.nb" in the section "Not assuming quasisymmetry".
+  ! Note Q = (1/2) * (XYEquation0 without X3 and Y3 terms) where XYEquation0 is the quantity in the above notebook.
+  Q = -sign_psi * B0 * abs_G0_over_B0 / (2*G0*G0) * (iota_N * I2 + mu0 * p2 * G0 / (B0 * B0)) + 2 * (X2c * Y2s - X2s * Y2c) &
+       + sign_psi * B0 / (2*G0) * (abs_G0_over_B0 * X20 * curvature - d_Z20_d_zeta) &
+       + I2 / (4 * G0) * (-abs_G0_over_B0 * torsion * (X1c*X1c + Y1s*Y1s + Y1c*Y1c) + Y1c * matmul(d_d_zeta,X1c) - X1c * matmul(d_d_zeta,Y1c))
+
+  ! See "20200318-01 Checking equations in Error field in O(r1) GarrenBoozer.docx"
+  ! A = torsion * (-Z2c * 2 * Y1s * Y1c - Z2s * (-X1c*X1c + Y1c*Y1c - Y1s*Y1s)) &
+  A = torsion * (-Z2c * 2 * Y1s * Y1c - Z2s * (-X1c*X1c - Y1c*Y1c + Y1s*Y1s)) &
+       -(Z2s / abs_G0_over_B0) * (-X1c * matmul(d_d_zeta,Y1c) + Y1c * matmul(d_d_zeta,X1c)) - (Z2c / abs_G0_over_B0) * (X1c * matmul(d_d_zeta,Y1s) - Y1s * matmul(d_d_zeta,X1c))
+
+  q_tilde = Q + A/2 + 2 * (X2s*X2s + X2c*X2c) * (-Y1s)/X1c
+
+  B02 = -sign_G * sign_psi * B0 * q_tilde
+
+  deallocate(Q,A,q_tilde)
+
   deallocate(matrix, right_hand_side, factors)
   deallocate(V1, V2, V3, qs, qc, rs, rc)
+  deallocate(d_Z20_d_zeta, d_Z2s_d_zeta, d_Z2c_d_zeta)
 
 end subroutine quasisymmetry_compute_B2_for_r1

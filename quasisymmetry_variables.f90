@@ -137,7 +137,7 @@ module quasisymmetry_variables
   real(dp) :: r = 0.1d+0
   integer :: mpol_nonzero
 
-  real(dp), dimension(:), allocatable :: X20, X2s, X2c, Y20, Y2s, Y2c, Z20, Z2s, Z2c, B20, B2s_array, B2c_array
+  real(dp), dimension(:), allocatable :: X20, X2s, X2c, Y20, Y2s, Y2c, Z20, Z2s, Z2c, B20, B2s_array, B2c_array, B02
   real(dp), dimension(:), allocatable :: X20_untwisted, X2s_untwisted, X2c_untwisted
   real(dp), dimension(:), allocatable :: Y20_untwisted, Y2s_untwisted, Y2c_untwisted, Z20_untwisted, Z2s_untwisted, Z2c_untwisted
   real(dp), dimension(:), allocatable :: R20, R2s, R2c, z20_cylindrical, z2s_cylindrical, z2c_cylindrical
