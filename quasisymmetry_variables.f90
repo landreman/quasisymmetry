@@ -161,6 +161,8 @@ module quasisymmetry_variables
   real(dp) :: iota_from_torsion, d2_volume_d_psi2 = 0
   logical :: circular_cross_section_surface = .false.
   integer :: finite_r_nonlinear_N_theta = 20
+  real(dp), dimension(:), allocatable :: r_singularity_vs_zeta
+  real(dp) :: r_singularity
 
   integer :: N_procs, mpi_rank
   logical :: proc0, verbose = .true.

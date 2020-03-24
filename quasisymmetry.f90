@@ -12,6 +12,11 @@ program quasisymmetry
   integer :: tic, toc, countrate, ierr
   real :: end_time
 
+!  double precision :: coefficients(5), real_parts(4), imag_parts(4)
+!  coefficients = (/ 0.5d+0, -1.1d+0, -0.8d+0, 0.3d+0, 1.2d+0 /)
+!  call quasisymmetry_quartic_roots(coefficients, real_parts, imag_parts)
+!  print *,"real parts:",real_parts
+!  print *,"imag parts:",imag_parts
 
   call mpi_init(ierr)
   call mpi_comm_rank(MPI_COMM_WORLD, mpi_rank, ierr)
