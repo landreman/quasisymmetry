@@ -78,6 +78,7 @@ if order_r_squared:
     Z20 = f.variables['Z20'][()]
     Z2s = f.variables['Z2s'][()]
     Z2c = f.variables['Z2c'][()]
+    r_singularity_vs_zeta = f.variables['r_singularity_vs_zeta'][()]
     
 if order_r_cubed:
     X3s1 = f.variables['X3s1'][()]
@@ -314,6 +315,13 @@ if order_r_squared:
     plotNum += 1
     plt.plot(phi,B20)
     plt.title('B20')
+    plt.xlabel('$\phi$')
+    plt.xlim(my_xlim)
+
+    plt.subplot(numRows,numCols,plotNum)
+    plotNum += 1
+    plt.plot(phi,r_singularity_vs_zeta)
+    plt.title('r_singularity_vs_zeta')
     plt.xlabel('$\phi$')
     plt.xlim(my_xlim)
 

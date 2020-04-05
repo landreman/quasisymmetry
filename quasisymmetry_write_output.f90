@@ -44,6 +44,7 @@ subroutine quasisymmetry_write_output
        vn_max_curvature = "max_curvature", &
        vn_max_modBinv_sqrt_half_grad_B_colon_grad_B = "max_modBinv_sqrt_half_grad_B_colon_grad_B", &
        vn_axis_length = "axis_length", &
+       vn_abs_G0_over_B0 = "abs_G0_over_B0", &
        vn_standard_deviation_of_R = "standard_deviation_of_R", &
        vn_standard_deviation_of_Z = "standard_deviation_of_Z", &
        vn_axis_helicity = "axis_helicity", &
@@ -69,7 +70,8 @@ subroutine quasisymmetry_write_output
        vn_B3s3_input = "B3s3_input", &
        vn_B3c3_input = "B3c3_input", &
        vn_Y3c1_initial = "Y3c1_initial", &
-       vn_d2_volume_d_psi2 = "d2_volume_d_psi2"
+       vn_d2_volume_d_psi2 = "d2_volume_d_psi2", &
+       vn_r_singularity = "r_singularity"
 
   ! Arrays with dimension 1
   character(len=*), parameter :: &
@@ -194,10 +196,13 @@ subroutine quasisymmetry_write_output
        vn_B0_order_a_squared_to_cancel = "B0_order_a_squared_to_cancel", &
        vn_B2s_array = "B2s_array", &
        vn_B2c_array = "B2c_array", &
-       vn_B02 = "B02"
+       vn_B02 = "B02", &
+       vn_r_singularity_vs_zeta = "r_singularity_vs_zeta"
 
   ! Arrays with dimension 2
   character(len=*), parameter :: &
+       vn_d_d_phi = "d_d_phi", &
+       vn_d_d_zeta = "d_d_zeta", &
        vn_N_scan_array  = "N_scan_array", &
        vn_scan_R0c  = "scan_R0c", &
        vn_scan_R0s  = "scan_R0s", &
@@ -230,7 +235,8 @@ subroutine quasisymmetry_write_output
   character(len=*), parameter, dimension(2) :: &
        axis_nmax_plus_1_4_dim = (/ character(len=50) :: 'axis_nmax_plus_1','4'/), &
        N_scan_axis_nmax_plus_1_dim = (/ character(len=50) :: 'N_scan','axis_nmax_plus_1'/), &
-       ntor_mpol_dim = (/ character(len=50) :: 'ntor_times_2_plus_1','mpol_plus_1' /)
+       ntor_mpol_dim = (/ character(len=50) :: 'ntor_times_2_plus_1','mpol_plus_1' /), &
+       N_phi_N_phi_dim = (/ character(len=50) :: 'N_phi','N_phi' /)
 
 !!$  ! Arrays with dimension 3:
 !!$  character(len=*), parameter, dimension(3) :: &
@@ -280,6 +286,7 @@ subroutine quasisymmetry_write_output
      call cdf_define(ncid, vn_max_curvature, max_curvature)
      call cdf_define(ncid, vn_max_modBinv_sqrt_half_grad_B_colon_grad_B, max_modBinv_sqrt_half_grad_B_colon_grad_B)
      call cdf_define(ncid, vn_axis_length, axis_length)
+     call cdf_define(ncid, vn_abs_G0_over_B0, abs_G0_over_B0)
      call cdf_define(ncid, vn_standard_deviation_of_R, standard_deviation_of_R)
      call cdf_define(ncid, vn_standard_deviation_of_Z, standard_deviation_of_Z)
      call cdf_define(ncid, vn_axis_helicity, axis_helicity)
@@ -307,6 +314,7 @@ subroutine quasisymmetry_write_output
         call cdf_define(ncid, vn_B20_residual, B20_residual)
         call cdf_define(ncid, vn_d2_volume_d_psi2, d2_volume_d_psi2)
         call cdf_setatt(ncid, vn_d2_volume_d_psi2, 'Magnetic well parameter. The quantity saved is the second derivative of the volume of the flux surfaces with respect to psi, where 2*pi*psi is the toroidal flux. Negative values of this quantity are favorable for stability.')
+        call cdf_define(ncid, vn_r_singularity, r_singularity)
      end if
      if (trim(order_r_option) == order_r_option_r3_B3) then
         call cdf_define(ncid, vn_B3c3_input, B3c3_input)
@@ -397,6 +405,7 @@ subroutine quasisymmetry_write_output
         call cdf_define(ncid, vn_z2s_cylindrical, z2s_cylindrical, dimname=N_phi_dim)
         call cdf_define(ncid, vn_z2c_cylindrical, z2c_cylindrical, dimname=N_phi_dim)
         call cdf_define(ncid, vn_B0_order_a_squared_to_cancel, B0_order_a_squared_to_cancel, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_r_singularity_vs_zeta, r_singularity_vs_zeta, dimname=N_phi_dim)
      end if
      if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2 .and. trim(order_r_option).ne.order_r_option_r2) then
         ! O(r^3) quantities
@@ -483,6 +492,8 @@ subroutine quasisymmetry_write_output
      call cdf_define(ncid, vn_RBS, RBS(-ntor:ntor, 0:mpol_nonzero), dimname=ntor_mpol_dim)
      call cdf_define(ncid, vn_ZBC, ZBC(-ntor:ntor, 0:mpol_nonzero), dimname=ntor_mpol_dim)
      call cdf_define(ncid, vn_ZBS, ZBS(-ntor:ntor, 0:mpol_nonzero), dimname=ntor_mpol_dim)
+     call cdf_define(ncid, vn_d_d_phi,  d_d_phi,  dimname=N_phi_N_phi_dim)
+     call cdf_define(ncid, vn_d_d_zeta, d_d_zeta, dimname=N_phi_N_phi_dim)
   case (general_option_scan)
      call cdf_define(ncid, vn_N_scan_array,  N_scan_array(1:axis_nmax+1,:), dimname=axis_nmax_plus_1_4_dim)
      call cdf_define(ncid, vn_scan_R0c,  scan_R0c, dimname=N_scan_axis_nmax_plus_1_dim)
@@ -522,6 +533,7 @@ subroutine quasisymmetry_write_output
      call cdf_write(ncid, vn_max_curvature, max_curvature)
      call cdf_write(ncid, vn_max_modBinv_sqrt_half_grad_B_colon_grad_B, max_modBinv_sqrt_half_grad_B_colon_grad_B)
      call cdf_write(ncid, vn_axis_length, axis_length)
+     call cdf_write(ncid, vn_abs_G0_over_B0, abs_G0_over_B0)
      call cdf_write(ncid, vn_standard_deviation_of_R, standard_deviation_of_R)
      call cdf_write(ncid, vn_standard_deviation_of_Z, standard_deviation_of_Z)
      call cdf_write(ncid, vn_axis_helicity, axis_helicity)
@@ -548,6 +560,7 @@ subroutine quasisymmetry_write_output
         call cdf_write(ncid, vn_B20_mean, B20_mean)
         call cdf_write(ncid, vn_B20_residual, B20_residual)
         call cdf_write(ncid, vn_d2_volume_d_psi2, d2_volume_d_psi2)
+        call cdf_write(ncid, vn_r_singularity, r_singularity)
      end if
      if (trim(order_r_option) == order_r_option_r3_B3) then
         call cdf_write(ncid, vn_B3c3_input, B3c3_input)
@@ -638,6 +651,7 @@ subroutine quasisymmetry_write_output
         call cdf_write(ncid, vn_z2s_cylindrical, z2s_cylindrical)
         call cdf_write(ncid, vn_z2c_cylindrical, z2c_cylindrical)
         call cdf_write(ncid, vn_B0_order_a_squared_to_cancel, B0_order_a_squared_to_cancel)
+        call cdf_write(ncid, vn_r_singularity_vs_zeta, r_singularity_vs_zeta)
      end if
      if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2 .and. trim(order_r_option).ne.order_r_option_r2) then
         ! O(r^3) quantities
@@ -724,6 +738,8 @@ subroutine quasisymmetry_write_output
      call cdf_write(ncid, vn_RBS, RBS(-ntor:ntor, 0:mpol_nonzero))
      call cdf_write(ncid, vn_ZBC, ZBC(-ntor:ntor, 0:mpol_nonzero))
      call cdf_write(ncid, vn_ZBS, ZBS(-ntor:ntor, 0:mpol_nonzero))
+     call cdf_write(ncid, vn_d_d_phi,  d_d_phi)
+     call cdf_write(ncid, vn_d_d_zeta, d_d_zeta)
   case (general_option_scan)
      call cdf_write(ncid, vn_N_scan_array,  N_scan_array(1:axis_nmax+1,:))
      call cdf_write(ncid, vn_scan_R0c,  scan_R0c)

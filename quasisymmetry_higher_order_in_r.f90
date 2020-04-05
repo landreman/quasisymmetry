@@ -59,6 +59,7 @@ subroutine quasisymmetry_higher_order_in_r
   if (allocated(X2c_untwisted)) deallocate(X2c_untwisted)
   if (allocated(Y2c_untwisted)) deallocate(Y2c_untwisted)
   if (allocated(Z2c_untwisted)) deallocate(Z2c_untwisted)
+  if (allocated(r_singularity_vs_zeta)) deallocate(r_singularity_vs_zeta)
 
   if (allocated(R20)) deallocate(R20)
   if (allocated(R2s)) deallocate(R2s)
@@ -86,6 +87,7 @@ subroutine quasisymmetry_higher_order_in_r
   allocate(Z20_untwisted(N_phi))
   allocate(Z2s_untwisted(N_phi))
   allocate(Z2c_untwisted(N_phi))
+  allocate(r_singularity_vs_zeta(N_phi))
 
   allocate(R20(N_phi))
   allocate(R2s(N_phi))
@@ -412,8 +414,15 @@ subroutine quasisymmetry_higher_order_in_r
   G0 = sign_G * abs_G0_over_B0 * B0
   Bbar = sign_psi * B0
   G2 = -mu0 * p2 * G0 / (B0 * B0) - iota * I2
+
   allocate(d_Z20_d_zeta(N_phi))
+  allocate(d_Z2c_d_zeta(N_phi))
+  allocate(d_Z2s_d_zeta(N_phi))
+
   d_Z20_d_zeta = matmul(d_d_zeta,Z20)
+  d_Z2c_d_zeta = matmul(d_d_zeta,Z2c)
+  d_Z2s_d_zeta = matmul(d_d_zeta,Z2s)
+
   if (allocated(B0_order_a_squared_to_cancel)) deallocate(B0_order_a_squared_to_cancel)
   allocate(B0_order_a_squared_to_cancel(N_phi))
   B0_order_a_squared_to_cancel = -sign_G * B0 * B0 * (G2 + I2 * N_helicity) * abs_G0_over_B0 / (2*G0*G0) &
@@ -423,10 +432,11 @@ subroutine quasisymmetry_higher_order_in_r
 
   d2_volume_d_psi2 = 4*pi*pi*abs(G0)/(B0*B0*B0)*(3*eta_bar*eta_bar - 4*B20_mean/B0 + 2*(G2+iota*I2)/G0)
 
+  call quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_Z2c_d_zeta)
 
 !  print *,"AAA"
   if (trim(order_r_option) == order_r_option_r2) then
-     deallocate(d_Z20_d_zeta)
+     deallocate(d_Z20_d_zeta, d_Z2s_d_zeta, d_Z2c_d_zeta)
      return
   end if
 !  print *,"BBB"
@@ -507,12 +517,6 @@ subroutine quasisymmetry_higher_order_in_r
   allocate(Z3s3_untwisted(N_phi))
   allocate(Z3c1_untwisted(N_phi))
   allocate(Z3c3_untwisted(N_phi))
-
-  ! Derivatives of Z20, Z2c, and Z2s are needed to compute (X3,Y3).
-  allocate(d_Z2c_d_zeta(N_phi))
-  allocate(d_Z2s_d_zeta(N_phi))
-  d_Z2c_d_zeta = matmul(d_d_zeta,Z2c)
-  d_Z2s_d_zeta = matmul(d_d_zeta,Z2s)
 
  ! print *,"DDD"
   if (trim(order_r_option) == order_r_option_r3_flux_constraint .or. trim(order_r_option) == order_r_option_r3_flux_constraint_const_B20) then
