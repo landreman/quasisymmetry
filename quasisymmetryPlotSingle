@@ -75,7 +75,10 @@ if order_r_squared:
     Z2s = f.variables['Z2s'][()]
     Z2c = f.variables['Z2c'][()]
     r_singularity_vs_zeta = f.variables['r_singularity_vs_zeta'][()]
-    
+    for j in range(len(phi)):
+        if r_singularity_vs_zeta[j] > 1.0e10:
+            r_singularity_vs_zeta[j] = np.nan
+
 if order_r_cubed:
     X3s1 = f.variables['X3s1'][()]
     X3c1 = f.variables['X3c1'][()]
