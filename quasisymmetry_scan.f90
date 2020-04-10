@@ -463,6 +463,8 @@ subroutine quasisymmetry_scan
      if (N_scan < 5000) then
         print "(a,99999(f8.2))"," iotas:",iotas
         print *," "
+        print "(a,99999(f8.2))"," eta_bar:",scan_eta_bar
+        print *," "
         print "(a,99999(f8.1))"," elongations:",max_elongations
         print *," "
         print "(a,99999(f8.2))"," rms_curvatures:",rms_curvatures

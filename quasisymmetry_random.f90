@@ -22,6 +22,7 @@ subroutine quasisymmetry_random
   integer*8, dimension(:), allocatable :: N_solves_kept
   real(dp), dimension(:), allocatable :: scan_eta_bar_local, scan_sigma_initial_local
   real(dp), dimension(:,:), allocatable :: scan_R0c_local, scan_R0s_local, scan_Z0c_local, scan_Z0s_local
+  real(dp), dimension(:), allocatable :: max_B2tildes_local
   logical :: keep_going
   real(dp) :: thresh, time1, time2
   real(dp) :: rand
@@ -44,6 +45,9 @@ subroutine quasisymmetry_random
   allocate(iota_tolerance_achieveds_local(N_random))
   allocate(elongation_tolerance_achieveds_local(N_random))
   allocate(Newton_tolerance_achieveds_local(N_random))
+  if (trim(order_r_option) == order_r_option_r1_compute_B2) then
+     allocate(max_B2tildes_local(N_random))
+  end if
 
   ! Allocate arrays to store the input parameters that correspond to saved results:
   allocate(scan_eta_bar_local(N_random))
@@ -195,6 +199,9 @@ subroutine quasisymmetry_random
      if (max_elongation > max_elongation_to_keep) cycle
      if (abs(iota) < min_iota_to_keep) cycle
      if (max_modBinv_sqrt_half_grad_B_colon_grad_B > max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep) cycle
+     if (trim(order_r_option) == order_r_option_r1_compute_B2) then
+        if (max_B2tilde > max_B2tilde_to_keep) cycle
+     end if
            
      ! If we made it this far, then record the results
      j_scan = j_scan + 1
@@ -219,7 +226,10 @@ subroutine quasisymmetry_random
      iota_tolerance_achieveds_local(j_scan) = iota_tolerance_achieved
      elongation_tolerance_achieveds_local(j_scan) = elongation_tolerance_achieved
      Newton_tolerance_achieveds_local(j_scan) = Newton_tolerance_achieved
-  
+     if (trim(order_r_option) == order_r_option_r1_compute_B2) then
+        max_B2tildes_local(j_scan) = max_B2tilde
+     end if
+
      ! Check whether either of the stopping criteria have been reached.
      call cpu_time(time1)
      if ((time1 - start_time >= random_time) .or. (j_scan >= N_random)) keep_going = .false.
@@ -264,6 +274,9 @@ subroutine quasisymmetry_random
      allocate(iota_tolerance_achieveds(N_scan))
      allocate(elongation_tolerance_achieveds(N_scan))
      allocate(Newton_tolerance_achieveds(N_scan))
+     if (trim(order_r_option) == order_r_option_r1_compute_B2) then
+        allocate(max_B2tildes(N_scan))
+     end if
 
      allocate(scan_eta_bar(N_scan))
      allocate(scan_sigma_initial(N_scan))
@@ -286,6 +299,9 @@ subroutine quasisymmetry_random
      iota_tolerance_achieveds(1:N_solves_kept(1)) = iota_tolerance_achieveds_local(1:N_solves_kept(1))
      elongation_tolerance_achieveds(1:N_solves_kept(1)) = elongation_tolerance_achieveds_local(1:N_solves_kept(1))
      Newton_tolerance_achieveds(1:N_solves_kept(1)) = Newton_tolerance_achieveds_local(1:N_solves_kept(1))
+     if (trim(order_r_option) == order_r_option_r1_compute_B2) then
+        max_B2tildes(1:N_solves_kept(1)) = max_B2tildes_local(1:N_solves_kept(1))
+     end if
 
      scan_eta_bar(1:N_solves_kept(1)) = scan_eta_bar_local(1:N_solves_kept(1))
      scan_sigma_initial(1:N_solves_kept(1)) = scan_sigma_initial_local(1:N_solves_kept(1))
@@ -310,6 +326,9 @@ subroutine quasisymmetry_random
         call mpi_recv(Newton_tolerance_achieveds(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(iota_tolerance_achieveds(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(elongation_tolerance_achieveds(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        if (trim(order_r_option) == order_r_option_r1_compute_B2) then
+           call mpi_recv(max_B2tildes(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        end if
 
         call mpi_recv(scan_eta_bar(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(scan_sigma_initial(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
@@ -345,7 +364,10 @@ subroutine quasisymmetry_random
      call mpi_send(Newton_tolerance_achieveds_local(1:j_scan),j_scan,MPI_LOGICAL,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(iota_tolerance_achieveds_local(1:j_scan),j_scan,MPI_LOGICAL,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(elongation_tolerance_achieveds_local(1:j_scan),j_scan,MPI_LOGICAL,0,mpi_rank,MPI_COMM_WORLD,ierr)
-     
+     if (trim(order_r_option) == order_r_option_r1_compute_B2) then
+        call mpi_send(max_B2tildes_local(1:j_scan),j_scan,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     end if
+
      call mpi_send(scan_eta_bar_local(1:j_scan),j_scan,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(scan_sigma_initial_local(1:j_scan),j_scan,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(scan_R0c_local(1:j_scan,:),j_scan*(axis_nmax+1),MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
@@ -365,6 +387,8 @@ subroutine quasisymmetry_random
      if (N_scan < 5000) then
         print "(a,99999(f8.2))"," iotas:",iotas
         print *," "
+        print "(a,99999(f8.2))"," eta_bar:",scan_eta_bar
+        print *," "
         print "(a,99999(f8.1))"," elongations:",max_elongations
         print *," "
         print "(a,99999(f8.2))"," rms_curvatures:",rms_curvatures
@@ -373,6 +397,10 @@ subroutine quasisymmetry_random
         print *," "
         print "(a,99999(f8.2))"," max_modBinv_sqrt_half_grad_B_colon_grad_Bs:",max_modBinv_sqrt_half_grad_B_colon_grad_Bs
         print *," "
+        if (trim(order_r_option) == order_r_option_r1_compute_B2) then
+           print "(a,99999(f8.2))"," max_B2tildes:",max_B2tildes
+           print *," "
+        end if
         print "(a,99999(f8.2))"," axis_lengths:",axis_lengths
         print *," "
         print "(a,99999(i2))","                axis_helicities:",axis_helicities

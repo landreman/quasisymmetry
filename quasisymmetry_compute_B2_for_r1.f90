@@ -32,13 +32,7 @@ subroutine quasisymmetry_compute_B2_for_r1
   real(dp) :: I2, G0
 
 
-  print "(a)", "Hello from quasisymmetry_compute_B2_for_r1"
-!!$  print *,"max(X1c):",maxval(abs(X1c))
-!!$  print *,"max(Y1s):",maxval(abs(Y1s))
-!!$  print *,"max(Y1c):",maxval(abs(Y1c))
-!!$  print *,"max(d_d_zeta):",maxval(abs(d_d_zeta))
-!!$  print *,"max(curvature):",maxval(abs(curvature))
-!!$  print *,"max(torsion):",maxval(abs(torsion))
+  if (verbose) print "(a)", " Hello from quasisymmetry_compute_B2_for_r1"
 
   if (allocated(X20)) deallocate(X20)
   if (allocated(X2s)) deallocate(X2s)
@@ -394,7 +388,7 @@ subroutine quasisymmetry_compute_B2_for_r1
      ! Done assembling the matrix and right-hand side.
 
      ! 2nd pass typing up the equations
-     if (.true.) then
+     if (debug) then
         allocate(right_hand_side2(2*N_phi))
         right_hand_side2 = 0
         ! Note: X2s has no inhomogeneous term
@@ -432,7 +426,7 @@ subroutine quasisymmetry_compute_B2_for_r1
              )
              
         ! print *,"Difference in RHS:",maxval(abs(right_hand_side(1:N_phi) - right_hand_side2(1:N_phi)))
-        print *,"Difference in RHS:",maxval(abs(right_hand_side - right_hand_side2))
+        if (verbose) print *,"Difference in RHS:",maxval(abs(right_hand_side - right_hand_side2))
         deallocate(right_hand_side2)
      end if
 
@@ -468,7 +462,7 @@ subroutine quasisymmetry_compute_B2_for_r1
   ! X20, X2s, X2c, Y20, Y2s, Y2c.
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  if (.true.) then
+  if (debug) then
      ! Verify that residuals in each equation are zero.
      allocate(eq1residual(N_phi))
      allocate(eq2residual(N_phi))
@@ -478,8 +472,8 @@ subroutine quasisymmetry_compute_B2_for_r1
      eq2residual = (-X2c * X1s + X2s * X1c) / (X1s * X1s + X1c * X1c) - (-Y2c * Y1s + Y2s * Y1c) / (Y1s * Y1s + Y1c * Y1c)
      max_eq1residual = maxval(abs(eq1residual))
      max_eq2residual = maxval(abs(eq2residual))
-     print *,"max(abs(residual)) for 1st equation from tilde analysis:",max_eq1residual
-     print *,"max(abs(residual)) for 2nd equation from tilde analysis:",max_eq2residual
+     if (verbose) print *,"max(abs(residual)) for 1st equation from tilde analysis:",max_eq1residual
+     if (verbose) print *,"max(abs(residual)) for 2nd equation from tilde analysis:",max_eq2residual
      if (max_eq1residual > 1e-12) stop "Large residual in 1st equation."
      if (max_eq2residual > 1e-12) stop "Large residual in 2nd equation."
 
@@ -519,11 +513,11 @@ subroutine quasisymmetry_compute_B2_for_r1
 
      max_eq1residual = maxval(abs(eq1residual))
      max_eq2residual = maxval(abs(eq2residual))
-     print *,"max(abs(eq1residual)):",max_eq1residual
-     print *,"max(abs(eq2residual)):",max_eq2residual
+     if (verbose) print *,"max(abs(eq1residual)):",max_eq1residual
+     if (verbose) print *,"max(abs(eq2residual)):",max_eq2residual
 
-     if (max_eq1residual > 1e-8) stop "Equation 1 residual is large !!!"
-     if (max_eq2residual > 1e-8) stop "Equation 2 residual is large !!!"
+     if (max_eq1residual > 1e-6) stop "Equation 1 residual is large !!!"
+     if (max_eq2residual > 1e-6) stop "Equation 2 residual is large !!!"
 
      ! Now check the two equations that were used to determine Y2s and Y2c:
 
@@ -533,11 +527,11 @@ subroutine quasisymmetry_compute_B2_for_r1
 
      max_eq1residual = maxval(abs(eq1residual))
      max_eq2residual = maxval(abs(eq2residual))
-     print *,"max(abs(Y2c eq residual)):",max_eq1residual
-     print *,"max(abs(Y2s eq residual)):",max_eq2residual
+     if (verbose) print *,"max(abs(Y2c eq residual)):",max_eq1residual
+     if (verbose) print *,"max(abs(Y2s eq residual)):",max_eq2residual
 
-     if (max_eq1residual > 1e-8) stop "Y2c equation residual is large !!!"
-     if (max_eq2residual > 1e-8) stop "Y2s equation residual is large !!!"
+     if (max_eq1residual > 1e-6) stop "Y2c equation residual is large !!!"
+     if (max_eq2residual > 1e-6) stop "Y2s equation residual is large !!!"
 
      deallocate(fX0, fXs, fXc, fY0, fYs, fYc, eq1residual, eq2residual)
   end if
@@ -554,7 +548,7 @@ subroutine quasisymmetry_compute_B2_for_r1
        - (0.25d+0) * B0_over_abs_G0 * B0_over_abs_G0 * (qc * qc - qs * qs + rc * rc - rs * rs))
 
 
-  if (.true.) then
+  if (debug) then
      ! Verify the B2s and B2c equations
      allocate(X2s_test(N_phi))
      allocate(X2c_test(N_phi))
@@ -565,8 +559,8 @@ subroutine quasisymmetry_compute_B2_for_r1
 
      max_eq1residual = maxval(abs(X2s - X2s_test))
      max_eq2residual = maxval(abs(X2c - X2c_test))
-     print *,"max(abs(residual)) in X2s equation:",max_eq1residual
-     print *,"max(abs(residual)) in X2c equation:",max_eq2residual
+     if (verbose) print *,"max(abs(residual)) in X2s equation:",max_eq1residual
+     if (verbose) print *,"max(abs(residual)) in X2c equation:",max_eq2residual
 
      deallocate(X2s_test, X2c_test)
   end if
@@ -596,6 +590,14 @@ subroutine quasisymmetry_compute_B2_for_r1
   q_tilde = Q + A/2 + 2 * (X2s*X2s + X2c*X2c) * (-Y1s)/X1c
 
   B02 = -sign_G * sign_psi * B0 * q_tilde
+
+  max_B2tilde = max( &
+       maxval(abs(B2s_array)), &
+       maxval(abs(B2c_array)), &
+       (maxval(B20) - minval(B20))/2, &
+       (maxval(B02) - minval(B02))/2)
+
+  if (verbose) print *,"max_B2tilde:",max_B2tilde
 
   deallocate(Q,A,q_tilde)
 

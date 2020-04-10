@@ -88,6 +88,7 @@ module quasisymmetry_variables
   real(dp) :: max_max_curvature_to_keep = 5.0d+0
   real(dp) :: min_iota_to_keep = 0.05d+0
   real(dp) :: max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep = 5.0d+0
+  real(dp) :: max_B2tilde_to_keep = 2.0
 
   integer :: matrix_size, axis_helicity, B_helicity, effective_nfp
   real(dp) :: last_iota, last_max_elongation, d_phi
@@ -121,7 +122,7 @@ module quasisymmetry_variables
   integer :: eta_bar_N_scan=0, sigma_initial_N_scan=0
   integer*8 :: N_scan
   real(dp), dimension(:), allocatable :: iotas, max_elongations, mean_elongations, rms_curvatures, max_curvatures, axis_lengths, eta_bar_values, sigma_initial_values
-  real(dp), dimension(:), allocatable :: max_modBinv_sqrt_half_grad_B_colon_grad_Bs
+  real(dp), dimension(:), allocatable :: max_modBinv_sqrt_half_grad_B_colon_grad_Bs, max_B2tildes
   real(dp), dimension(:), allocatable :: standard_deviations_of_R, standard_deviations_of_Z
   real(dp) :: standard_deviation_of_R, standard_deviation_of_Z
   integer, dimension(:), allocatable :: axis_helicities, B_helicities, effective_nfps
@@ -163,13 +164,14 @@ module quasisymmetry_variables
   logical :: circular_cross_section_surface = .false.
   integer :: finite_r_nonlinear_N_theta = 20
   real(dp), dimension(:), allocatable :: r_singularity_vs_zeta
-  real(dp) :: r_singularity
+  real(dp) :: r_singularity, max_B2tilde
   integer :: N_random = 10
   real(dp) :: random_time = 3
 
   integer :: N_procs, mpi_rank
   logical :: proc0, verbose = .true.
   real(dp) :: min_R0_to_keep = 1.0d-10
+  logical :: debug = .true.
 
   namelist / quasisymmetry / resolution_option, general_option, verbose_option, nfp, sign_G, sign_psi, I2_over_B0, vmec_template_filename, r, &
        N_iterations, N_line_search, Newton_tolerance, iota_tolerance, elongation_tolerance, max_precise_elongation, max_elongation_to_keep, N_phi, max_N_phi, &
@@ -177,7 +179,7 @@ module quasisymmetry_variables
        R0s_min, R0s_max, R0s_N_scan, R0c_min, R0c_max, R0c_N_scan, Z0s_min, Z0s_max, Z0s_N_scan, Z0c_min, Z0c_max, Z0c_N_scan, &
        eta_bar_min, eta_bar_max, eta_bar_N_scan, sigma_initial_min, sigma_initial_max, sigma_initial_N_scan, max_max_curvature_to_keep, min_iota_to_keep, &
        finite_r_option, order_r_option, B0, B2s, B2c, p2, untwist, max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep, B3s3_input, B3c3_input, Y3c1_initial, &
-       circular_cross_section_surface, finite_r_nonlinear_N_theta, N_random, random_time, min_R0_to_keep
+       circular_cross_section_surface, finite_r_nonlinear_N_theta, N_random, random_time, min_R0_to_keep, max_B2tilde_to_keep, debug
 
 end module quasisymmetry_variables
 
