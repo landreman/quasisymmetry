@@ -41,8 +41,8 @@ subroutine quasisymmetry_single_solve
 
      call quasisymmetry_init_axis()
 
-     if (any(R0 < 1.0d-10)) then
-        if (verbose) print *,"R0 is <= 0, so skipping solve."
+     if (any(R0 < min_R0_to_keep)) then
+        if (verbose) print *,"R0 is < min_R0_to_keep, so skipping solve."
         skipped_solve = .true.
         exit
      end if

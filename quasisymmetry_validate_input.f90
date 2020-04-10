@@ -100,4 +100,16 @@ subroutine quasisymmetry_validate_input
 !!$     finite_r_option = finite_r_option_nonlinear
 !!$  end if
 
+  ! Ensuring that "max" values are not less than "min" values simplifies the logic in quasisymmetry_random()
+  if (eta_bar_max < eta_bar_min) stop "eta_bar_max < eta_bar_min"
+  if (sigma_initial_max < sigma_initial_min) stop "sigma_initial_max < sigma_initial_min"
+  do j = 1, axis_nmax+1
+     if (R0s_max(j) < R0s_min(j)) stop "An entry of R0s_max is < the corresponding entry in R0s_min"
+     if (R0c_max(j) < R0c_min(j)) stop "An entry of R0c_max is < the corresponding entry in R0c_min"
+     if (Z0s_max(j) < Z0s_min(j)) stop "An entry of Z0s_max is < the corresponding entry in Z0s_min"
+     if (Z0c_max(j) < Z0c_min(j)) stop "An entry of Z0c_max is < the corresponding entry in Z0c_min"
+  end do
+
+  if (min_R0_to_keep <= 0) stop "min_R0_to_keep should be positive."
+
 end subroutine quasisymmetry_validate_input
