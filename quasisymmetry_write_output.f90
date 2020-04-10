@@ -48,7 +48,6 @@ subroutine quasisymmetry_write_output
        vn_standard_deviation_of_R = "standard_deviation_of_R", &
        vn_standard_deviation_of_Z = "standard_deviation_of_Z", &
        vn_axis_helicity = "axis_helicity", &
-       vn_B_helicity = "B_helicity", &
        vn_effective_nfp = "effective_nfp", &
        vn_Newton_tolerance_achieved = "Newton_tolerance_achieved", &
        vn_iota_tolerance_achieved = "iota_tolerance_achieved", &
@@ -86,7 +85,6 @@ subroutine quasisymmetry_write_output
        vn_standard_deviations_of_R = "standard_deviations_of_R", &
        vn_standard_deviations_of_Z = "standard_deviations_of_Z", &
        vn_axis_helicities = "axis_helicities", &
-       vn_B_helicities = "B_helicities", &
        vn_effective_nfps = "effective_nfps", &
        vn_Newton_tolerance_achieveds = "Newton_tolerance_achieveds", &
        vn_iota_tolerance_achieveds = "iota_tolerance_achieveds", &
@@ -291,7 +289,6 @@ subroutine quasisymmetry_write_output
      call cdf_define(ncid, vn_standard_deviation_of_R, standard_deviation_of_R)
      call cdf_define(ncid, vn_standard_deviation_of_Z, standard_deviation_of_Z)
      call cdf_define(ncid, vn_axis_helicity, axis_helicity)
-     call cdf_define(ncid, vn_B_helicity, B_helicity)
      call cdf_define(ncid, vn_effective_nfp, effective_nfp)
      call cdf_define(ncid, vn_Newton_tolerance_achieved, Newton_tolerance_achieved)
      call cdf_define(ncid, vn_iota_tolerance_achieved, iota_tolerance_achieved)
@@ -466,7 +463,6 @@ subroutine quasisymmetry_write_output
      call cdf_define(ncid, vn_standard_deviations_of_R, standard_deviations_of_R, dimname=N_scan_dim)
      call cdf_define(ncid, vn_standard_deviations_of_Z, standard_deviations_of_Z, dimname=N_scan_dim)
      call cdf_define(ncid, vn_axis_helicities, axis_helicities, dimname=N_scan_dim)
-     call cdf_define(ncid, vn_B_helicities, B_helicities, dimname=N_scan_dim)
      call cdf_define(ncid, vn_Newton_tolerance_achieveds, Newton_tolerance_achieveds, dimname=N_scan_dim)
      call cdf_define(ncid, vn_iota_tolerance_achieveds, iota_tolerance_achieveds, dimname=N_scan_dim)
      call cdf_define(ncid, vn_elongation_tolerance_achieveds, elongation_tolerance_achieveds, dimname=N_scan_dim)
@@ -548,7 +544,6 @@ subroutine quasisymmetry_write_output
      call cdf_write(ncid, vn_standard_deviation_of_R, standard_deviation_of_R)
      call cdf_write(ncid, vn_standard_deviation_of_Z, standard_deviation_of_Z)
      call cdf_write(ncid, vn_axis_helicity, axis_helicity)
-     call cdf_write(ncid, vn_B_helicity, B_helicity)
      call cdf_write(ncid, vn_effective_nfp, effective_nfp)
      call cdf_write(ncid, vn_Newton_tolerance_achieved, Newton_tolerance_achieved)
      call cdf_write(ncid, vn_iota_tolerance_achieved, iota_tolerance_achieved)
@@ -582,7 +577,7 @@ subroutine quasisymmetry_write_output
           .or. trim(order_r_option)==order_r_option_r3_Y3s3_Y3c3) then
         call cdf_write(ncid, vn_Y3c1_initial, Y3c1_initial)
      end if
-  case (general_option_scan)
+  case (general_option_scan, general_option_random)
      call cdf_write(ncid, vn_sigma_initial_min, sigma_initial_min)
      call cdf_write(ncid, vn_sigma_initial_max, sigma_initial_max)
      call cdf_write(ncid, vn_eta_bar_min, eta_bar_min)
@@ -711,7 +706,7 @@ subroutine quasisymmetry_write_output
         call cdf_write(ncid, vn_B3s3, B3s3)
         call cdf_write(ncid, vn_B3c3, B3c3)
      end if
-  case (general_option_scan)
+  case (general_option_scan, general_option_random)
      call cdf_write(ncid, vn_iotas, iotas)
      call cdf_write(ncid, vn_max_elongations, max_elongations)
      call cdf_write(ncid, vn_mean_elongations, mean_elongations)
@@ -722,7 +717,6 @@ subroutine quasisymmetry_write_output
      call cdf_write(ncid, vn_standard_deviations_of_R, standard_deviations_of_R)
      call cdf_write(ncid, vn_standard_deviations_of_Z, standard_deviations_of_Z)
      call cdf_write(ncid, vn_axis_helicities, axis_helicities)
-     call cdf_write(ncid, vn_B_helicities, B_helicities)
      call cdf_write(ncid, vn_Newton_tolerance_achieveds, Newton_tolerance_achieveds)
      call cdf_write(ncid, vn_iota_tolerance_achieveds, iota_tolerance_achieveds)
      call cdf_write(ncid, vn_elongation_tolerance_achieveds, elongation_tolerance_achieveds)
@@ -758,7 +752,7 @@ subroutine quasisymmetry_write_output
      call cdf_write(ncid, vn_ZBS, ZBS(-ntor:ntor, 0:mpol_nonzero))
      call cdf_write(ncid, vn_d_d_phi,  d_d_phi)
      call cdf_write(ncid, vn_d_d_zeta, d_d_zeta)
-  case (general_option_scan)
+  case (general_option_scan, general_option_random)
      call cdf_write(ncid, vn_scan_R0c,  scan_R0c)
      call cdf_write(ncid, vn_scan_R0s,  scan_R0s)
      call cdf_write(ncid, vn_scan_Z0c,  scan_Z0c)

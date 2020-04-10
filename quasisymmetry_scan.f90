@@ -16,7 +16,7 @@ subroutine quasisymmetry_scan
   character(len=buffer_length) :: proc_assignments_string
   real(dp), dimension(:), allocatable :: iotas_local, max_elongations_local, mean_elongations_local, rms_curvatures_local, max_curvatures_local, axis_lengths_local
   real(dp), dimension(:), allocatable :: standard_deviations_of_R_local, standard_deviations_of_Z_local, max_modBinv_sqrt_half_grad_B_colon_grad_Bs_local
-  integer, dimension(:), allocatable :: axis_helicities_local, B_helicities_local, effective_nfps_local
+  integer, dimension(:), allocatable :: axis_helicities_local, effective_nfps_local
   logical, dimension(:), allocatable :: iota_tolerance_achieveds_local, elongation_tolerance_achieveds_local, Newton_tolerance_achieveds_local
   integer*8, dimension(:), allocatable :: N_solves_kept
   real(dp), dimension(:), allocatable :: scan_eta_bar_local, scan_sigma_initial_local
@@ -150,7 +150,6 @@ subroutine quasisymmetry_scan
   allocate(standard_deviations_of_R_local(N_scan_local))
   allocate(standard_deviations_of_Z_local(N_scan_local))
   allocate(axis_helicities_local(N_scan_local))
-  allocate(B_helicities_local(N_scan_local))
   allocate(effective_nfps_local(N_scan_local))
   allocate(iota_tolerance_achieveds_local(N_scan_local))
   allocate(elongation_tolerance_achieveds_local(N_scan_local))
@@ -292,7 +291,6 @@ subroutine quasisymmetry_scan
            standard_deviations_of_R_local(j_scan_local) = standard_deviation_of_R
            standard_deviations_of_Z_local(j_scan_local) = standard_deviation_of_Z
            axis_helicities_local(j_scan_local) = axis_helicity
-           B_helicities_local(j_scan_local) = B_helicity
            effective_nfps_local(j_scan_local) = effective_nfp
            iota_tolerance_achieveds_local(j_scan_local) = iota_tolerance_achieved
            elongation_tolerance_achieveds_local(j_scan_local) = elongation_tolerance_achieved
@@ -357,7 +355,6 @@ subroutine quasisymmetry_scan
      allocate(standard_deviations_of_R(N_scan))
      allocate(standard_deviations_of_Z(N_scan))
      allocate(axis_helicities(N_scan))
-     allocate(B_helicities(N_scan))
      allocate(effective_nfps(N_scan))
      allocate(iota_tolerance_achieveds(N_scan))
      allocate(elongation_tolerance_achieveds(N_scan))
@@ -381,7 +378,6 @@ subroutine quasisymmetry_scan
      standard_deviations_of_R(1:N_solves_kept(1)) = standard_deviations_of_R_local(1:N_solves_kept(1))
      standard_deviations_of_Z(1:N_solves_kept(1)) = standard_deviations_of_Z_local(1:N_solves_kept(1))
      axis_helicities(1:N_solves_kept(1)) = axis_helicities_local(1:N_solves_kept(1))
-     B_helicities(1:N_solves_kept(1)) = B_helicities_local(1:N_solves_kept(1))
      effective_nfps(1:N_solves_kept(1)) = effective_nfps_local(1:N_solves_kept(1))
      iota_tolerance_achieveds(1:N_solves_kept(1)) = iota_tolerance_achieveds_local(1:N_solves_kept(1))
      elongation_tolerance_achieveds(1:N_solves_kept(1)) = elongation_tolerance_achieveds_local(1:N_solves_kept(1))
@@ -407,7 +403,6 @@ subroutine quasisymmetry_scan
         call mpi_recv(standard_deviations_of_R(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(standard_deviations_of_Z(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(axis_helicities(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
-        call mpi_recv(B_helicities(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(effective_nfps(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(Newton_tolerance_achieveds(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(iota_tolerance_achieveds(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
@@ -444,7 +439,6 @@ subroutine quasisymmetry_scan
      call mpi_send(standard_deviations_of_R_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(standard_deviations_of_Z_local(1:j_scan_local),j_scan_local,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(axis_helicities_local(1:j_scan_local),j_scan_local,MPI_INT,0,mpi_rank,MPI_COMM_WORLD,ierr)
-     call mpi_send(B_helicities_local(1:j_scan_local),j_scan_local,MPI_INT,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(effective_nfps_local(1:j_scan_local),j_scan_local,MPI_INT,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(Newton_tolerance_achieveds_local(1:j_scan_local),j_scan_local,MPI_LOGICAL,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(iota_tolerance_achieveds_local(1:j_scan_local),j_scan_local,MPI_LOGICAL,0,mpi_rank,MPI_COMM_WORLD,ierr)
@@ -482,8 +476,6 @@ subroutine quasisymmetry_scan
         print "(a,99999(i2))","                 effective_nfps:",effective_nfps
         print *," "
         print "(a,99999(i2))","                axis_helicities:",axis_helicities
-        print "(a,99999(i2))","                   B_helicities:",B_helicities
-        print *," axis_helicities==B_helicities:",B_helicities==axis_helicities
         print *,"    Newton_tolerance_achieveds:",Newton_tolerance_achieveds
         print *,"      iota_tolerance_achieveds:",iota_tolerance_achieveds
         print *,"elongation_tolerance_achieveds:",elongation_tolerance_achieveds

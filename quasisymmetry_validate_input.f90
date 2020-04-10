@@ -28,6 +28,7 @@ subroutine quasisymmetry_validate_input
   select case (trim(general_option))
   case (general_option_single)
   case (general_option_scan)
+  case (general_option_random)
   case default
      print *,"Error! Invalid general_option:",general_option
      stop

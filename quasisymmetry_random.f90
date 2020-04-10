@@ -17,7 +17,7 @@ subroutine quasisymmetry_random
   integer :: mpi_status(MPI_STATUS_SIZE)
   real(dp), dimension(:), allocatable :: iotas_local, max_elongations_local, mean_elongations_local, rms_curvatures_local, max_curvatures_local, axis_lengths_local
   real(dp), dimension(:), allocatable :: standard_deviations_of_R_local, standard_deviations_of_Z_local, max_modBinv_sqrt_half_grad_B_colon_grad_Bs_local
-  integer, dimension(:), allocatable :: axis_helicities_local, B_helicities_local
+  integer, dimension(:), allocatable :: axis_helicities_local
   logical, dimension(:), allocatable :: iota_tolerance_achieveds_local, elongation_tolerance_achieveds_local, Newton_tolerance_achieveds_local
   integer*8, dimension(:), allocatable :: N_solves_kept
   real(dp), dimension(:), allocatable :: scan_eta_bar_local, scan_sigma_initial_local
@@ -27,6 +27,8 @@ subroutine quasisymmetry_random
   real(dp) :: rand
   real(dp) :: log_eta_bar_min, log_eta_bar_max, log_sigma_initial_min, log_sigma_initial_max
   real(dp), dimension(max_axis_nmax+1) :: log_R0s_min, log_R0s_max, log_R0c_min, log_R0c_max, log_Z0s_min, log_Z0s_max, log_Z0c_min, log_Z0c_max
+
+  call mpi_barrier(MPI_COMM_WORLD,ierr) ! So initial lines printed by proc0 are sure to come first.
 
   ! Allocate arrays to store the scan results:
   allocate(iotas_local(N_random))
@@ -39,7 +41,6 @@ subroutine quasisymmetry_random
   allocate(standard_deviations_of_R_local(N_random))
   allocate(standard_deviations_of_Z_local(N_random))
   allocate(axis_helicities_local(N_random))
-  allocate(B_helicities_local(N_random))
   allocate(iota_tolerance_achieveds_local(N_random))
   allocate(elongation_tolerance_achieveds_local(N_random))
   allocate(Newton_tolerance_achieveds_local(N_random))
@@ -84,6 +85,8 @@ subroutine quasisymmetry_random
         case default
            stop "Error! Unrecognized eta_bar_scan_option"
         end select
+     else
+        eta_bar = eta_bar_max
      end if
 
      ! If needed, pick a random value for sigma_initial.
@@ -101,6 +104,8 @@ subroutine quasisymmetry_random
         case default
            stop "Error! Unrecognized sigma_initial_scan_option"
         end select
+     else
+        sigma_initial = sigma_initial_max
      end if
 
      ! Set Fourier amplitudes for axis:
@@ -110,18 +115,26 @@ subroutine quasisymmetry_random
            if (R0s_max(j) > R0s_min(j)) then
               call random_number(rand)
               R0s(j) = R0s_min(j) + (R0s_max(j) - R0s_min(j)) * rand
+           else
+              R0s(j) = R0s_max(j)
            end if
            if (R0c_max(j) > R0c_min(j)) then
               call random_number(rand)
               R0c(j) = R0c_min(j) + (R0c_max(j) - R0c_min(j)) * rand
+           else
+              R0c(j) = R0c_max(j)
            end if
            if (Z0s_max(j) > Z0s_min(j)) then
               call random_number(rand)
               Z0s(j) = Z0s_min(j) + (Z0s_max(j) - Z0s_min(j)) * rand
+           else
+              Z0s(j) = Z0s_max(j)
            end if
            if (Z0c_max(j) > Z0c_min(j)) then
               call random_number(rand)
               Z0c(j) = Z0c_min(j) + (Z0c_max(j) - Z0c_min(j)) * rand
+           else
+              Z0c(j) = Z0c_max(j)
            end if
         end do
 
@@ -132,24 +145,34 @@ subroutine quasisymmetry_random
               R0s(j) = exp(log_R0s_min(j) + (log_R0s_max(j) - log_R0s_min(j)) * rand)
               call random_number(rand)
               if (rand > 0.5) R0s(j) = -R0s(j) ! Flip sign with 50% probability.
+           else
+              R0s(j) = R0s_max(j)
            end if
            if (R0c_max(j) > R0c_min(j)) then
               call random_number(rand)
               R0c(j) = exp(log_R0c_min(j) + (log_R0c_max(j) - log_R0c_min(j)) * rand)
               call random_number(rand)
               if (rand > 0.5) R0c(j) = -R0c(j) ! Flip sign with 50% probability.
+           else
+              R0c(j) = R0c_max(j)
            end if
-           if ((Z0s_max(j) > Z0s_min(j)) .and. (j>1 .or. trim(Fourier_scan_option)==Fourier_scan_option_2_sided_log)) then
+           if (Z0s_max(j) > Z0s_min(j)) then
               call random_number(rand)
               Z0s(j) = exp(log_Z0s_min(j) + (log_Z0s_max(j) - log_Z0s_min(j)) * rand)
-              call random_number(rand)
-              if (rand > 0.5) Z0s(j) = -Z0s(j) ! Flip sign with 50% probability.
+              if (j>2 .or. trim(Fourier_scan_option)==Fourier_scan_option_2_sided_log) then
+                 call random_number(rand)
+                 if (rand > 0.5) Z0s(j) = -Z0s(j) ! Flip sign with 50% probability.
+              end if
+           else
+              Z0s(j) = Z0s_max(j)
            end if
            if (Z0c_max(j) > Z0c_min(j)) then
               call random_number(rand)
               Z0c(j) = exp(log_Z0c_min(j) + (log_Z0c_max(j) - log_Z0c_min(j)) * rand)
               call random_number(rand)
               if (rand > 0.5) Z0c(j) = -Z0c(j) ! Flip sign with 50% probability.
+           else
+              Z0c(j) = Z0c_max(j)
            end if
         end do
      case default
@@ -193,7 +216,6 @@ subroutine quasisymmetry_random
      standard_deviations_of_R_local(j_scan) = standard_deviation_of_R
      standard_deviations_of_Z_local(j_scan) = standard_deviation_of_Z
      axis_helicities_local(j_scan) = axis_helicity
-     B_helicities_local(j_scan) = B_helicity
      iota_tolerance_achieveds_local(j_scan) = iota_tolerance_achieved
      elongation_tolerance_achieveds_local(j_scan) = elongation_tolerance_achieved
      Newton_tolerance_achieveds_local(j_scan) = Newton_tolerance_achieved
@@ -239,7 +261,6 @@ subroutine quasisymmetry_random
      allocate(standard_deviations_of_R(N_scan))
      allocate(standard_deviations_of_Z(N_scan))
      allocate(axis_helicities(N_scan))
-     allocate(B_helicities(N_scan))
      allocate(iota_tolerance_achieveds(N_scan))
      allocate(elongation_tolerance_achieveds(N_scan))
      allocate(Newton_tolerance_achieveds(N_scan))
@@ -262,7 +283,6 @@ subroutine quasisymmetry_random
      standard_deviations_of_R(1:N_solves_kept(1)) = standard_deviations_of_R_local(1:N_solves_kept(1))
      standard_deviations_of_Z(1:N_solves_kept(1)) = standard_deviations_of_Z_local(1:N_solves_kept(1))
      axis_helicities(1:N_solves_kept(1)) = axis_helicities_local(1:N_solves_kept(1))
-     B_helicities(1:N_solves_kept(1)) = B_helicities_local(1:N_solves_kept(1))
      iota_tolerance_achieveds(1:N_solves_kept(1)) = iota_tolerance_achieveds_local(1:N_solves_kept(1))
      elongation_tolerance_achieveds(1:N_solves_kept(1)) = elongation_tolerance_achieveds_local(1:N_solves_kept(1))
      Newton_tolerance_achieveds(1:N_solves_kept(1)) = Newton_tolerance_achieveds_local(1:N_solves_kept(1))
@@ -287,7 +307,6 @@ subroutine quasisymmetry_random
         call mpi_recv(standard_deviations_of_R(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(standard_deviations_of_Z(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(axis_helicities(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
-        call mpi_recv(B_helicities(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(Newton_tolerance_achieveds(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(iota_tolerance_achieveds(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(elongation_tolerance_achieveds(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_INT,j,j,MPI_COMM_WORLD,mpi_status,ierr)
@@ -323,7 +342,6 @@ subroutine quasisymmetry_random
      call mpi_send(standard_deviations_of_R_local(1:j_scan),j_scan,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(standard_deviations_of_Z_local(1:j_scan),j_scan,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(axis_helicities_local(1:j_scan),j_scan,MPI_INT,0,mpi_rank,MPI_COMM_WORLD,ierr)
-     call mpi_send(B_helicities_local(1:j_scan),j_scan,MPI_INT,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(Newton_tolerance_achieveds_local(1:j_scan),j_scan,MPI_LOGICAL,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(iota_tolerance_achieveds_local(1:j_scan),j_scan,MPI_LOGICAL,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(elongation_tolerance_achieveds_local(1:j_scan),j_scan,MPI_LOGICAL,0,mpi_rank,MPI_COMM_WORLD,ierr)
@@ -358,8 +376,6 @@ subroutine quasisymmetry_random
         print "(a,99999(f8.2))"," axis_lengths:",axis_lengths
         print *," "
         print "(a,99999(i2))","                axis_helicities:",axis_helicities
-        print "(a,99999(i2))","                   B_helicities:",B_helicities
-        print *," axis_helicities==B_helicities:",B_helicities==axis_helicities
         print *,"    Newton_tolerance_achieveds:",Newton_tolerance_achieveds
         print *,"      iota_tolerance_achieveds:",iota_tolerance_achieveds
         print *,"elongation_tolerance_achieveds:",elongation_tolerance_achieveds

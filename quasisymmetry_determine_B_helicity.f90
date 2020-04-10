@@ -41,6 +41,7 @@ subroutine quasisymmetry_determine_B_helicity
   if (verbose) print *,"B Helicity counter:",counter, "  B_helicity:",B_helicity
   if (modulo(counter,4) .ne. 0) stop "Helicity counter was not a multiple of 4"
 
+  print "(a,1000(i2))","quadrant:",quadrant
   deallocate(quadrant)
 
 end subroutine quasisymmetry_determine_B_helicity

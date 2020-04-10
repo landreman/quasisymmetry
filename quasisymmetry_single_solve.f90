@@ -226,7 +226,8 @@ subroutine quasisymmetry_single_solve
     
   call quasisymmetry_elongation_in_Rz_plane()
 
-  call quasisymmetry_determine_B_helicity()
+  ! Now that iota is shifted by axis_helicity, B_helicity should always be 0.
+  !call quasisymmetry_determine_B_helicity()
 
   call quasisymmetry_grad_B_tensor()
 
