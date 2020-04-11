@@ -71,7 +71,12 @@ subroutine quasisymmetry_write_output
        vn_Y3c1_initial = "Y3c1_initial", &
        vn_d2_volume_d_psi2 = "d2_volume_d_psi2", &
        vn_r_singularity = "r_singularity", &
-       vn_min_R0_to_keep = "min_R0_to_keep"
+       vn_min_r_singularity_to_keep = "min_r_singularity_to_keep", &
+       vn_min_R0_to_keep = "min_R0_to_keep", &
+       vn_max_B2tilde_to_keep = "max_B2tilde_to_keep", &
+       vn_max_B2tilde = "max_B2tilde", &
+       vn_B20_variation = "B20_variation", &
+       vn_max_B20_variation_to_keep = "max_B20_variation_to_keep"
 
   ! Arrays with dimension 1
   character(len=*), parameter :: &
@@ -105,6 +110,8 @@ subroutine quasisymmetry_write_output
        vn_sigma_initial_values = "sigma_initial_values", &
        vn_scan_eta_bar = "scan_eta_bar", &
        vn_eta_bar_values = "eta_bar_values", &
+       vn_scan_B2s = "scan_B2s", &
+       vn_scan_B2c = "scan_B2c", &
        vn_R0c = "R0c", &
        vn_R0s = "R0s", &
        vn_Z0c = "Z0c", &
@@ -196,7 +203,11 @@ subroutine quasisymmetry_write_output
        vn_B2s_array = "B2s_array", &
        vn_B2c_array = "B2c_array", &
        vn_B02 = "B02", &
-       vn_r_singularity_vs_zeta = "r_singularity_vs_zeta"
+       vn_r_singularity_vs_zeta = "r_singularity_vs_zeta", &
+       vn_max_B2tildes = "max_B2tildes", &
+       vn_r_singularities = "r_singularities", &
+       vn_d2_volume_d_psi2s = "d2_volume_d_psi2s", &
+       vn_B20_variations = "B20_variations"
 
   ! Arrays with dimension 2
   character(len=*), parameter :: &
@@ -305,11 +316,15 @@ subroutine quasisymmetry_write_output
         ! Quantities that matter either for order_r_option_r1_compute_B2 or O(r^2) or O(r^3)
         call cdf_define(ncid, vn_p2, p2)
      end if
+     if (trim(order_r_option) == order_r_option_r1_compute_B2) then
+        call cdf_define(ncid, vn_max_B2tilde, max_B2tilde)
+     end if
      if (trim(order_r_option) .ne. order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2) then
         call cdf_define(ncid, vn_B2s, B2s)
         call cdf_define(ncid, vn_B2c, B2c)
         call cdf_define(ncid, vn_B20_mean, B20_mean)
         call cdf_define(ncid, vn_B20_residual, B20_residual)
+        call cdf_define(ncid, vn_B20_variation, B20_variation)
         call cdf_define(ncid, vn_d2_volume_d_psi2, d2_volume_d_psi2)
         call cdf_setatt(ncid, vn_d2_volume_d_psi2, 'Magnetic well parameter. The quantity saved is the second derivative of the volume of the flux surfaces with respect to psi, where 2*pi*psi is the toroidal flux. Negative values of this quantity are favorable for stability.')
         call cdf_define(ncid, vn_r_singularity, r_singularity)
@@ -336,6 +351,13 @@ subroutine quasisymmetry_write_output
      call cdf_define(ncid, vn_max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep, max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep)
      call cdf_define(ncid, vn_min_iota_to_keep, min_iota_to_keep)
      call cdf_define(ncid, vn_min_R0_to_keep, min_R0_to_keep)
+     if (trim(order_r_option) == order_r_option_r1_compute_B2) then
+        call cdf_define(ncid, vn_max_B2tilde_to_keep, max_B2tilde_to_keep)
+     end if
+     if (trim(order_r_option) == order_r_option_r2) then
+        call cdf_define(ncid, vn_min_r_singularity_to_keep, min_r_singularity_to_keep)
+        call cdf_define(ncid, vn_max_B20_variation_to_keep, max_B20_variation_to_keep)
+     end if
      ! Handle variables used for 'scan' but not 'random':
      if (trim(general_option) == general_option_scan) then
         call cdf_define(ncid, vn_sigma_initial_N_scan, sigma_initial_N_scan)
@@ -476,6 +498,16 @@ subroutine quasisymmetry_write_output
      call cdf_define(ncid, vn_Z0c_max, Z0c_max(1:axis_nmax+1), dimname=axis_nmax_plus_1_dim)
      call cdf_define(ncid, vn_scan_sigma_initial, scan_sigma_initial, dimname=N_scan_dim)
      call cdf_define(ncid, vn_scan_eta_bar, scan_eta_bar, dimname=N_scan_dim)
+     if (trim(order_r_option) == order_r_option_r1_compute_B2) then
+        call cdf_define(ncid, vn_max_B2tildes, max_B2tildes, dimname=N_scan_dim)
+     end if
+     if (trim(order_r_option) == order_r_option_r2) then
+        call cdf_define(ncid, vn_scan_B2s, scan_B2s, dimname=N_scan_dim)
+        call cdf_define(ncid, vn_scan_B2c, scan_B2c, dimname=N_scan_dim)
+        call cdf_define(ncid, vn_r_singularities, r_singularities, dimname=N_scan_dim)
+        call cdf_define(ncid, vn_d2_volume_d_psi2s, d2_volume_d_psi2s, dimname=N_scan_dim)
+        call cdf_define(ncid, vn_B20_variations, B20_variations, dimname=N_scan_dim)
+     end if
      ! Handle variables used for 'scan' but not 'random':
      if (trim(general_option) == general_option_scan) then
         call cdf_define(ncid, vn_R0s_N_scan, R0s_N_scan(1:axis_nmax+1), dimname=axis_nmax_plus_1_dim)
@@ -560,11 +592,15 @@ subroutine quasisymmetry_write_output
         ! Quantities that matter either for order_r_option_r1_compute_B2 or O(r^2) or O(r^3)
         call cdf_write(ncid, vn_p2, p2)
      end if
+     if (trim(order_r_option) == order_r_option_r1_compute_B2) then
+        call cdf_write(ncid, vn_max_B2tilde, max_B2tilde)
+     end if
      if (trim(order_r_option) .ne. order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2) then
         call cdf_write(ncid, vn_B2s, B2s)
         call cdf_write(ncid, vn_B2c, B2c)
         call cdf_write(ncid, vn_B20_mean, B20_mean)
         call cdf_write(ncid, vn_B20_residual, B20_residual)
+        call cdf_write(ncid, vn_B20_variation, B20_variation)
         call cdf_write(ncid, vn_d2_volume_d_psi2, d2_volume_d_psi2)
         call cdf_write(ncid, vn_r_singularity, r_singularity)
      end if
@@ -590,6 +626,13 @@ subroutine quasisymmetry_write_output
      call cdf_write(ncid, vn_max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep, max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep)
      call cdf_write(ncid, vn_min_iota_to_keep, min_iota_to_keep)
      call cdf_write(ncid, vn_min_R0_to_keep, min_R0_to_keep)
+     if (trim(order_r_option) == order_r_option_r1_compute_B2) then
+        call cdf_write(ncid, vn_max_B2tilde_to_keep, max_B2tilde_to_keep)
+     end if
+     if (trim(order_r_option) == order_r_option_r2) then
+        call cdf_write(ncid, vn_min_r_singularity_to_keep, min_r_singularity_to_keep)
+        call cdf_write(ncid, vn_max_B20_variation_to_keep, max_B20_variation_to_keep)
+     end if
      ! Handle variables used for 'scan' but not 'random':
      if (trim(general_option) == general_option_scan) then
         call cdf_write(ncid, vn_sigma_initial_N_scan, sigma_initial_N_scan)
@@ -730,6 +773,16 @@ subroutine quasisymmetry_write_output
      call cdf_write(ncid, vn_Z0c_max, Z0c_max(1:axis_nmax+1))
      call cdf_write(ncid, vn_scan_sigma_initial, scan_sigma_initial)
      call cdf_write(ncid, vn_scan_eta_bar, scan_eta_bar)
+     if (trim(order_r_option) == order_r_option_r1_compute_B2) then
+        call cdf_write(ncid, vn_max_B2tildes, max_B2tildes)
+     end if
+     if (trim(order_r_option) == order_r_option_r2) then
+        call cdf_write(ncid, vn_scan_B2s, scan_B2s)
+        call cdf_write(ncid, vn_scan_B2c, scan_B2c)
+        call cdf_write(ncid, vn_r_singularities, r_singularities)
+        call cdf_write(ncid, vn_d2_volume_d_psi2s, d2_volume_d_psi2s)
+        call cdf_write(ncid, vn_B20_variations, B20_variations)
+     end if
      ! Handle variables used for 'scan' but not 'random':
      if (trim(general_option) == general_option_scan) then
         call cdf_write(ncid, vn_R0s_N_scan, R0s_N_scan(1:axis_nmax+1))

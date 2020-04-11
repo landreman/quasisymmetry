@@ -20,14 +20,15 @@ subroutine quasisymmetry_random
   integer, dimension(:), allocatable :: axis_helicities_local
   logical, dimension(:), allocatable :: iota_tolerance_achieveds_local, elongation_tolerance_achieveds_local, Newton_tolerance_achieveds_local
   integer*8, dimension(:), allocatable :: N_solves_kept
-  real(dp), dimension(:), allocatable :: scan_eta_bar_local, scan_sigma_initial_local
+  real(dp), dimension(:), allocatable :: scan_eta_bar_local, scan_sigma_initial_local, scan_B2s_local, scan_B2c_local
   real(dp), dimension(:,:), allocatable :: scan_R0c_local, scan_R0s_local, scan_Z0c_local, scan_Z0s_local
-  real(dp), dimension(:), allocatable :: max_B2tildes_local
+  real(dp), dimension(:), allocatable :: max_B2tildes_local, r_singularities_local, d2_volume_d_psi2s_local, B20_variations_local
   logical :: keep_going
   real(dp) :: thresh, time1, time2
   real(dp) :: rand
   real(dp) :: log_eta_bar_min, log_eta_bar_max, log_sigma_initial_min, log_sigma_initial_max
   real(dp), dimension(max_axis_nmax+1) :: log_R0s_min, log_R0s_max, log_R0c_min, log_R0c_max, log_Z0s_min, log_Z0s_max, log_Z0c_min, log_Z0c_max
+  real(dp) :: log_B2s_min, log_B2s_max, log_B2c_min, log_B2c_max
 
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! So initial lines printed by proc0 are sure to come first.
 
@@ -48,6 +49,11 @@ subroutine quasisymmetry_random
   if (trim(order_r_option) == order_r_option_r1_compute_B2) then
      allocate(max_B2tildes_local(N_random))
   end if
+  if (trim(order_r_option) == order_r_option_r2) then
+     allocate(r_singularities_local(N_random))
+     allocate(d2_volume_d_psi2s_local(N_random))
+     allocate(B20_variations_local(N_random))
+  end if
 
   ! Allocate arrays to store the input parameters that correspond to saved results:
   allocate(scan_eta_bar_local(N_random))
@@ -56,6 +62,10 @@ subroutine quasisymmetry_random
   allocate(scan_R0s_local(N_random,axis_nmax+1))
   allocate(scan_Z0c_local(N_random,axis_nmax+1))
   allocate(scan_Z0s_local(N_random,axis_nmax+1))
+  if (trim(order_r_option) == order_r_option_r2) then
+     allocate(scan_B2s_local(N_random))
+     allocate(scan_B2c_local(N_random))
+  end if
 
   log_eta_bar_min = log(abs(eta_bar_min))
   log_eta_bar_max = log(abs(eta_bar_max))
@@ -69,6 +79,10 @@ subroutine quasisymmetry_random
   log_Z0s_max = log(abs(Z0s_max))
   log_Z0c_min = log(abs(Z0c_min))
   log_Z0c_max = log(abs(Z0c_max))
+  log_B2s_min = log(abs(B2s_min))
+  log_B2s_max = log(abs(B2s_max))
+  log_B2c_min = log(abs(B2c_min))
+  log_B2c_max = log(abs(B2c_max))
 
   j_scan = 0
   keep_going = .true.
@@ -110,6 +124,46 @@ subroutine quasisymmetry_random
         end select
      else
         sigma_initial = sigma_initial_max
+     end if
+
+     if (trim(order_r_option) == order_r_option_r2) then
+        ! If needed, pick a random value for B2s.
+        if (B2s_max > B2s_min) then
+           call random_number(rand)
+           select case (trim(B2s_scan_option))
+           case (B2s_scan_option_linear)
+              B2s = B2s_min + rand * (B2s_max - B2s_min)
+           case (B2s_scan_option_log)
+              B2s = exp(log_B2s_min + rand * (log_B2s_max - log_B2s_min))
+           case (B2s_scan_option_2_sided_log)
+              B2s = exp(log_B2s_min + rand * (log_B2s_max - log_B2s_min))
+              call random_number(rand)
+              if (rand > 0.5) B2s = -B2s ! Flip sign with 50% probability.
+           case default
+              stop "Error! Unrecognized B2s_scan_option"
+           end select
+        else
+           B2s = B2s_max
+        end if
+        
+        ! If needed, pick a random value for B2c.
+        if (B2c_max > B2c_min) then
+           call random_number(rand)
+           select case (trim(B2c_scan_option))
+           case (B2c_scan_option_linear)
+              B2c = B2c_min + rand * (B2c_max - B2c_min)
+           case (B2c_scan_option_log)
+              B2c = exp(log_B2c_min + rand * (log_B2c_max - log_B2c_min))
+           case (B2c_scan_option_2_sided_log)
+              B2c = exp(log_B2c_min + rand * (log_B2c_max - log_B2c_min))
+              call random_number(rand)
+              if (rand > 0.5) B2c = -B2c ! Flip sign with 50% probability.
+           case default
+              stop "Error! Unrecognized B2c_scan_option"
+           end select
+        else
+           B2c = B2c_max
+        end if
      end if
 
      ! Set Fourier amplitudes for axis:
@@ -192,15 +246,29 @@ subroutine quasisymmetry_random
         print *,"R0c:",R0c(1:axis_nmax+1)
         print *,"Z0s:",Z0s(1:axis_nmax+1)
         print *,"Z0c:",Z0c(1:axis_nmax+1)
+        if (trim(order_r_option) == order_r_option_r2) then
+           print *,"B2s =",B2s,", B2c = ",B2c
+        end if
      end if
            
      call quasisymmetry_single_solve()
+
+     ! Check whether one of the stopping criteria has been reached.
+     ! We do this before all the 'cycles' in case most of the parameters are rejected
+     call cpu_time(time1)
+     if (time1 - start_time >= random_time) keep_going = .false.
+
+     ! If we can reject this solution, go back and pick new input parameters.
      if (skipped_solve) cycle ! In case R0 <= 0 or some other reason caused quasisymmetry_single_solve to exit prematurely.
      if (max_elongation > max_elongation_to_keep) cycle
      if (abs(iota) < min_iota_to_keep) cycle
      if (max_modBinv_sqrt_half_grad_B_colon_grad_B > max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep) cycle
      if (trim(order_r_option) == order_r_option_r1_compute_B2) then
         if (max_B2tilde > max_B2tilde_to_keep) cycle
+     end if
+     if (trim(order_r_option) == order_r_option_r2) then
+        if (r_singularity < min_r_singularity_to_keep) cycle
+        if (B20_variation > max_B20_variation_to_keep) cycle
      end if
            
      ! If we made it this far, then record the results
@@ -212,7 +280,11 @@ subroutine quasisymmetry_random
      scan_R0s_local(j_scan,:) = R0s(1:axis_nmax+1)
      scan_Z0c_local(j_scan,:) = Z0c(1:axis_nmax+1)
      scan_Z0s_local(j_scan,:) = Z0s(1:axis_nmax+1)
-           
+     if (trim(order_r_option) == order_r_option_r2) then
+        scan_B2s_local(j_scan) = B2s
+        scan_B2c_local(j_scan) = B2c
+     end if
+
      iotas_local(j_scan) = iota
      max_elongations_local(j_scan) = max_elongation
      mean_elongations_local(j_scan) = mean_elongation
@@ -229,10 +301,14 @@ subroutine quasisymmetry_random
      if (trim(order_r_option) == order_r_option_r1_compute_B2) then
         max_B2tildes_local(j_scan) = max_B2tilde
      end if
+     if (trim(order_r_option) == order_r_option_r2) then
+        r_singularities_local(j_scan) = r_singularity
+        d2_volume_d_psi2s_local(j_scan) = d2_volume_d_psi2
+        B20_variations_local(j_scan) = B20_variation
+     end if
 
-     ! Check whether either of the stopping criteria have been reached.
-     call cpu_time(time1)
-     if ((time1 - start_time >= random_time) .or. (j_scan >= N_random)) keep_going = .false.
+     ! Check whether one of the stopping criteria has been reached
+     if (j_scan >= N_random) keep_going = .false.
   end do
 
   call cpu_time(time1)
@@ -277,6 +353,11 @@ subroutine quasisymmetry_random
      if (trim(order_r_option) == order_r_option_r1_compute_B2) then
         allocate(max_B2tildes(N_scan))
      end if
+     if (trim(order_r_option) == order_r_option_r2) then
+        allocate(r_singularities(N_scan))
+        allocate(d2_volume_d_psi2s(N_scan))
+        allocate(B20_variations(N_scan))
+     end if
 
      allocate(scan_eta_bar(N_scan))
      allocate(scan_sigma_initial(N_scan))
@@ -284,6 +365,10 @@ subroutine quasisymmetry_random
      allocate(scan_R0s(N_scan,axis_nmax+1))
      allocate(scan_Z0c(N_scan,axis_nmax+1))
      allocate(scan_Z0s(N_scan,axis_nmax+1))
+     if (trim(order_r_option) == order_r_option_r2) then
+        allocate(scan_B2s(N_scan))
+        allocate(scan_B2c(N_scan))
+     end if
 
      ! Store results from proc0 in the final arrays:
      iotas(1:N_solves_kept(1)) = iotas_local(1:N_solves_kept(1))
@@ -302,6 +387,11 @@ subroutine quasisymmetry_random
      if (trim(order_r_option) == order_r_option_r1_compute_B2) then
         max_B2tildes(1:N_solves_kept(1)) = max_B2tildes_local(1:N_solves_kept(1))
      end if
+     if (trim(order_r_option) == order_r_option_r2) then
+        r_singularities(1:N_solves_kept(1)) = r_singularities_local(1:N_solves_kept(1))
+        d2_volume_d_psi2s(1:N_solves_kept(1)) = d2_volume_d_psi2s_local(1:N_solves_kept(1))
+        B20_variations(1:N_solves_kept(1)) = B20_variations_local(1:N_solves_kept(1))
+     end if
 
      scan_eta_bar(1:N_solves_kept(1)) = scan_eta_bar_local(1:N_solves_kept(1))
      scan_sigma_initial(1:N_solves_kept(1)) = scan_sigma_initial_local(1:N_solves_kept(1))
@@ -309,6 +399,10 @@ subroutine quasisymmetry_random
      scan_R0s(1:N_solves_kept(1),:) = scan_R0s_local(1:N_solves_kept(1),:)
      scan_Z0c(1:N_solves_kept(1),:) = scan_Z0c_local(1:N_solves_kept(1),:)
      scan_Z0s(1:N_solves_kept(1),:) = scan_Z0s_local(1:N_solves_kept(1),:)
+     if (trim(order_r_option) == order_r_option_r2) then
+        scan_B2s(1:N_solves_kept(1)) = scan_B2s_local(1:N_solves_kept(1))
+        scan_B2c(1:N_solves_kept(1)) = scan_B2c_local(1:N_solves_kept(1))
+     end if
 
      index = N_solves_kept(1) + 1
      do j = 1, N_procs-1
@@ -329,6 +423,11 @@ subroutine quasisymmetry_random
         if (trim(order_r_option) == order_r_option_r1_compute_B2) then
            call mpi_recv(max_B2tildes(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         end if
+        if (trim(order_r_option) == order_r_option_r2) then
+           call mpi_recv(r_singularities(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+           call mpi_recv(d2_volume_d_psi2s(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+           call mpi_recv(B20_variations(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        end if
 
         call mpi_recv(scan_eta_bar(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(scan_sigma_initial(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
@@ -336,9 +435,10 @@ subroutine quasisymmetry_random
         call mpi_recv(scan_R0s(index:index+N_solves_kept(j+1)-1,:),N_solves_kept(j+1)*(axis_nmax+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(scan_Z0c(index:index+N_solves_kept(j+1)-1,:),N_solves_kept(j+1)*(axis_nmax+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(scan_Z0s(index:index+N_solves_kept(j+1)-1,:),N_solves_kept(j+1)*(axis_nmax+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
-        !do k = 1,max_axis_nmax+1
-        !   call mpi_recv(scan_R0c(index:index+N_solves_kept(j+1)-1,k),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
-        !end do
+        if (trim(order_r_option) == order_r_option_r2) then
+           call mpi_recv(scan_B2s(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+           call mpi_recv(scan_B2c(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        end if
 
         index = index + N_solves_kept(j+1)
      end do
@@ -367,6 +467,11 @@ subroutine quasisymmetry_random
      if (trim(order_r_option) == order_r_option_r1_compute_B2) then
         call mpi_send(max_B2tildes_local(1:j_scan),j_scan,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      end if
+     if (trim(order_r_option) == order_r_option_r2) then
+        call mpi_send(r_singularities_local(1:j_scan),j_scan,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+        call mpi_send(d2_volume_d_psi2s_local(1:j_scan),j_scan,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+        call mpi_send(B20_variations_local(1:j_scan),j_scan,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     end if
 
      call mpi_send(scan_eta_bar_local(1:j_scan),j_scan,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(scan_sigma_initial_local(1:j_scan),j_scan,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
@@ -374,9 +479,10 @@ subroutine quasisymmetry_random
      call mpi_send(scan_R0s_local(1:j_scan,:),j_scan*(axis_nmax+1),MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(scan_Z0c_local(1:j_scan,:),j_scan*(axis_nmax+1),MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(scan_Z0s_local(1:j_scan,:),j_scan*(axis_nmax+1),MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
-     !do k = 1,max_axis_nmax+1
-     !   call mpi_send(scan_R0c_local(1:j_scan,k),j_scan,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
-     !end do
+     if (trim(order_r_option) == order_r_option_r2) then
+        call mpi_send(scan_B2s_local(1:j_scan),j_scan,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+        call mpi_send(scan_B2c_local(1:j_scan),j_scan,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     end if
   end if
 
   if (proc0) then
@@ -399,6 +505,12 @@ subroutine quasisymmetry_random
         print *," "
         if (trim(order_r_option) == order_r_option_r1_compute_B2) then
            print "(a,99999(f8.2))"," max_B2tildes:",max_B2tildes
+           print *," "
+        end if
+        if (trim(order_r_option) == order_r_option_r2) then
+           print "(a,99999(f8.2))"," r_singularities:",r_singularities
+           print *," "
+           print "(a,99999(f8.2))"," B20_variations:",B20_variations
            print *," "
         end if
         print "(a,99999(f8.2))"," axis_lengths:",axis_lengths

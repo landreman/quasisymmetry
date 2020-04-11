@@ -1,7 +1,7 @@
 subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_Z2c_d_zeta)
 
   use quasisymmetry_variables, only: dp, N_phi, abs_G0_over_B0, X1c, Y1s, Y1c, X20, X2s, X2c, Y20, Y2s, Y2c, Z20, Z2s, Z2c, &
-       curvature, torsion, r_singularity, r_singularity_vs_zeta, d_X1c_d_zeta, d_Y1s_d_zeta, d_Y1c_d_zeta
+       curvature, torsion, r_singularity, r_singularity_vs_zeta, d_X1c_d_zeta, d_Y1s_d_zeta, d_Y1c_d_zeta, verbose
 
   implicit none
 
@@ -13,14 +13,14 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
   real(dp) :: quadratic_A, quadratic_B, quadratic_C, radical, sigma
   real(dp) :: start_time, end_time
   integer :: max_j_phi
-  logical :: verbose = .false.
+  logical :: local_verbose = .false.
 
   call cpu_time(start_time)
 
   lp = abs_G0_over_B0 ! Shorthand
 
   max_j_phi = N_phi
-  if (verbose) max_j_phi = 1
+  !if (local_verbose) max_j_phi = 1
   do j = 1, max_j_phi
 
      ! Write sqrt(g) = r * [g0 + r*g1c*cos(theta) + (r^2)*(g20 + g2s*sin(2*theta) + g2c*cos(2*theta) + ...]
@@ -91,7 +91,7 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
 
      call quasisymmetry_quartic_roots(coefficients, real_parts, imag_parts)
 
-     if (verbose) then
+     if (local_verbose) then
         print *,"g0:",g0,"  g1c:",g1c
         print *,"g20:",g20,"  g2s:",g2s,"  g2c:",g2c
         print *,"K0:",K0,"  K2s:",K2s,"  K2c:",K2c
@@ -107,7 +107,7 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
 
         ! If root is not purely real, skip it.
         if (abs(imag_parts(jr)) > 1e-7) then
-           if (verbose) print *,"Skipping root with jr=",jr," since imag part is",imag_parts(jr)
+           if (local_verbose) print *,"Skipping root with jr=",jr," since imag part is",imag_parts(jr)
            cycle
         end if
 
@@ -115,27 +115,28 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
 
         ! Discard any roots that have magnitude larger than 1. (I'm not sure this ever happens, but check to be sure.)
         if (abs(sin2theta) > 1) then
-           if (verbose) print *,"Skipping root with jr=",jr," since sin2theta=",sin2theta
+           if (local_verbose) print *,"Skipping root with jr=",jr," since sin2theta=",sin2theta
            cycle
         end if
 
         sigma_denominator = ((K4s*2*sin2theta + K2c) * sqrt(1 - sin2theta*sin2theta))
         if (abs(sigma_denominator) < 1e-8) print *,"WARNING!!! sigma_denominator=",sigma_denominator
         sigma = -(K0 + K2s * sin2theta + K4c*(1 - 2*sin2theta*sin2theta)) / sigma_denominator
-        if (abs(sigma*sigma-1) > 1e-5) print *,"WARNING!!! abs(sigma*sigma-1) =",abs(sigma*sigma-1)
+        if (abs(sigma*sigma-1) > 1e-3) print *,"WARNING!!! abs(sigma*sigma-1) =",abs(sigma*sigma-1)
         sigma = nint(sigma) ! Ensure sigma is exactly either +1 or -1.
         cos2theta = sigma * sqrt(1 - sin2theta*sin2theta)
         abs_costheta = sqrt(0.5*(1 + cos2theta))
-        if (verbose) print *,"  jr=",jr,"  sin2theta=",sin2theta,"  cos2theta=",cos2theta
+        if (local_verbose) print *,"  jr=",jr,"  sin2theta=",sin2theta,"  cos2theta=",cos2theta
         do varsigma = -1, 1, 2 ! so varsigma will be either -1 or +1.
            costheta = varsigma * abs_costheta
            sintheta = sin2theta / (2 * costheta)
-           if (verbose) print *,"    varsigma=",varsigma,"  costheta=",costheta,"  sintheta=",sintheta
+           if (local_verbose) print *,"    varsigma=",varsigma,"  costheta=",costheta,"  sintheta=",sintheta
 
            ! Sanity test
-           if (abs(costheta*costheta + sintheta*sintheta - 1) > 1e-8) then
+           if (abs(costheta*costheta + sintheta*sintheta - 1) > 1e-4) then
               print *,"Error! sintheta=",sintheta,"  costheta=",costheta
               print *,"j=",j,"  jr=",jr,"  sin2theta=",sin2theta,"  cos2theta=",cos2theta,"  sigma_denominator=",sigma_denominator
+              print *,"abs(costheta*costheta + sintheta*sintheta - 1):",abs(costheta*costheta + sintheta*sintheta - 1)
               stop
            end if
 
@@ -144,10 +145,10 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
            if (abs(denominator) > 1e-8) then ! This method cannot be used if we would need to divide by 0
               r = g1c*sintheta / denominator
               residual = g0 + r*g1c*costheta + r*r*(g20 + g2s*sin2theta + g2c*cos2theta) ! Residual in the equation sqrt(g)=0.
-              if (verbose) print *,"    Linear method: r=",r,"  residual=",residual
+              if (local_verbose) print *,"    Linear method: r=",r,"  residual=",residual
               if ((r>0) .and. (abs(residual) < 1e-5)) then
                  rc = min(rc, r)
-                 if (verbose) print *,"      > rc =",rc
+                 if (local_verbose) print *,"      > rc =",rc
               end if
            else
               ! Use the more complicated method to determine r by solving a quadratic equation.
@@ -158,10 +159,10 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
               do sign_quadratic = -1, 1, 2 ! So sign_quadratic = +1 or -1
                  r = (-quadratic_B + sign_quadratic * radical) / (2 * quadratic_A) ! This is the quadratic formula.
                  residual = -g1c*sintheta + 2*r*(g2s*cos2theta - g2c*sin2theta) ! Residual in the equation d sqrt(g) / d theta = 0.
-                 if (verbose) print *,"    Quadratic method: r=",r,"  residual=",residual
+                 if (local_verbose) print *,"    Quadratic method: r=",r,"  residual=",residual
                  if ((r>0) .and. (abs(residual) < 1e-5)) then
                     rc = min(rc, r)
-                    if (verbose) print *,"      > rc =",rc
+                    if (local_verbose) print *,"      > rc =",rc
                  end if
               end do
            end if
@@ -173,7 +174,7 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
   r_singularity = minval(r_singularity_vs_zeta)
 
   call cpu_time(end_time)
-  print "(a,es11.4,a,es10.3,a)"," r_singularity:",r_singularity,"  Time to compute:",end_time - start_time," sec."
+  if (verbose) print "(a,es11.4,a,es10.3,a)"," r_singularity:",r_singularity,"  Time to compute:",end_time - start_time," sec."
 
 end subroutine quasisymmetry_max_r_before_singularity
 

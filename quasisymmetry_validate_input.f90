@@ -61,6 +61,24 @@ subroutine quasisymmetry_validate_input
      stop
   end select
 
+  select case (trim(B2s_scan_option))
+  case (B2s_scan_option_linear)
+  case (B2s_scan_option_log)
+  case (B2s_scan_option_2_sided_log)
+  case default
+     print *,"Error! Invalid B2s_scan_option:",B2s_scan_option
+     stop
+  end select
+
+  select case (trim(B2c_scan_option))
+  case (B2c_scan_option_linear)
+  case (B2c_scan_option_log)
+  case (B2c_scan_option_2_sided_log)
+  case default
+     print *,"Error! Invalid B2c_scan_option:",B2c_scan_option
+     stop
+  end select
+
   select case (trim(Fourier_scan_option))
   case (Fourier_scan_option_linear)
   case (Fourier_scan_option_2_sided_log)
@@ -104,6 +122,8 @@ subroutine quasisymmetry_validate_input
   ! Ensuring that "max" values are not less than "min" values simplifies the logic in quasisymmetry_random()
   if (eta_bar_max < eta_bar_min) stop "eta_bar_max < eta_bar_min"
   if (sigma_initial_max < sigma_initial_min) stop "sigma_initial_max < sigma_initial_min"
+  if (B2s_max < B2s_min) stop "B2s_max < B2s_min"
+  if (B2c_max < B2c_min) stop "B2c_max < B2c_min"
   do j = 1, axis_nmax+1
      if (R0s_max(j) < R0s_min(j)) stop "An entry of R0s_max is < the corresponding entry in R0s_min"
      if (R0c_max(j) < R0c_min(j)) stop "An entry of R0c_max is < the corresponding entry in R0c_min"
