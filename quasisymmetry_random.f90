@@ -22,7 +22,7 @@ subroutine quasisymmetry_random
   integer*8, dimension(:), allocatable :: N_solves_kept
   real(dp), dimension(:), allocatable :: scan_eta_bar_local, scan_sigma_initial_local, scan_B2s_local, scan_B2c_local
   real(dp), dimension(:,:), allocatable :: scan_R0c_local, scan_R0s_local, scan_Z0c_local, scan_Z0s_local
-  real(dp), dimension(:), allocatable :: max_B2tildes_local, r_singularities_local, d2_volume_d_psi2s_local, B20_variations_local
+  real(dp), dimension(:), allocatable :: max_B2tildes_local, r_singularities_local, d2_volume_d_psi2s_local, B20_variations_local, min_R0s_local
   logical :: keep_going
   real(dp) :: thresh, time1, time2
   real(dp) :: rand
@@ -39,6 +39,7 @@ subroutine quasisymmetry_random
   allocate(rms_curvatures_local(N_random))
   allocate(max_curvatures_local(N_random))
   allocate(max_modBinv_sqrt_half_grad_B_colon_grad_Bs_local(N_random))
+  allocate(min_R0s_local(N_random))
   allocate(axis_lengths_local(N_random))
   allocate(standard_deviations_of_R_local(N_random))
   allocate(standard_deviations_of_Z_local(N_random))
@@ -84,6 +85,7 @@ subroutine quasisymmetry_random
   log_B2c_min = log(abs(B2c_min))
   log_B2c_max = log(abs(B2c_max))
 
+  call cpu_time(time2)
   j_scan = 0
   keep_going = .true.
   do while (keep_going)
@@ -258,6 +260,12 @@ subroutine quasisymmetry_random
      call cpu_time(time1)
      if (time1 - start_time >= random_time) keep_going = .false.
 
+     ! Periodically print a progress report:
+     if (time1 - time2 > 10) then
+        print "(a,i5,a,i10,a)"," Proc",mpi_rank," now has",j_scan," solutions."
+        time2 = time1
+     end if
+
      ! If we can reject this solution, go back and pick new input parameters.
      if (skipped_solve) cycle ! In case R0 <= 0 or some other reason caused quasisymmetry_single_solve to exit prematurely.
      if (max_elongation > max_elongation_to_keep) cycle
@@ -291,6 +299,7 @@ subroutine quasisymmetry_random
      rms_curvatures_local(j_scan) = rms_curvature
      max_curvatures_local(j_scan) = max_curvature
      max_modBinv_sqrt_half_grad_B_colon_grad_Bs_local(j_scan) = max_modBinv_sqrt_half_grad_B_colon_grad_B
+     min_R0s_local(j_scan) = min_R0
      axis_lengths_local(j_scan) = axis_length
      standard_deviations_of_R_local(j_scan) = standard_deviation_of_R
      standard_deviations_of_Z_local(j_scan) = standard_deviation_of_Z
@@ -343,6 +352,7 @@ subroutine quasisymmetry_random
      allocate(rms_curvatures(N_scan))
      allocate(max_curvatures(N_scan))
      allocate(max_modBinv_sqrt_half_grad_B_colon_grad_Bs(N_scan))
+     allocate(min_R0s(N_scan))
      allocate(axis_lengths(N_scan))
      allocate(standard_deviations_of_R(N_scan))
      allocate(standard_deviations_of_Z(N_scan))
@@ -377,6 +387,7 @@ subroutine quasisymmetry_random
      rms_curvatures(1:N_solves_kept(1)) = rms_curvatures_local(1:N_solves_kept(1))
      max_curvatures(1:N_solves_kept(1)) = max_curvatures_local(1:N_solves_kept(1))
      max_modBinv_sqrt_half_grad_B_colon_grad_Bs(1:N_solves_kept(1)) = max_modBinv_sqrt_half_grad_B_colon_grad_Bs_local(1:N_solves_kept(1))
+     min_R0s(1:N_solves_kept(1)) = min_R0s_local(1:N_solves_kept(1))
      axis_lengths(1:N_solves_kept(1)) = axis_lengths_local(1:N_solves_kept(1))
      standard_deviations_of_R(1:N_solves_kept(1)) = standard_deviations_of_R_local(1:N_solves_kept(1))
      standard_deviations_of_Z(1:N_solves_kept(1)) = standard_deviations_of_Z_local(1:N_solves_kept(1))
@@ -413,6 +424,7 @@ subroutine quasisymmetry_random
         call mpi_recv(rms_curvatures(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(max_curvatures(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(max_modBinv_sqrt_half_grad_B_colon_grad_Bs(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        call mpi_recv(min_R0s(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(axis_lengths(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(standard_deviations_of_R(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         call mpi_recv(standard_deviations_of_Z(index:index+N_solves_kept(j+1)-1),N_solves_kept(j+1),MPI_DOUBLE,j,j,MPI_COMM_WORLD,mpi_status,ierr)
@@ -457,6 +469,7 @@ subroutine quasisymmetry_random
      call mpi_send(rms_curvatures_local(1:j_scan),j_scan,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(max_curvatures_local(1:j_scan),j_scan,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(max_modBinv_sqrt_half_grad_B_colon_grad_Bs_local(1:j_scan),j_scan,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     call mpi_send(min_R0s_local(1:j_scan),j_scan,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(axis_lengths_local(1:j_scan),j_scan,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(standard_deviations_of_R_local(1:j_scan),j_scan,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)
      call mpi_send(standard_deviations_of_Z_local(1:j_scan),j_scan,MPI_DOUBLE,0,mpi_rank,MPI_COMM_WORLD,ierr)

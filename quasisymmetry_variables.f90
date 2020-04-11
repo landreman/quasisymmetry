@@ -163,7 +163,7 @@ module quasisymmetry_variables
   real(dp) :: B0 = 1.0d+0
   real(dp) :: p2 = 0.0d+0
   real(dp), parameter :: mu0 = 1.25663706143592d-6
-  real(dp) :: B20_mean, B20_residual, B20_variation, iota2
+  real(dp) :: B20_mean, B20_residual, B20_variation, iota2, min_R0
   real(dp) :: Y3c1_initial
 
   real(dp), dimension(:), allocatable :: d_X1c_d_zeta, d_Y1c_d_zeta, d_Y1s_d_zeta
@@ -180,7 +180,7 @@ module quasisymmetry_variables
   real(dp) :: r_singularity, max_B2tilde, min_r_singularity_to_keep = 0.1, max_B20_variation_to_keep
   integer :: N_random = 10
   real(dp) :: random_time = 3
-  real(dp), dimension(:), allocatable :: r_singularities, d2_volume_d_psi2s, B20_variations
+  real(dp), dimension(:), allocatable :: r_singularities, d2_volume_d_psi2s, B20_variations, min_R0s
 
   integer :: N_procs, mpi_rank
   logical :: proc0, verbose = .true.

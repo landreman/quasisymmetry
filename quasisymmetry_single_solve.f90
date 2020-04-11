@@ -41,7 +41,8 @@ subroutine quasisymmetry_single_solve
 
      call quasisymmetry_init_axis()
 
-     if (any(R0 < min_R0_to_keep)) then
+     min_R0 = minval(R0)
+     if (min_R0 < min_R0_to_keep) then
         if (verbose) print *,"R0 is < min_R0_to_keep, so skipping solve."
         skipped_solve = .true.
         !exit

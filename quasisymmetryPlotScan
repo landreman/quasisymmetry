@@ -10,7 +10,7 @@ if len(sys.argv) != 2:
     print "Error! You must specify 1 argument: the quasisymmetry_out.*.nc file"
     exit(1)
 
-max_max_elongation = 6
+max_max_elongation = 20
 
 filename = sys.argv[1]
 print "Reading filename "+filename
