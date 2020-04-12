@@ -1,11 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # This python script checks the output file for an example to 
 # see if the results are close to expected values.  This script may be
 # run directly, and it is also called when "make test" is run from the
 # main QUASISYMMETRY directory.
 
-execfile('../testsCommon.py')
+exec(open('../testsCommon.py').read())
 
 numFailures = 0
 
@@ -44,5 +44,5 @@ numFailures += compareToReference(referenceFile,outputFile,'standard_deviation_o
 outputFile.close()
 referenceFile.close()
 
-print "numFailures:",numFailures
+print("numFailures:",numFailures)
 exit(numFailures > 0)
