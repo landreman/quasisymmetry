@@ -12,7 +12,7 @@ numFailures = 0
 outputFile = readOutputFile()
 referenceFile = readReferenceFile()
 
-absoluteTolerance = 1e-12
+absoluteTolerance = 1e-11
 relativeTolerance = 1e-100
 numFailures += compareToReference(referenceFile,outputFile,'RBC',absoluteTolerance=absoluteTolerance,relativeTolerance=relativeTolerance)
 numFailures += compareToReference(referenceFile,outputFile,'RBS',absoluteTolerance=absoluteTolerance,relativeTolerance=relativeTolerance)

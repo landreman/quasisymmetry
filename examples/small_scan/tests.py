@@ -12,7 +12,7 @@ numFailures = 0
 outputFile = readOutputFile()
 referenceFile = readReferenceFile()
 
-absoluteTolerance = 1e-13
+absoluteTolerance = 1e-12
 relativeTolerance = 1e-100
 numFailures += compareToReference(referenceFile,outputFile,'iotas',absoluteTolerance=absoluteTolerance,relativeTolerance=relativeTolerance)
 numFailures += compareToReference(referenceFile,outputFile,'max_elongations',absoluteTolerance=absoluteTolerance,relativeTolerance=relativeTolerance)

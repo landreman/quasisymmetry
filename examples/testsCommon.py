@@ -45,9 +45,10 @@ def shouldBe(latestValue, trueValue, relativeTolerance, absoluteTolerance):
         relativeDifference = abs(difference / trueValue)
         relativeTest = (relativeDifference <= relativeTolerance)
     else:
+        relativeDifference = "N/A"
         relativeTest = False
     absoluteTest = (difference <= absoluteTolerance)
-    string = "Expected a value close to "+str(trueValue)+", and it was "+str(latestValue)
+    string = "Expected "+str(trueValue)+" found "+str(latestValue)+". abs diff="+str(difference)+" rel diff="+str(relativeDifference)
     if relativeTest:
         if absoluteTest:
             print("    Test passed. "+string+". Both abs and rel tol met.")
