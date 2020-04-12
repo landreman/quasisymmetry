@@ -398,6 +398,7 @@ subroutine quasisymmetry_higher_order_in_r
   normalizer = 1 / sum(d_l_d_phi)
   B20_mean = sum(B20 * d_l_d_phi) * normalizer
   B20_residual = sqrt(sum((B20 - B20_mean) * (B20 - B20_mean) * d_l_d_phi) * normalizer) / B0
+  B20_variation = maxval(B20) - minval(B20)
 
   deallocate(V1, V2, V3, qs, qc, rs, rc)
   deallocate(matrix, right_hand_side)
@@ -557,7 +558,7 @@ subroutine quasisymmetry_higher_order_in_r
            B0**2*abs_G0_over_B0*I2*X1c*Y1s**3*torsion - B0**2*I2*X1c*Y1c*Y1s*d_X1c_d_zeta + &
            B0**2*I2*X1c**2*Y1s*d_Y1c_d_zeta)/(16*B0**2*G0*X1c**2*Y1s**2)
 
-     if (.true.) then
+     if (debug) then
         ! Check equations from paper:
         allocate(Q(N_phi))
         allocate(predicted_flux_constraint_coefficient(N_phi))
@@ -1193,7 +1194,7 @@ subroutine quasisymmetry_higher_order_in_r
 
      deallocate(matrix, right_hand_side)
 
-     if (.true.) then
+     if (debug) then
         ! Verify that we have actually solved the equations
 
         allocate(d_X3c1_d_zeta(N_phi))

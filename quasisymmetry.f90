@@ -3,7 +3,7 @@
 program quasisymmetry
 
   use quasisymmetry_variables, only: start_time, total_time, general_option, general_option_single, general_option_scan, &
-       N_procs, mpi_rank, proc0
+       general_option_random, N_procs, mpi_rank, proc0
 
   implicit none
 
@@ -39,6 +39,8 @@ program quasisymmetry
      call quasisymmetry_write_vmec_input()
   case (general_option_scan)
      call quasisymmetry_scan()
+  case (general_option_random)
+     call quasisymmetry_random()
   case default
      print *,"Invalid general_option:",general_option
      stop

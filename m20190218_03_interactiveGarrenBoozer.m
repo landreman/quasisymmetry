@@ -224,6 +224,9 @@ label_mean_elongation = uicontrol('Style','text','Units','pixels','Position',[la
 height = height - margin/2;
 label_helicity = uicontrol('Style','text','Units','pixels','Position',[label_left,height+label_margin,200,20],'String','Helicity: ','horizontalalignment','left','fontsize',15);
 
+height = height - margin/2;
+label_r_singularity = uicontrol('Style','text','Units','pixels','Position',[label_left,height+label_margin,200,20],'String','Max r: ','horizontalalignment','left','fontsize',15);
+
 %{
 height = height - margin/2;
 label_B20 = uicontrol('Style','text','Units','pixels','Position',[label_left,height+label_margin,150,20],'String','B20: ','horizontalalignment','left');
@@ -630,8 +633,10 @@ set(f,'Visible','on')
         phi_fortran = ncread(output_filename,'phi');
         if order_r_option == order_r_option_r1_button
             B20 = phi_fortran * 0;
+            r_singularity = Inf;
         else
             B20 = ncread(output_filename,'B20');
+            r_singularity = ncread(output_filename,'r_singularity');
         end
         
         label_iota.String = sprintf('Iota: %.4g',iota);
@@ -642,6 +647,7 @@ set(f,'Visible','on')
         else
             label_helicity.String = sprintf('Quasi-helical symmetry');
         end
+        label_r_singularity.String = sprintf('Max r: %.4g',r_singularity);
         %label_B20.String = sprintf('B20: %g',B20);
         
         R = zeros(size(phi2D));

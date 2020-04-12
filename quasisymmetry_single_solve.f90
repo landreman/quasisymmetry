@@ -41,16 +41,19 @@ subroutine quasisymmetry_single_solve
 
      call quasisymmetry_init_axis()
 
-     if (any(R0 < 1.0d-10)) then
-        if (verbose) print *,"R0 is <= 0, so skipping solve."
+     min_R0 = minval(R0)
+     if (min_R0 < min_R0_to_keep) then
+        if (verbose) print *,"R0 is < min_R0_to_keep, so skipping solve."
         skipped_solve = .true.
-        exit
+        !exit
+        return
      end if
 
      if (max_curvature > max_max_curvature_to_keep) then
         if (verbose) print *,"max_curvature > max_max_curvature_to_keep, so skipping solve."
         skipped_solve = .true.
-        exit
+        !exit
+        return
      end if
 
      call quasisymmetry_solve()
@@ -88,6 +91,12 @@ subroutine quasisymmetry_single_solve
      N_phi = new_N_phi
 
   end do
+
+  ! If doing a scan, and we can veto this run after 1st order, don't bother computing diagnostics
+  if (trim(general_option)==general_option_scan .or. trim(general_option)==general_option_random) then
+     if (max_elongation > max_elongation_to_keep) return
+     if (abs(iota) < min_iota_to_keep) return
+  end if
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Now evaluate diagnostics that need only be evaluated at the final N_phi resolution
@@ -226,7 +235,8 @@ subroutine quasisymmetry_single_solve
     
   call quasisymmetry_elongation_in_Rz_plane()
 
-  call quasisymmetry_determine_B_helicity()
+  ! Now that iota is shifted by axis_helicity, B_helicity should always be 0.
+  !call quasisymmetry_determine_B_helicity()
 
   call quasisymmetry_grad_B_tensor()
 

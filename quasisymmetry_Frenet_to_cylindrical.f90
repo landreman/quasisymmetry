@@ -322,8 +322,8 @@ contains
           ! Solve for the phi0 such that r0 + X1 n + Y1 b has the desired phi
 
           phi_target = phi_conversion(j_phi)
-          phi0_rootSolve_min = phi_target - 0.3
-          phi0_rootSolve_max = phi_target + 0.3
+          phi0_rootSolve_min = phi_target - 1.0 / nfp
+          phi0_rootSolve_max = phi_target + 1.0 / nfp
           call quasisymmetry_fzero(Frenet_to_cylindrical_residual, phi0_rootSolve_min, phi0_rootSolve_max, phi_target, &
                rootSolve_relerr, rootSolve_abserr, fzeroFlag)
           ! Note: fzero returns its answer in phi0_rootSolve_min
