@@ -1,21 +1,26 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import numpy as np
 from scipy.io import netcdf
 import sys, os
 
-print "Usage: "+__file__+" quasisymmetry_out.*.nc"
+print()
+print("Usage: "+__file__+" quasisymmetry_out.*.nc")
 
 if len(sys.argv) != 2:
-    print "Error! You must specify 1 argument: the quasisymmetry_out.*.nc file"
+    print("Error! You must specify 1 argument: the quasisymmetry_out.*.nc file")
     exit(1)
 
+def toString(ncVar):
+    temp = [c.decode('UTF-8') for c in ncVar]
+    return (''.join(temp)).strip()
+
 filename = sys.argv[1]
-print "Reading filename "+filename
+print("Reading filename "+filename)
 f = netcdf.netcdf_file(filename,mode='r',mmap=False)
-general_option = str(f.variables['general_option'][()])
-if general_option.strip()=="scan":
-    print "Error! This script is designed for plotting single runs, but the quasisymmetry_out file you provided is a scan."
+general_option = toString(f.variables['general_option'][()])
+if general_option != "single":
+    print("Error! This script is designed for plotting single runs, but the quasisymmetry_out file you provided is a scan.")
     f.close()
     exit(1)
 
@@ -29,7 +34,7 @@ RBC = f.variables['RBC'][()]
 RBS = f.variables['RBS'][()]
 ZBC = f.variables['ZBC'][()]
 ZBS = f.variables['ZBS'][()]
-print "RBC.shape:",RBC.shape
+print("RBC.shape:",RBC.shape)
 
 phi = f.variables['phi'][()]
 X1c = f.variables['X1c'][()]
@@ -44,14 +49,12 @@ modBinv_sqrt_half_grad_B_colon_grad_B = f.variables['modBinv_sqrt_half_grad_B_co
 
 #order_r_option = f.variables["order_r_option"][()]
 #order_r_option = ''.join(str(f.variables["order_r_option"][()]))
-order_r_option = ''.join(f.variables["order_r_option"][()])
-print "order_r_option:",order_r_option
-order_r_option = order_r_option.strip()
-print "order_r_option:",order_r_option
+order_r_option = toString(f.variables["order_r_option"][()])
+print("order_r_option:",order_r_option)
 order_r_squared = (order_r_option != 'r1' and order_r_option != 'r1_compute_B2')
-print "order_r_squared:",order_r_squared
+print("order_r_squared:",order_r_squared)
 order_r_cubed = (order_r_option != 'r1' and order_r_option != 'r1_compute_B2' and order_r_option != 'r2')
-print "order_r_cubed:",order_r_cubed
+print("order_r_cubed:",order_r_cubed)
 order_r1_compute_B2 = order_r_option == 'r1_compute_B2'
 
 if order_r1_compute_B2:
@@ -475,8 +478,9 @@ fig = plt.figure(figsize=(16,7))
 fig.patch.set_facecolor('white')
 
 # Zoom in:
-factor = 1
-fig.subplots_adjust(bottom=-factor+0.05,top=1+factor)
+#factor = 1
+factor = 0.2
+fig.subplots_adjust(bottom=-factor+0.0,top=0.95+factor)
 
 N_theta = 40
 N_phi = 150
@@ -513,7 +517,7 @@ if order_r_squared:
 B_rescaled = (B - B.min()) / (B.max() - B.min())
 
 ax = fig.gca(projection='3d')
-ax.set_aspect('equal')
+#ax.set_aspect('equal')
 ax.plot_surface(x, y, z, facecolors = cm.viridis(B_rescaled), rstride=1, cstride=1, antialiased=False)
 
 max_range = np.array([x.max()-x.min(), y.max()-y.min(), z.max()-z.min()]).max() / 2.0

@@ -11,7 +11,7 @@ subroutine quasisymmetry_random
   include 'mpif.h'
 
   integer :: j, k
-  integer*8 :: j_scan, index
+  integer*8 :: j_scan, index, attempts
   integer :: ierr, tag
   integer*8 :: dummy_long(1), print_summary_stride
   integer :: mpi_status(MPI_STATUS_SIZE)
@@ -19,7 +19,7 @@ subroutine quasisymmetry_random
   real(dp), dimension(:), allocatable :: standard_deviations_of_R_local, standard_deviations_of_Z_local, max_modBinv_sqrt_half_grad_B_colon_grad_Bs_local
   integer, dimension(:), allocatable :: axis_helicities_local
   logical, dimension(:), allocatable :: iota_tolerance_achieveds_local, elongation_tolerance_achieveds_local, Newton_tolerance_achieveds_local
-  integer*8, dimension(:), allocatable :: N_solves_kept
+  integer*8, dimension(:), allocatable :: N_solves_kept, attempts_per_proc
   real(dp), dimension(:), allocatable :: scan_eta_bar_local, scan_sigma_initial_local, scan_B2s_local, scan_B2c_local
   real(dp), dimension(:,:), allocatable :: scan_R0c_local, scan_R0s_local, scan_Z0c_local, scan_Z0s_local
   real(dp), dimension(:), allocatable :: max_B2tildes_local, r_singularities_local, d2_volume_d_psi2s_local, B20_variations_local, min_R0s_local
@@ -87,8 +87,10 @@ subroutine quasisymmetry_random
 
   call cpu_time(time2)
   j_scan = 0
+  attempts = 0
   keep_going = .true.
   do while (keep_going)
+     attempts = attempts + 1
 
      ! If needed, pick a random value for eta_bar.
      if (eta_bar_max > eta_bar_min) then
@@ -262,7 +264,7 @@ subroutine quasisymmetry_random
 
      ! Periodically print a progress report:
      if (time1 - time2 > 10) then
-        print "(a,i5,a,i10,a)"," Proc",mpi_rank," now has",j_scan," solutions."
+        print "(a,i5,a,i12,a,i10,a)"," Proc",mpi_rank," now has",attempts," attempts and",j_scan," solutions."
         time2 = time1
      end if
 
@@ -335,14 +337,21 @@ subroutine quasisymmetry_random
      end if
 
      allocate(N_solves_kept(N_procs))
+     allocate(attempts_per_proc(N_procs))
      N_solves_kept(1) = j_scan
+     attempts_per_proc(1) = attempts
      do j = 1, N_procs-1
         ! Use mpi_rank as the tag
         call mpi_recv(dummy_long,1,MPI_INTEGER8,j,j,MPI_COMM_WORLD,mpi_status,ierr)
         N_solves_kept(j+1) = dummy_long(1)
+        call mpi_recv(dummy_long,1,MPI_INTEGER8,j,j,MPI_COMM_WORLD,mpi_status,ierr)
+        attempts_per_proc(j+1) = dummy_long(1)
+        attempts = attempts + dummy_long(1)
      end do
+     print *,"attempted solutions on each proc:",attempts_per_proc
      print *,"# solves kept on each proc:",N_solves_kept
      N_scan = sum(N_solves_kept)
+     print *,"Total # of attempts:",attempts
      print *,"Total # of solves kept:",N_scan
 
      ! Now that we know the total number of runs that were kept, we can allocate the arrays for the final results:
@@ -460,6 +469,8 @@ subroutine quasisymmetry_random
      ! Send the number of runs this proc kept:
      dummy_long(1) = j_scan
      ! Use mpi_rank as the tag
+     call mpi_send(dummy_long,1,MPI_INTEGER8,0,mpi_rank,MPI_COMM_WORLD,ierr)
+     dummy_long(1) = attempts
      call mpi_send(dummy_long,1,MPI_INTEGER8,0,mpi_rank,MPI_COMM_WORLD,ierr)
 
      ! Send the other results:

@@ -1,19 +1,20 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import numpy as np
 from scipy.io import netcdf
 import sys, os
 
-print "Usage: "+__file__+" quasisymmetry_out.*.nc"
+print()
+print("Usage: "+__file__+" quasisymmetry_out.*.nc")
 
 if len(sys.argv) != 2:
-    print "Error! You must specify 1 argument: the quasisymmetry_out.*.nc file"
+    print("Error! You must specify 1 argument: the quasisymmetry_out.*.nc file")
     exit(1)
 
 max_max_elongation = 20
 
 filename = sys.argv[1]
-print "Reading filename "+filename
+print("Reading filename "+filename)
 f = netcdf.netcdf_file(filename,mode='r',mmap=False)
 iotas = f.variables['iotas'][()]
 max_elongations = f.variables['max_elongations'][()]
@@ -25,10 +26,10 @@ scan_R0s = f.variables['scan_R0s'][()]
 scan_Z0c = f.variables['scan_Z0c'][()]
 scan_Z0s = f.variables['scan_Z0s'][()]
 
-print "Original number of scan entries:",len(iotas)
+print("Original number of scan entries:",len(iotas))
 mask = max_elongations < max_max_elongation
 iotas = iotas[mask]
-print "Number of filtered scan entries:",len(iotas)
+print("Number of filtered scan entries:",len(iotas))
 max_elongations = max_elongations[mask]
 axis_helicities = axis_helicities[mask]
 scan_sigma_initial = scan_sigma_initial[mask]
@@ -39,7 +40,7 @@ scan_Z0s = scan_Z0s[:,mask]
 scan_Z0c = scan_Z0c[:,mask]
 
 
-print "scan_R0c.shape:",scan_R0c.shape
+print("scan_R0c.shape:",scan_R0c.shape)
 
 axis_nmax = len(scan_R0c[:,0])-1
 N_plots = axis_nmax*2 + 2

@@ -1,7 +1,8 @@
 subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_Z2c_d_zeta)
 
   use quasisymmetry_variables, only: dp, N_phi, abs_G0_over_B0, X1c, Y1s, Y1c, X20, X2s, X2c, Y20, Y2s, Y2c, Z20, Z2s, Z2c, &
-       curvature, torsion, r_singularity, r_singularity_vs_zeta, d_X1c_d_zeta, d_Y1s_d_zeta, d_Y1c_d_zeta, verbose
+       curvature, torsion, r_singularity, r_singularity_vs_zeta, d_X1c_d_zeta, d_Y1s_d_zeta, d_Y1c_d_zeta, verbose, &
+       general_option, general_option_single
 
   implicit none
 
@@ -137,7 +138,7 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
               print *,"Error! sintheta=",sintheta,"  costheta=",costheta
               print *,"j=",j,"  jr=",jr,"  sin2theta=",sin2theta,"  cos2theta=",cos2theta,"  sigma_denominator=",sigma_denominator
               print *,"abs(costheta*costheta + sintheta*sintheta - 1):",abs(costheta*costheta + sintheta*sintheta - 1)
-              stop
+              if (trim(general_option)==general_option_single) stop
            end if
 
            ! Try to get r using the simpler method, the equation that is linear in r.
