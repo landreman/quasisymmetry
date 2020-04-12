@@ -197,6 +197,8 @@ subroutine quasisymmetry_write_output
        vn_B2s_array = "B2s_array", &
        vn_B2c_array = "B2c_array", &
        vn_B02 = "B02", &
+       vn_t1s = "t1s", &
+       vn_t1c = "t1c", &
        vn_r_singularity_vs_zeta = "r_singularity_vs_zeta"
 
   ! Arrays with dimension 2
@@ -376,6 +378,8 @@ subroutine quasisymmetry_write_output
         call cdf_define(ncid, vn_B2s_array, B2s_array, dimname=N_phi_dim)
         call cdf_define(ncid, vn_B2c_array, B2c_array, dimname=N_phi_dim)
         call cdf_define(ncid, vn_B02, B02, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_t1s, t1s, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_t1c, t1c, dimname=N_phi_dim)
      end if
      if (trim(order_r_option) .ne. order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2) then
         ! O(r^2) quantities
@@ -622,6 +626,8 @@ subroutine quasisymmetry_write_output
         call cdf_write(ncid, vn_B2s_array, B2s_array)
         call cdf_write(ncid, vn_B2c_array, B2c_array)
         call cdf_write(ncid, vn_B02, B02)
+        call cdf_write(ncid, vn_t1s, t1s)
+        call cdf_write(ncid, vn_t1c, t1c)
      end if
      if (trim(order_r_option) .ne. order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2) then
         ! O(r^2) quantities

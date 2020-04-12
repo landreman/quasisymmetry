@@ -597,6 +597,20 @@ subroutine quasisymmetry_compute_B2_for_r1
 
   B02 = -sign_G * sign_psi * B0 * q_tilde
 
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! Compute difference between the tilde and non-tilde poloidal angles:
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  allocate(t1s(N_phi))
+  allocate(t1c(N_phi))
+
+  t1c =  2 * X2s / X1c
+  t1s = -2 * X2c / X1c
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  ! Clean up
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
   deallocate(Q,A,q_tilde)
 
   deallocate(matrix, right_hand_side, factors)
