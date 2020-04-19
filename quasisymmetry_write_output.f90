@@ -78,7 +78,7 @@ subroutine quasisymmetry_write_output
        vn_max_B2tilde = "max_B2tilde", &
        vn_B20_variation = "B20_variation", &
        vn_max_B20_variation_to_keep = "max_B20_variation_to_keep", &
-       vn_grad_grad_B_scale_length = "grad_grad_B_scale_length"
+       vn_grad_grad_B_inverse_scale_length = "grad_grad_B_inverse_scale_length"
 
   ! Arrays with dimension 1
   character(len=*), parameter :: &
@@ -213,7 +213,7 @@ subroutine quasisymmetry_write_output
        vn_r_singularities = "r_singularities", &
        vn_d2_volume_d_psi2s = "d2_volume_d_psi2s", &
        vn_B20_variations = "B20_variations", &
-       vn_grad_grad_B_scale_length_vs_zeta = "grad_grad_B_scale_length_vs_zeta"
+       vn_grad_grad_B_inverse_scale_length_vs_zeta = "grad_grad_B_inverse_scale_length_vs_zeta"
 
   ! Arrays with dimension 2
   character(len=*), parameter :: &
@@ -335,7 +335,10 @@ subroutine quasisymmetry_write_output
         call cdf_define(ncid, vn_d2_volume_d_psi2, d2_volume_d_psi2)
         call cdf_setatt(ncid, vn_d2_volume_d_psi2, 'Magnetic well parameter. The quantity saved is the second derivative of the volume of the flux surfaces with respect to psi, where 2*pi*psi is the toroidal flux. Negative values of this quantity are favorable for stability.')
         call cdf_define(ncid, vn_r_singularity, r_singularity)
-        call cdf_define(ncid, vn_grad_grad_B_scale_length, grad_grad_B_scale_length)
+        call cdf_define(ncid, vn_grad_grad_B_inverse_scale_length, grad_grad_B_inverse_scale_length)
+        call cdf_setatt(ncid, vn_grad_grad_B_inverse_scale_length, 'An inverse scale length computed from the grad grad \vec{B} tensor: ' // &
+             '\sqrt{\sqrt{\sum_{i,j,k=1}^3 (grad grad \vec{B})_{i,j,k}^2} / (4 B)}. This has units of 1/length, and equals R0 for an axisymmetric vacuum field. ' // &
+             'Large values are good, meaning the coils can be farther away.')
      end if
      if (trim(order_r_option) == order_r_option_r3_B3) then
         call cdf_define(ncid, vn_B3c3_input, B3c3_input)
@@ -440,7 +443,7 @@ subroutine quasisymmetry_write_output
         call cdf_define(ncid, vn_z2c_cylindrical, z2c_cylindrical, dimname=N_phi_dim)
         call cdf_define(ncid, vn_B0_order_a_squared_to_cancel, B0_order_a_squared_to_cancel, dimname=N_phi_dim)
         call cdf_define(ncid, vn_r_singularity_vs_zeta, r_singularity_vs_zeta, dimname=N_phi_dim)
-        call cdf_define(ncid, vn_grad_grad_B_scale_length_vs_zeta, grad_grad_B_scale_length_vs_zeta, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_grad_grad_B_inverse_scale_length_vs_zeta, grad_grad_B_inverse_scale_length_vs_zeta, dimname=N_phi_dim)
      end if
      if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2 .and. trim(order_r_option).ne.order_r_option_r2) then
         ! O(r^3) quantities
@@ -616,7 +619,7 @@ subroutine quasisymmetry_write_output
         call cdf_write(ncid, vn_B20_variation, B20_variation)
         call cdf_write(ncid, vn_d2_volume_d_psi2, d2_volume_d_psi2)
         call cdf_write(ncid, vn_r_singularity, r_singularity)
-        call cdf_write(ncid, vn_grad_grad_B_scale_length, grad_grad_B_scale_length)
+        call cdf_write(ncid, vn_grad_grad_B_inverse_scale_length, grad_grad_B_inverse_scale_length)
      end if
      if (trim(order_r_option) == order_r_option_r3_B3) then
         call cdf_write(ncid, vn_B3c3_input, B3c3_input)
@@ -721,7 +724,7 @@ subroutine quasisymmetry_write_output
         call cdf_write(ncid, vn_z2c_cylindrical, z2c_cylindrical)
         call cdf_write(ncid, vn_B0_order_a_squared_to_cancel, B0_order_a_squared_to_cancel)
         call cdf_write(ncid, vn_r_singularity_vs_zeta, r_singularity_vs_zeta)
-        call cdf_write(ncid, vn_grad_grad_B_scale_length_vs_zeta, grad_grad_B_scale_length_vs_zeta)
+        call cdf_write(ncid, vn_grad_grad_B_inverse_scale_length_vs_zeta, grad_grad_B_inverse_scale_length_vs_zeta)
      end if
      if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2 .and. trim(order_r_option).ne.order_r_option_r2) then
         ! O(r^3) quantities

@@ -7,11 +7,14 @@ subroutine quasisymmetry_grad_grad_B_tensor
   real(dp), allocatable, dimension(:) :: d_Z20_d_zeta, d_Z2s_d_zeta, d_Z2c_d_zeta, d2_X1c_d_zeta2, d2_Y1c_d_zeta2, d2_Y1s_d_zeta2, difference
   real(dp) :: G0, iota_N0, lp, G2, I2, norm_difference, analytic_value
   integer :: i,j,k
+  real :: time1, time2
 
   ! Only proceed if we have O(r^2) information
   if ((trim(order_r_option)==order_r_option_r1) .or. (trim(order_r_option)==order_r_option_r1_compute_B2)) return
 
-  allocate(grad_grad_B_scale_length_vs_zeta(N_phi))
+  call cpu_time(time1)
+
+  allocate(grad_grad_B_inverse_scale_length_vs_zeta(N_phi))
   allocate(grad_grad_B(N_phi,3,3,3))
   allocate(difference(N_phi))
   allocate(d_curvature_d_zeta(N_phi))
@@ -531,8 +534,8 @@ subroutine quasisymmetry_grad_grad_B_tensor
      end if
   end if
 
-  ! Compute the scale length
-  difference = 0
+  ! Compute the (inverse) scale length
+  difference = 0 ! We can re-use the 'difference' array, even though this step has nothing to do with differences.
   do i = 1, 3
      do j = 1, 3
         do k = 1, 3
@@ -540,11 +543,16 @@ subroutine quasisymmetry_grad_grad_B_tensor
         end do
      end do
   end do
-  grad_grad_B_scale_length_vs_zeta = sqrt(4*B0 / sqrt(difference))
-  grad_grad_B_scale_length = maxval(grad_grad_B_scale_length_vs_zeta)
+  grad_grad_B_inverse_scale_length_vs_zeta = sqrt(sqrt(difference) / (4*B0))
+  grad_grad_B_inverse_scale_length = maxval(grad_grad_B_inverse_scale_length_vs_zeta)
 
   deallocate(grad_grad_B)
   deallocate(d_curvature_d_zeta, d_torsion_d_zeta, d_X20_d_zeta, d_X2s_d_zeta, d_X2c_d_zeta, d_Y20_d_zeta, d_Y2s_d_zeta, d_Y2c_d_zeta)
   deallocate(d_Z20_d_zeta, d_Z2s_d_zeta, d_Z2c_d_zeta, d2_X1c_d_zeta2, d2_Y1c_d_zeta2, d2_Y1s_d_zeta2, difference)
+
+  if (verbose) then
+     call cpu_time(time2)
+     print *,"Time for grad_grad_B_tensor:",time2-time1
+  end if
   
 end subroutine quasisymmetry_grad_grad_B_tensor
