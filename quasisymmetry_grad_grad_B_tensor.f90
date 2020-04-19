@@ -5,12 +5,13 @@ subroutine quasisymmetry_grad_grad_B_tensor
   real(dp), allocatable :: grad_grad_B(:,:,:,:)
   real(dp), allocatable, dimension(:) :: d_curvature_d_zeta, d_torsion_d_zeta, d_X20_d_zeta, d_X2s_d_zeta, d_X2c_d_zeta, d_Y20_d_zeta, d_Y2s_d_zeta, d_Y2c_d_zeta
   real(dp), allocatable, dimension(:) :: d_Z20_d_zeta, d_Z2s_d_zeta, d_Z2c_d_zeta, d2_X1c_d_zeta2, d2_Y1c_d_zeta2, d2_Y1s_d_zeta2, difference
-  real(dp) :: G0, iota_N0, lp, G2, I2, norm_difference
+  real(dp) :: G0, iota_N0, lp, G2, I2, norm_difference, analytic_value
   integer :: i,j,k
 
   ! Only proceed if we have O(r^2) information
   if ((trim(order_r_option)==order_r_option_r1) .or. (trim(order_r_option)==order_r_option_r1_compute_B2)) return
 
+  allocate(grad_grad_B_scale_length_vs_zeta(N_phi))
   allocate(grad_grad_B(N_phi,3,3,3))
   allocate(difference(N_phi))
   allocate(d_curvature_d_zeta(N_phi))
@@ -485,6 +486,62 @@ subroutine quasisymmetry_grad_grad_B_tensor
         end do
      end if
   end if
+
+  ! For axisymmetry with no current, compare to analytic result
+  if (axis_nmax < 1 .and. abs(I2) < 1e-5) then
+     do i = 1, 3
+        do j = 1, 3
+           do k = 1, 3
+              print "(3(a,i1),a,es24.15)", "grad_grad_B(",i,",",j,",",k,") =",grad_grad_B(1,i,j,k)
+              ! Check all components other than {tnn, ntn, nnt, ttt}. These should be 0.
+              if (.not. ((i==3 .and. j==3 .and. k==3) .or. (i==3 .and. j==1 .and. k==1) .or. (i==1 .and. j==3 .and. k==1) .or. (i==i .and. j==1 .and. k==3))) then
+                 norm_difference = maxval(abs(grad_grad_B(:,i,j,k)))
+                 if (norm_difference > 1e-6) then
+                    print "(a,3(i1),a,es24.15)", " Error! grad_grad_B is nonzero for (i,j,k)=",i,j,k," diff=",norm_difference
+                    stop
+                 else
+                    if (verbose) print "(a,3(i1),a,es24.15)", "  grad_grad_B=0 as it should for (i,j,k)=",i,j,k," val=",norm_difference
+                 end if
+              end if
+           end do
+        end do
+     end do
+
+     ! Check ttt component
+     analytic_value = -2 * B0 / (R0c(1) * R0c(1))
+     norm_difference = maxval(abs(grad_grad_B(:,3,3,3) - analytic_value))
+     if (norm_difference > 1e-6) then
+        print "(a,es24.14)", "ERROR!! grad_grad_B(:,3,3,3) is wrong. diff=",norm_difference
+        stop
+     else
+        if (verbose) print "(2(a,es24.14))", "  grad_grad_B(:,3,3,3) is correct. expected=",analytic_value," diff=",norm_difference
+     end if
+
+     ! Check tnn, ntn, nnt components
+     analytic_value = -analytic_value
+     norm_difference = max( &
+          maxval(abs(grad_grad_B(:,3,1,1) - analytic_value)), &
+          maxval(abs(grad_grad_B(:,1,3,1) - analytic_value)), &
+          maxval(abs(grad_grad_B(:,1,1,3) - analytic_value)) )
+     if (norm_difference > 1e-6) then
+        print "(a,es24.14)", "ERROR!! At least one of {tnn, ntn, nnt} components of grad_grad_B are wrong. diff=",norm_difference
+        stop
+     else
+        if (verbose) print "(a,es24.14)", "  tnn, ntn, nnt components of grad_grad_B are correct. diff=",norm_difference
+     end if
+  end if
+
+  ! Compute the scale length
+  difference = 0
+  do i = 1, 3
+     do j = 1, 3
+        do k = 1, 3
+           difference = difference + grad_grad_B(:,i,j,k) * grad_grad_B(:,i,j,k)
+        end do
+     end do
+  end do
+  grad_grad_B_scale_length_vs_zeta = sqrt(4*B0 / sqrt(difference))
+  grad_grad_B_scale_length = maxval(grad_grad_B_scale_length_vs_zeta)
 
   deallocate(grad_grad_B)
   deallocate(d_curvature_d_zeta, d_torsion_d_zeta, d_X20_d_zeta, d_X2s_d_zeta, d_X2c_d_zeta, d_Y20_d_zeta, d_Y2s_d_zeta, d_Y2c_d_zeta)

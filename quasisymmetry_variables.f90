@@ -181,6 +181,8 @@ module quasisymmetry_variables
   integer :: N_random = 10
   real(dp) :: random_time = 3
   real(dp), dimension(:), allocatable :: r_singularities, d2_volume_d_psi2s, B20_variations, min_R0s
+  real(dp), dimension(:), allocatable :: grad_grad_B_scale_length_vs_zeta
+  real(dp) :: grad_grad_B_scale_length
 
   integer :: N_procs, mpi_rank
   logical :: proc0, verbose = .true.
