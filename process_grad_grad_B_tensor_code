@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 
-in_filename = 'quasisymmetry_grad_grad_B_tensor'
-out_filename = 'quasisymmetry_grad_grad_B_tensor.x.f90'
+#in_filename = 'quasisymmetry_grad_grad_B_tensor'
+#out_filename = 'quasisymmetry_grad_grad_B_tensor.x.f90'
+
+in_filename = 'quasisymmetry_grad_grad_B_tensor_alt'
+out_filename = 'quasisymmetry_grad_grad_B_tensor_alt.x.f90'
 
 f = open(in_filename)
 lines = f.readlines()
@@ -17,6 +20,22 @@ for j in range(len(lines)):
     if len(line) > 1 and line[0] != '!' and j < len(lines) and len(lines[j+1])>1:
         newline = line[:-1]+'&\n'
 
+    # Convert Rogerio's notation to my original notation
+    newline = newline.replace(r"CapitalPhi","CurlyPhi")
+    newline = newline.replace(r"*sg**2","")
+    newline = newline.replace(r"*sg**4","")
+    newline = newline.replace(r"s\[Psi]","sign_psi")
+    newline = newline.replace(r"sg","sign_G")
+    newline = newline.replace(r"*sign_psi**2","")
+    newline = newline.replace(r"sign_psi**3","sign_psi")
+    newline = newline.replace(r"sign_G**3","sign_G")
+    newline = newline.replace(r"X22s","X2s")
+    newline = newline.replace(r"X22c","X2c")
+    newline = newline.replace(r"Y22s","Y2s")
+    newline = newline.replace(r"Y22c","Y2c")
+    newline = newline.replace(r"Z22s","Z2s")
+    newline = newline.replace(r"Z22c","Z2c")
+
     # Replacement rules
     newline = newline.replace(r"(\[CurlyPhi])","")
     newline = newline.replace(r"*s\[Psi]**2","")
@@ -28,6 +47,7 @@ for j in range(len(lines)):
     newline = newline.replace(r"\[Iota]0","iota")
     newline = newline.replace(r"\[Kappa]","curvature")
     newline = newline.replace(r"\[Tau]","torsion")
+    newline = newline.replace(r"torsion**2","torsion*torsion")
     newline = newline.replace(r"Derivative(1)(X1c)","d_X1c_d_zeta")
     newline = newline.replace(r"Derivative(1)(Y1c)","d_Y1c_d_zeta")
     newline = newline.replace(r"Derivative(1)(Y1s)","d_Y1s_d_zeta")
@@ -62,7 +82,8 @@ for j in range(len(lines)):
     newline = newline.replace(r"Derivative(2)(Y1c)","d2_Y1c_d_zeta2")
     newline = newline.replace(r"Derivative(2)(Y1s)","d2_Y1s_d_zeta2")
 
-    #newline = newline.replace(r"","")
+    newline = newline.replace(r"d_Y1s_d_zeta**2","d_Y1s_d_zeta*d_Y1s_d_zeta")
+    newline = newline.replace(r"Y1c**3","Y1c*Y1c*Y1c")
     #newline = newline.replace(r"","")
 
     newlines.append(newline)
