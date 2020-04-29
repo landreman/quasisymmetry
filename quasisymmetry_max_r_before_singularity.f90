@@ -13,8 +13,10 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
   real(dp) :: coefficients(5), real_parts(4), imag_parts(4)
   real(dp) :: quadratic_A, quadratic_B, quadratic_C, radical, sigma
   real(dp) :: start_time, end_time
+  real(dp) :: abs_cos2theta, residual_if_sigma_plus, residual_if_sigma_minus
   integer :: max_j_phi
   logical :: local_verbose = .false.
+  !logical :: local_verbose = .true.
 
   call cpu_time(start_time)
 
@@ -120,12 +122,31 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
            cycle
         end if
 
-        sigma_denominator = ((K4s*2*sin2theta + K2c) * sqrt(1 - sin2theta*sin2theta))
-        if (abs(sigma_denominator) < 1e-8) print *,"WARNING!!! sigma_denominator=",sigma_denominator
-        sigma = -(K0 + K2s * sin2theta + K4c*(1 - 2*sin2theta*sin2theta)) / sigma_denominator
-        if (abs(sigma*sigma-1) > 1e-3) print *,"WARNING!!! abs(sigma*sigma-1) =",abs(sigma*sigma-1)
-        sigma = nint(sigma) ! Ensure sigma is exactly either +1 or -1.
-        cos2theta = sigma * sqrt(1 - sin2theta*sin2theta)
+        ! Determine sigma by checking which choice gives the smaller residual in the K equation
+        abs_cos2theta = sqrt(1 - sin2theta * sin2theta)
+        residual_if_sigma_plus  = abs(K0 + K2s * sin2theta + K2c *   abs_cos2theta &
+             + K4s * 2 * sin2theta *   abs_cos2theta  + K4c * (1 - 2 * sin2theta * sin2theta))
+        residual_if_sigma_minus = abs(K0 + K2s * sin2theta + K2c * (-abs_cos2theta) &
+             + K4s * 2 * sin2theta * (-abs_cos2theta) + K4c * (1 - 2 * sin2theta * sin2theta))
+
+        if (residual_if_sigma_plus > residual_if_sigma_minus) then
+           sigma = -1
+        else
+           sigma = 1
+        end if
+        cos2theta = sigma * abs_cos2theta
+
+        ! The next few lines give an older method for computing sigma, which has problems in edge cases
+        ! where w (the root of the quartic polynomial) is very close to +1 or -1, giving sigma
+        ! not very close to +1 or -1 due to bad loss of precision.
+        !
+        !sigma_denominator = ((K4s*2*sin2theta + K2c) * sqrt(1 - sin2theta*sin2theta))
+        !if (abs(sigma_denominator) < 1e-8) print *,"WARNING!!! sigma_denominator=",sigma_denominator
+        !sigma = -(K0 + K2s * sin2theta + K4c*(1 - 2*sin2theta*sin2theta)) / sigma_denominator
+        !if (abs(sigma*sigma-1) > 1e-3) print *,"WARNING!!! abs(sigma*sigma-1) =",abs(sigma*sigma-1)
+        !sigma = nint(sigma) ! Ensure sigma is exactly either +1 or -1.
+        !cos2theta = sigma * sqrt(1 - sin2theta*sin2theta)
+
         abs_costheta = sqrt(0.5*(1 + cos2theta))
         if (local_verbose) print *,"  jr=",jr,"  sin2theta=",sin2theta,"  cos2theta=",cos2theta
         do varsigma = -1, 1, 2 ! so varsigma will be either -1 or +1.
@@ -136,7 +157,7 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
            ! Sanity test
            if (abs(costheta*costheta + sintheta*sintheta - 1) > 1e-4) then
               print *,"Error! sintheta=",sintheta,"  costheta=",costheta
-              print *,"j=",j,"  jr=",jr,"  sin2theta=",sin2theta,"  cos2theta=",cos2theta,"  sigma_denominator=",sigma_denominator
+              print *,"j=",j,"  jr=",jr,"  sin2theta=",sin2theta,"  cos2theta=",cos2theta
               print *,"abs(costheta*costheta + sintheta*sintheta - 1):",abs(costheta*costheta + sintheta*sintheta - 1)
               if (trim(general_option)==general_option_single) stop
            end if
