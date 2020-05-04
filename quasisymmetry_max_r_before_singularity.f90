@@ -200,7 +200,7 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
         end do
      end do
      r_singularity_basic_vs_zeta(j) = rc
-     if (r_singularity_Newton_iterations > 0 .and. j>-2) call r_singularity_Newton_solve()
+     if (r_singularity_Newton_iterations > 0) call r_singularity_Newton_solve()
      r_singularity_vs_zeta(j) = rc
 
   end do
@@ -213,6 +213,7 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
 contains
 
   subroutine r_singularity_Newton_solve()
+    ! Apply Newton's method to iteratively refine the solution for (r,theta) where the surfaces become singular.
 
     use quasisymmetry_variables, only: r_singularity_Newton_iterations, r_singularity_line_search, r_singularity_Newton_tolerance
     implicit none
