@@ -82,9 +82,15 @@ if order_r_squared:
     Z2s = f.variables['Z2s'][()]
     Z2c = f.variables['Z2c'][()]
     r_singularity_vs_zeta = f.variables['r_singularity_vs_zeta'][()]
+    try:
+        r_singularity_basic_vs_zeta = f.variables['r_singularity_basic_vs_zeta'][()]
+    except:
+        r_singularity_basic_vs_zeta = r_singularity_vs_zeta # Old output files might not have this field
     for j in range(len(phi)):
         if r_singularity_vs_zeta[j] > 1.0e10:
             r_singularity_vs_zeta[j] = np.nan
+        if r_singularity_basic_vs_zeta[j] > 1.0e10:
+            r_singularity_basic_vs_zeta[j] = np.nan
 
 if order_r_cubed:
     X3s1 = f.variables['X3s1'][()]
@@ -326,7 +332,9 @@ if order_r_squared:
 
     plt.subplot(numRows,numCols,plotNum)
     plotNum += 1
-    plt.plot(phi,r_singularity_vs_zeta)
+    plt.plot(phi,r_singularity_vs_zeta,label='refined')
+    plt.plot(phi,r_singularity_basic_vs_zeta,':k',label='unrefined')
+    plt.legend(fontsize=6,loc=0)
     plt.title('r_singularity_vs_zeta')
     plt.xlabel('$\phi$')
     plt.xlim(my_xlim)

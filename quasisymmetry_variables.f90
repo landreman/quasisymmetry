@@ -176,13 +176,15 @@ module quasisymmetry_variables
   real(dp) :: iota_from_torsion, d2_volume_d_psi2 = 0
   logical :: circular_cross_section_surface = .false.
   integer :: finite_r_nonlinear_N_theta = 20
-  real(dp), dimension(:), allocatable :: r_singularity_vs_zeta
+  real(dp), dimension(:), allocatable :: r_singularity_vs_zeta, r_singularity_basic_vs_zeta
   real(dp) :: r_singularity, max_B2tilde, min_r_singularity_to_keep = 0.1, max_B20_variation_to_keep
   integer :: N_random = 10
   real(dp) :: random_time = 3
   real(dp), dimension(:), allocatable :: r_singularities, d2_volume_d_psi2s, B20_variations, min_R0s
   real(dp), dimension(:), allocatable :: grad_grad_B_inverse_scale_length_vs_zeta
   real(dp) :: grad_grad_B_inverse_scale_length
+  integer :: r_singularity_Newton_iterations = 0, r_singularity_line_search = 4
+  real(dp) :: r_singularity_Newton_tolerance = 1.0e-40
 
   integer :: N_procs, mpi_rank
   logical :: proc0, verbose = .true.
@@ -196,7 +198,8 @@ module quasisymmetry_variables
        eta_bar_min, eta_bar_max, eta_bar_N_scan, sigma_initial_min, sigma_initial_max, sigma_initial_N_scan, max_max_curvature_to_keep, min_iota_to_keep, &
        finite_r_option, order_r_option, B0, B2s, B2c, p2, untwist, max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep, B3s3_input, B3c3_input, Y3c1_initial, &
        circular_cross_section_surface, finite_r_nonlinear_N_theta, N_random, random_time, min_R0_to_keep, max_B2tilde_to_keep, debug, min_r_singularity_to_keep, &
-       max_B20_variation_to_keep, B2s_min, B2s_max, B2c_min, B2c_max, B2s_scan_option, B2c_scan_option
+       max_B20_variation_to_keep, B2s_min, B2s_max, B2c_min, B2c_max, B2s_scan_option, B2c_scan_option, &
+       r_singularity_Newton_iterations, r_singularity_line_search, r_singularity_Newton_tolerance
 
 end module quasisymmetry_variables
 

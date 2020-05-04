@@ -1,8 +1,8 @@
 subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_Z2c_d_zeta)
 
   use quasisymmetry_variables, only: dp, N_phi, abs_G0_over_B0, X1c, Y1s, Y1c, X20, X2s, X2c, Y20, Y2s, Y2c, Z20, Z2s, Z2c, &
-       curvature, torsion, r_singularity, r_singularity_vs_zeta, d_X1c_d_zeta, d_Y1s_d_zeta, d_Y1c_d_zeta, verbose, &
-       general_option, general_option_single
+       curvature, torsion, r_singularity, r_singularity_vs_zeta, r_singularity_basic_vs_zeta, d_X1c_d_zeta, d_Y1s_d_zeta, d_Y1c_d_zeta, verbose, &
+       general_option, general_option_single, r_singularity_Newton_iterations
 
   implicit none
 
@@ -11,12 +11,13 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
   real(dp) :: g0, g1c, g20, g2s, g2c, sigma_denominator, abs_costheta, denominator, r, residual, rc
   real(dp) :: K0, K2s, K2c, K4s, K4c, sintheta, costheta, sin2theta, cos2theta, lp
   real(dp) :: coefficients(5), real_parts(4), imag_parts(4)
-  real(dp) :: quadratic_A, quadratic_B, quadratic_C, radical, varpi
+  real(dp) :: quadratic_A, quadratic_B, quadratic_C, radical, varpi, sintheta_at_rc, costheta_at_rc
   real(dp) :: start_time, end_time
   real(dp) :: abs_cos2theta, residual_if_varpi_plus, residual_if_varpi_minus
   integer :: max_j_phi
   logical :: local_verbose = .false.
   !logical :: local_verbose = .true.
+  real(dp) :: Newton_residual(2), Newton_residual_sqnorm, state(2), inv_Jacobian(2,2), theta
 
   call cpu_time(start_time)
 
@@ -169,8 +170,12 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
               residual = g0 + r*g1c*costheta + r*r*(g20 + g2s*sin2theta + g2c*cos2theta) ! Residual in the equation sqrt(g)=0.
               if (local_verbose) print *,"    Linear method: r=",r,"  residual=",residual
               if ((r>0) .and. (abs(residual) < 1e-5)) then
-                 rc = min(rc, r)
-                 if (local_verbose) print *,"      > rc =",rc
+                 if (r < rc) then ! If this is a new minimum
+                    rc = r
+                    sintheta_at_rc = sintheta
+                    costheta_at_rc = costheta
+                    if (local_verbose) print *,"      New minimum: rc =",rc
+                 end if
               end if
            else
               ! Use the more complicated method to determine r by solving a quadratic equation.
@@ -183,13 +188,19 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
                  residual = -g1c*sintheta + 2*r*(g2s*cos2theta - g2c*sin2theta) ! Residual in the equation d sqrt(g) / d theta = 0.
                  if (local_verbose) print *,"    Quadratic method: r=",r,"  residual=",residual
                  if ((r>0) .and. (abs(residual) < 1e-5)) then
-                    rc = min(rc, r)
-                    if (local_verbose) print *,"      > rc =",rc
+                    if (r < rc) then ! If this is a new minimum
+                       rc = r
+                       sintheta_at_rc = sintheta
+                       costheta_at_rc = costheta
+                       if (local_verbose) print *,"      New minimum: rc =",rc
+                    end if
                  end if
               end do
            end if
         end do
      end do
+     r_singularity_basic_vs_zeta(j) = rc
+     if (r_singularity_Newton_iterations > 0 .and. j>-2) call r_singularity_Newton_solve()
      r_singularity_vs_zeta(j) = rc
 
   end do
@@ -197,6 +208,97 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
 
   call cpu_time(end_time)
   if (verbose) print "(a,es11.4,a,es10.3,a)"," r_singularity:",r_singularity,"  Time to compute:",end_time - start_time," sec."
+
+
+contains
+
+  subroutine r_singularity_Newton_solve()
+
+    use quasisymmetry_variables, only: r_singularity_Newton_iterations, r_singularity_line_search, r_singularity_Newton_tolerance
+    implicit none
+
+    real(dp) :: state0(2), step_direction(2), step_scale, last_Newton_residual_sqnorm
+    integer :: j_Newton, j_line_search
+    logical :: verbose_Newton = .true.
+
+    theta = atan2(sintheta_at_rc, costheta_at_rc)
+    state(1) = rc
+    state(2) = theta
+    call r_singularity_residual()
+    if (verbose_Newton) print "(a,i4,3(a,es24.15))","r_singularity: jphi=",j," r=",state(1)," th=",state(2)," Residual L2 norm:",Newton_residual_sqnorm
+    Newton: do j_Newton = 1, r_singularity_Newton_iterations
+       if (verbose_Newton) print "(a,i3)","  Newton iteration ",j_Newton
+       last_Newton_residual_sqnorm = Newton_residual_sqnorm
+       if (last_Newton_residual_sqnorm < r_singularity_Newton_tolerance) exit Newton
+       state0 = state
+       call r_singularity_Jacobian()
+       step_direction = - matmul(inv_Jacobian, Newton_residual)
+       step_scale = 1
+       line_search: do j_line_search = 1, r_singularity_line_search
+          state = state0 + step_scale * step_direction
+          call r_singularity_residual()
+          if (verbose_Newton) print "(a,i3,3(a,es24.15))","    Line search step",j_line_search,"  r=",state(1)," th=",state(2)," Residual L2 norm:",Newton_residual_sqnorm
+          if (Newton_residual_sqnorm < last_Newton_residual_sqnorm) exit line_search
+          
+          step_scale = step_scale / 2       
+       end do line_search
+       
+       if (Newton_residual_sqnorm > last_Newton_residual_sqnorm) then
+          if (verbose_Newton) print *,"Line search failed to reduce residual."
+          exit Newton
+       end if
+    end do Newton
+
+    rc = state(1)
+
+  end subroutine r_singularity_Newton_solve
+
+  subroutine r_singularity_residual
+
+    implicit none
+
+    real(dp) :: theta0, r0
+    
+    r0 = state(1)
+    theta0 = state(2)
+    sintheta = sin(theta0)
+    costheta = cos(theta0)
+    sin2theta = sin(2*theta0)
+    cos2theta = cos(2*theta0)
+    ! If ghat = sqrt{g}/r,
+    ! residual = [ghat; d ghat / d theta]
+    Newton_residual(1) = g0 + r0 * g1c * costheta + r0 * r0 * (g20 + g2s * sin2theta + g2c * cos2theta)
+    Newton_residual(2) = r0 * (-g1c * sintheta) + 2 * r0 * r0 * (g2s * cos2theta - g2c * sin2theta)
+    Newton_residual_sqnorm = Newton_residual(1) * Newton_residual(1) + Newton_residual(2) * Newton_residual(2)
+    
+  end subroutine r_singularity_residual
+
+  subroutine r_singularity_Jacobian
+
+    implicit none
+
+    real(dp) :: inv_determinant, Jacobian(2,2)
+    real(dp) :: theta0, r0
+    
+    r0 = state(1)
+    theta0 = state(2)
+    
+    ! If ghat = sqrt{g}/r,
+    ! Jacobian = [d ghat / d r,           d ghat / d theta    ]
+    !            [d^2 ghat / d r d theta, d^2 ghat / d theta^2]
+    Jacobian(1,1) = g1c * costheta + 2 * r0 * (g20 + g2s * sin2theta + g2c * cos2theta)
+    Jacobian(1,2) = r0 * (-g1c * sintheta) + 2 * r0 * r0 * (g2s * cos2theta - g2c * sin2theta)
+    Jacobian(2,1) = -g1c * sintheta + 4 * r0 * (g2s * cos2theta - g2c * sin2theta)
+    Jacobian(2,2) = -r0 * (g1c * costheta) - 4 * r0 * r0 * (g2s * sin2theta + g2c * cos2theta)
+    
+    inv_determinant = 1 / (Jacobian(1,1) * Jacobian(2,2) - Jacobian(1,2) * Jacobian(2,1))
+    
+    inv_Jacobian(1,1) =  Jacobian(2,2) * inv_determinant
+    inv_Jacobian(1,2) = -Jacobian(1,2) * inv_determinant
+    inv_Jacobian(2,1) = -Jacobian(2,1) * inv_determinant
+    inv_Jacobian(2,2) =  Jacobian(1,1) * inv_determinant
+    
+  end subroutine r_singularity_Jacobian
 
 end subroutine quasisymmetry_max_r_before_singularity
 
