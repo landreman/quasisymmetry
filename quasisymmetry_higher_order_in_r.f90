@@ -17,9 +17,7 @@ subroutine quasisymmetry_higher_order_in_r
   real(dp), dimension(:), allocatable :: right_hand_side
   integer :: j, iunit=20
   real(dp), dimension(:), allocatable :: fX0, fXs, fXc, fY0, fYs, fYc, eq1residual, eq2residual
-  real(dp), dimension(:), allocatable :: d_X20_d_zeta, d_X2s_d_zeta, d_X2c_d_zeta
-  real(dp), dimension(:), allocatable :: d_Y20_d_zeta, d_Y2s_d_zeta, d_Y2c_d_zeta
-  real(dp), dimension(:), allocatable :: d_Z20_d_zeta, d_Z2s_d_zeta, d_Z2c_d_zeta, d_X3c3_d_zeta, d_X3s3_d_zeta
+  real(dp), dimension(:), allocatable :: d_X3c3_d_zeta, d_X3s3_d_zeta
   real(dp), dimension(:), allocatable :: d_X3c1_d_zeta, d_X3s1_d_zeta, d_Y3c1_d_zeta, d_Y3s1_d_zeta, d_Y3c3_d_zeta, d_Y3s3_d_zeta
   real(dp), dimension(:), allocatable :: d_Z3c1_d_zeta, d_Z3s1_d_zeta, d_Z3c3_d_zeta, d_Z3s3_d_zeta
   real(dp), dimension(:), allocatable :: flux_constraint_coefficient
@@ -71,6 +69,21 @@ subroutine quasisymmetry_higher_order_in_r
   if (allocated(z2s_cylindrical)) deallocate(z2s_cylindrical)
   if (allocated(z2c_cylindrical)) deallocate(z2c_cylindrical)
 
+  if (allocated(d_curvature_d_zeta)) deallocate(d_curvature_d_zeta)
+  if (allocated(d_torsion_d_zeta)) deallocate(d_torsion_d_zeta)
+  if (allocated(d_X20_d_zeta)) deallocate(d_X20_d_zeta)
+  if (allocated(d_X2s_d_zeta)) deallocate(d_X2s_d_zeta)
+  if (allocated(d_X2c_d_zeta)) deallocate(d_X2c_d_zeta)
+  if (allocated(d_Y20_d_zeta)) deallocate(d_Y20_d_zeta)
+  if (allocated(d_Y2s_d_zeta)) deallocate(d_Y2s_d_zeta)
+  if (allocated(d_Y2c_d_zeta)) deallocate(d_Y2c_d_zeta)
+  if (allocated(d_Z20_d_zeta)) deallocate(d_Z20_d_zeta)
+  if (allocated(d_Z2s_d_zeta)) deallocate(d_Z2s_d_zeta)
+  if (allocated(d_Z2c_d_zeta)) deallocate(d_Z2c_d_zeta)
+  if (allocated(d2_X1c_d_zeta2)) deallocate(d2_X1c_d_zeta2)
+  if (allocated(d2_Y1c_d_zeta2)) deallocate(d2_Y1c_d_zeta2)
+  if (allocated(d2_Y1s_d_zeta2)) deallocate(d2_Y1s_d_zeta2)
+
   allocate(X20(N_phi))
   allocate(X2s(N_phi))
   allocate(X2c(N_phi))
@@ -109,6 +122,21 @@ subroutine quasisymmetry_higher_order_in_r
   allocate(qc(N_phi))
   allocate(rs(N_phi))
   allocate(rc(N_phi))
+
+  allocate(d_curvature_d_zeta(N_phi))
+  allocate(d_torsion_d_zeta(N_phi))
+  allocate(d_X20_d_zeta(N_phi))
+  allocate(d_X2s_d_zeta(N_phi))
+  allocate(d_X2c_d_zeta(N_phi))
+  allocate(d_Y20_d_zeta(N_phi))
+  allocate(d_Y2s_d_zeta(N_phi))
+  allocate(d_Y2c_d_zeta(N_phi))
+  allocate(d_Z20_d_zeta(N_phi))
+  allocate(d_Z2s_d_zeta(N_phi))
+  allocate(d_Z2c_d_zeta(N_phi))
+  allocate(d2_X1c_d_zeta2(N_phi))
+  allocate(d2_Y1c_d_zeta2(N_phi))
+  allocate(d2_Y1s_d_zeta2(N_phi))
 
   V1 = X1c * X1c + Y1c * Y1c + Y1s * Y1s
   V2 = 2 * Y1s * Y1c
@@ -422,13 +450,20 @@ subroutine quasisymmetry_higher_order_in_r
   Bbar = sign_psi * B0
   G2 = -mu0 * p2 * G0 / (B0 * B0) - iota * I2
 
-  allocate(d_Z20_d_zeta(N_phi))
-  allocate(d_Z2c_d_zeta(N_phi))
-  allocate(d_Z2s_d_zeta(N_phi))
-
-  d_Z20_d_zeta = matmul(d_d_zeta,Z20)
-  d_Z2c_d_zeta = matmul(d_d_zeta,Z2c)
-  d_Z2s_d_zeta = matmul(d_d_zeta,Z2s)
+  d_curvature_d_zeta = matmul(d_d_zeta, curvature)
+  d_torsion_d_zeta = matmul(d_d_zeta, torsion)
+  d_X20_d_zeta = matmul(d_d_zeta, X20)
+  d_X2s_d_zeta = matmul(d_d_zeta, X2s)
+  d_X2c_d_zeta = matmul(d_d_zeta, X2c)
+  d_Y20_d_zeta = matmul(d_d_zeta, Y20)
+  d_Y2s_d_zeta = matmul(d_d_zeta, Y2s)
+  d_Y2c_d_zeta = matmul(d_d_zeta, Y2c)
+  d_Z20_d_zeta = matmul(d_d_zeta, Z20)
+  d_Z2s_d_zeta = matmul(d_d_zeta, Z2s)
+  d_Z2c_d_zeta = matmul(d_d_zeta, Z2c)
+  d2_X1c_d_zeta2 = matmul(d_d_zeta, d_X1c_d_zeta)
+  d2_Y1c_d_zeta2 = matmul(d_d_zeta, d_Y1c_d_zeta)
+  d2_Y1s_d_zeta2 = matmul(d_d_zeta, d_Y1s_d_zeta)
 
   if (allocated(B0_order_a_squared_to_cancel)) deallocate(B0_order_a_squared_to_cancel)
   allocate(B0_order_a_squared_to_cancel(N_phi))
@@ -439,14 +474,9 @@ subroutine quasisymmetry_higher_order_in_r
 
   d2_volume_d_psi2 = 4*pi*pi*abs(G0)/(B0*B0*B0)*(3*eta_bar*eta_bar - 4*B20_mean/B0 + 2*(G2+iota*I2)/G0)
 
-  call quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_Z2c_d_zeta)
+  call quasisymmetry_max_r_before_singularity()
 
-!  print *,"AAA"
-  if (trim(order_r_option) == order_r_option_r2) then
-     deallocate(d_Z20_d_zeta, d_Z2s_d_zeta, d_Z2c_d_zeta)
-     return
-  end if
-!  print *,"BBB"
+  if (trim(order_r_option) == order_r_option_r2) return
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   ! Beginning of O(r^3) calculation
@@ -1618,15 +1648,5 @@ subroutine quasisymmetry_higher_order_in_r
      print *,"max(abs(B3s3-B3s3_input)):",max_eq1residual
      if (max_eq1residual > 1e-13) stop "B3s3 difference is large !!!"
   end if
-
-  if(allocated(d_X20_d_zeta)) deallocate(d_X20_d_zeta)
-  if(allocated(d_X2s_d_zeta)) deallocate(d_X2s_d_zeta)
-  if(allocated(d_X2c_d_zeta)) deallocate(d_X2c_d_zeta)
-  if(allocated(d_Y20_d_zeta)) deallocate(d_Y20_d_zeta)
-  if(allocated(d_Y2s_d_zeta)) deallocate(d_Y2s_d_zeta)
-  if(allocated(d_Y2c_d_zeta)) deallocate(d_Y2c_d_zeta)
-  if(allocated(d_Z20_d_zeta)) deallocate(d_Z20_d_zeta)
-  if(allocated(d_Z2s_d_zeta)) deallocate(d_Z2s_d_zeta)
-  if(allocated(d_Z2c_d_zeta)) deallocate(d_Z2c_d_zeta)
 
 end subroutine quasisymmetry_higher_order_in_r

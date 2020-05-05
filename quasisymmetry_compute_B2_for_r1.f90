@@ -27,7 +27,6 @@ subroutine quasisymmetry_compute_B2_for_r1
   real(dp), allocatable, dimension(:) :: Y2s_from_X20, Y2s_from_Y20, Y2s_inhomogeneous
   real(dp), allocatable, dimension(:) :: Y2c_from_X20, Y2c_from_Y20, Y2c_inhomogeneous
   real(dp), allocatable, dimension(:) :: X2s_test, X2c_test
-  real(dp), dimension(:), allocatable :: d_Z20_d_zeta, d_Z2s_d_zeta, d_Z2c_d_zeta
   real(dp), allocatable, dimension(:) :: Q, A, q_tilde
   real(dp) :: I2, G0
 

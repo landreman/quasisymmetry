@@ -1,26 +1,26 @@
-subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_Z2c_d_zeta)
+subroutine quasisymmetry_max_r_before_singularity()
 
-  use quasisymmetry_variables, only: dp, N_phi, abs_G0_over_B0, X1c, Y1s, Y1c, X20, X2s, X2c, Y20, Y2s, Y2c, Z20, Z2s, Z2c, &
-       curvature, torsion, r_singularity, r_singularity_vs_zeta, r_singularity_basic_vs_zeta, d_X1c_d_zeta, d_Y1s_d_zeta, d_Y1c_d_zeta, verbose, &
-       general_option, general_option_single, r_singularity_theta_vs_zeta, r_singularity_residual_sqnorm
+  !use quasisymmetry_variables, only: dp, N_phi, abs_G0_over_B0, X1c, Y1s, Y1c, X20, X2s, X2c, Y20, Y2s, Y2c, Z20, Z2s, Z2c, &
+  !     curvature, torsion, r_singularity, r_singularity_vs_zeta, r_singularity_basic_vs_zeta, d_X1c_d_zeta, d_Y1s_d_zeta, d_Y1c_d_zeta, verbose, &
+  !     general_option, general_option_single, r_singularity_theta_vs_zeta, r_singularity_residual_sqnorm
+  use quasisymmetry_variables, r_global => r, residual_global => residual
 
   implicit none
 
-  real(dp), intent(in) :: d_Z20_d_zeta(N_phi), d_Z2s_d_zeta(N_phi), d_Z2c_d_zeta(N_phi)
   integer :: j, jr, varsigma, sign_quadratic
-  real(dp) :: g0, g1c, g20, g2s, g2c, sigma_denominator, abs_costheta, denominator, r, residual, rc
-  real(dp) :: g3s1, g3s3, g3c1, g3c3, g40, g4s2, g4s4, g4c2, g4c4
+  real(dp) :: g0, g1c, g20, g2s, g2c, sigma_denominator, abs_costheta, denominator, rr, residual, rc
+  real(dp) :: g3s1, g3s3, g3c1, g3c3, g40, g4s2, g4s4, g4c2, g4c4, sin3theta, cos3theta, sin4theta, cos4theta
   real(dp) :: K0, K2s, K2c, K4s, K4c, sintheta, costheta, sin2theta, cos2theta, lp
   real(dp) :: coefficients(5), real_parts(4), imag_parts(4)
   real(dp) :: quadratic_A, quadratic_B, quadratic_C, radical, varpi, sintheta_at_rc, costheta_at_rc
-  real(dp) :: start_time, end_time
+  real(dp) :: r_singularity_start_time, end_time
   real(dp) :: abs_cos2theta, residual_if_varpi_plus, residual_if_varpi_minus
   integer :: max_j_phi
   logical :: local_verbose = .false.
   !logical :: local_verbose = .true.
   real(dp) :: Newton_residual(2), Newton_residual_sqnorm, state(2), inv_Jacobian(2,2), theta
 
-  call cpu_time(start_time)
+  call cpu_time(r_singularity_start_time)
 
   lp = abs_G0_over_B0 ! Shorthand
 
@@ -68,7 +68,7 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
           X1c(j)*Z2s(j)*d_Y1s_d_zeta(j) + X1c(j)*Y1s(j)*d_Z2s_d_zeta(j)
 
      if (r_singularity_high_order) then
-        g3s1 = lp*(2*X20(j)*X20(j)*Y1c(j)*curvature(j) + X2c(j)*X2c(j)*Y1c(j)*curvature(j) + X2s(j)*X2s(j)*Y1c(j)*curvature(j) - X1c(j)*X2s(j)1<*Y2s(j)*curvature(j) + &
+        g3s1 = lp*(2*X20(j)*X20(j)*Y1c(j)*curvature(j) + X2c(j)*X2c(j)*Y1c(j)*curvature(j) + X2s(j)*X2s(j)*Y1c(j)*curvature(j) - X1c(j)*X2s(j)*Y2s(j)*curvature(j) + &
              2*Y1c(j)*Z20(j)*Z20(j)*curvature(j) - 3*Y1c(j)*Z20(j)*Z2c(j)*curvature(j) + Y1c(j)*Z2c(j)*Z2c(j)*curvature(j) - 3*Y1s(j)*Z20(j)*Z2s(j)*curvature(j) + &
              Y1c(j)*Z2s(j)*Z2s(j)*curvature(j) - 2*Y1c(j)*Y20(j)*Z20(j)*torsion(j) - Y1c(j)*Y2c(j)*Z20(j)*torsion(j) - Y1s(j)*Y2s(j)*Z20(j)*torsion(j) + &
              4*Y1c(j)*Y20(j)*Z2c(j)*torsion(j) - Y1c(j)*Y2c(j)*Z2c(j)*torsion(j) + 5*Y1s(j)*Y2s(j)*Z2c(j)*torsion(j) - &
@@ -304,30 +304,30 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
            ! Try to get r using the simpler method, the equation that is linear in r.
            denominator = 2*(g2s*cos2theta - g2c*sin2theta)
            if (abs(denominator) > 1e-8) then ! This method cannot be used if we would need to divide by 0
-              r = g1c*sintheta / denominator
-              residual = g0 + r*g1c*costheta + r*r*(g20 + g2s*sin2theta + g2c*cos2theta) ! Residual in the equation sqrt(g)=0.
-              if (local_verbose) print *,"    Linear method: r=",r,"  residual=",residual
-              if ((r>0) .and. (abs(residual) < 1e-5)) then
-                 if (r < rc) then ! If this is a new minimum
-                    rc = r
+              rr = g1c*sintheta / denominator
+              residual = g0 + rr*g1c*costheta + rr*rr*(g20 + g2s*sin2theta + g2c*cos2theta) ! Residual in the equation sqrt(g)=0.
+              if (local_verbose) print *,"    Linear method: rr=",rr,"  residual=",residual
+              if ((rr>0) .and. (abs(residual) < 1e-5)) then
+                 if (rr < rc) then ! If this is a new minimum
+                    rc = rr
                     sintheta_at_rc = sintheta
                     costheta_at_rc = costheta
                     if (local_verbose) print *,"      New minimum: rc =",rc
                  end if
               end if
            else
-              ! Use the more complicated method to determine r by solving a quadratic equation.
+              ! Use the more complicated method to determine rr by solving a quadratic equation.
               quadratic_A = g20 + g2s * sin2theta + g2c * cos2theta
               quadratic_B = costheta * g1c
               quadratic_C = g0
               radical = sqrt(quadratic_B * quadratic_B - 4 * quadratic_A * quadratic_C)
               do sign_quadratic = -1, 1, 2 ! So sign_quadratic = +1 or -1
-                 r = (-quadratic_B + sign_quadratic * radical) / (2 * quadratic_A) ! This is the quadratic formula.
-                 residual = -g1c*sintheta + 2*r*(g2s*cos2theta - g2c*sin2theta) ! Residual in the equation d sqrt(g) / d theta = 0.
-                 if (local_verbose) print *,"    Quadratic method: r=",r,"  residual=",residual
-                 if ((r>0) .and. (abs(residual) < 1e-5)) then
-                    if (r < rc) then ! If this is a new minimum
-                       rc = r
+                 rr = (-quadratic_B + sign_quadratic * radical) / (2 * quadratic_A) ! This is the quadratic formula.
+                 residual = -g1c*sintheta + 2*rr*(g2s*cos2theta - g2c*sin2theta) ! Residual in the equation d sqrt(g) / d theta = 0.
+                 if (local_verbose) print *,"    Quadratic method: rr=",rr,"  residual=",residual
+                 if ((rr>0) .and. (abs(residual) < 1e-5)) then
+                    if (rr < rc) then ! If this is a new minimum
+                       rc = rr
                        sintheta_at_rc = sintheta
                        costheta_at_rc = costheta
                        if (local_verbose) print *,"      New minimum: rc =",rc
@@ -348,7 +348,7 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
   r_singularity = minval(r_singularity_vs_zeta)
 
   call cpu_time(end_time)
-  if (verbose) print "(a,es11.4,a,es10.3,a)"," r_singularity:",r_singularity,"  Time to compute:",end_time - start_time," sec."
+  if (verbose) print "(a,es11.4,a,es10.3,a)"," r_singularity:",r_singularity,"  Time to compute:",end_time - r_singularity_start_time," sec."
 
 
 contains
@@ -413,6 +413,20 @@ contains
     ! residual = [ghat; d ghat / d theta]
     Newton_residual(1) = g0 + r0 * g1c * costheta + r0 * r0 * (g20 + g2s * sin2theta + g2c * cos2theta)
     Newton_residual(2) = r0 * (-g1c * sintheta) + 2 * r0 * r0 * (g2s * cos2theta - g2c * sin2theta)
+
+    if (r_singularity_high_order) then
+       sin3theta = sin(3*theta)
+       cos3theta = cos(3*theta)
+       sin4theta = sin(4*theta)
+       cos4theta = cos(4*theta)
+
+       Newton_residual(1) = Newton_residual(1) + r0 * r0 * r0 * (g3s1 * sintheta + g3s3 * sin3theta + g3c1 * costheta + g3c3 * cos3theta) &
+            + r0 * r0 * r0 * r0 * (g40 + g4s2 * sin2theta + g4s4 * sin4theta + g4c2 * cos2theta + g4c4 * cos4theta)
+
+       Newton_residual(2) = Newton_residual(2) + r0 * r0 * r0 * (g3s1 * costheta + g3s3 * 3 * cos3theta + g3c1 * (-sintheta) + g3c3 * (-3*sin3theta)) &
+            + r0 * r0 * r0 * r0 * (g4s2 * 2 * cos2theta + g4s4 * 4 * cos4theta + g4c2 * (-2*sin2theta) + g4c4 * (-4*sin4theta))
+    end if
+
     Newton_residual_sqnorm = Newton_residual(1) * Newton_residual(1) + Newton_residual(2) * Newton_residual(2)
 
   end subroutine r_singularity_residual
@@ -435,8 +449,27 @@ contains
     Jacobian(2,1) = -g1c * sintheta + 4 * r0 * (g2s * cos2theta - g2c * sin2theta)
     Jacobian(2,2) = -r0 * (g1c * costheta) - 4 * r0 * r0 * (g2s * sin2theta + g2c * cos2theta)
 
-    inv_determinant = 1 / (Jacobian(1,1) * Jacobian(2,2) - Jacobian(1,2) * Jacobian(2,1))
+    if (r_singularity_high_order) then
+       ! d ghat / d r
+       Jacobian(1,1) = Jacobian(1,1) + 3 * r0 * r0 * (g3s1 * sintheta + g3s3 * sin3theta + g3c1 * costheta + g3c3 * cos3theta) &
+            + 4 * r0 * r0 * r0 * (g40 + g4s2 * sin2theta + g4s4 * sin4theta + g4c2 * cos2theta + g4c4 * cos4theta)
 
+       ! d ghat / d theta
+       Jacobian(1,2) = Jacobian(1,2) + r0 * r0 * r0 * (g3s1 * costheta + g3s3 * 3 * cos3theta + g3c1 * (-sintheta) + g3c3 * (-3*sin3theta)) &
+            + r0 * r0 * r0 * r0 * (g4s2 * 2 * cos2theta + g4s4 * 4 * cos4theta + g4c2 * (-2*sin2theta) + g4c4 * (-4*sin4theta))
+
+       ! d^2 ghat / d r d theta
+       Jacobian(2,1) = Jacobian(2,1) + 3 * r0 * r0 * (g3s1 * costheta + g3s3 * 3 * cos3theta + g3c1 * (-sintheta) + g3c3 * (-3*sin3theta)) &
+            + 4 * r0 * r0 * r0 * (g4s2 * 2 * cos2theta + g4s4 * 4 * cos4theta + g4c2 * (-2*sin2theta) + g4c4 * (-4*sin4theta))
+
+       ! d^2 ghat / d theta^2
+       Jacobian(2,2) = Jacobian(2,2) - r0 * r0 * r0 * (g3s1 * sintheta + g3s3 * 3 * sin3theta + g3c1 * costheta + g3c3 * 3 * cos3theta) &
+            - r0 * r0 * r0 * r0 * (g4s2 * 2 * sin2theta + g4s4 * 4 * sin4theta + g4c2 * 2 * cos2theta + g4c4 * 4 * cos4theta)
+       
+    end if
+
+    inv_determinant = 1 / (Jacobian(1,1) * Jacobian(2,2) - Jacobian(1,2) * Jacobian(2,1))
+    ! Inverse of a 2x2 matrix:
     inv_Jacobian(1,1) =  Jacobian(2,2) * inv_determinant
     inv_Jacobian(1,2) = -Jacobian(1,2) * inv_determinant
     inv_Jacobian(2,1) = -Jacobian(2,1) * inv_determinant

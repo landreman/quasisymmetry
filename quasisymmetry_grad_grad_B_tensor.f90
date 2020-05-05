@@ -3,8 +3,7 @@ subroutine quasisymmetry_grad_grad_B_tensor
   use quasisymmetry_variables
 
   real(dp), allocatable, dimension(:,:,:,:) :: grad_grad_B, grad_grad_B_alt
-  real(dp), allocatable, dimension(:) :: d_curvature_d_zeta, d_torsion_d_zeta, d_X20_d_zeta, d_X2s_d_zeta, d_X2c_d_zeta, d_Y20_d_zeta, d_Y2s_d_zeta, d_Y2c_d_zeta
-  real(dp), allocatable, dimension(:) :: d_Z20_d_zeta, d_Z2s_d_zeta, d_Z2c_d_zeta, d2_X1c_d_zeta2, d2_Y1c_d_zeta2, d2_Y1s_d_zeta2, difference
+  real(dp), allocatable, dimension(:) :: difference
   real(dp) :: G0, iota_N0, lp, G2, I2, norm_difference, analytic_value
   integer :: i,j,k
   real :: time1, time2
@@ -17,41 +16,12 @@ subroutine quasisymmetry_grad_grad_B_tensor
   allocate(grad_grad_B_inverse_scale_length_vs_zeta(N_phi))
   allocate(grad_grad_B(N_phi,3,3,3))
   allocate(difference(N_phi))
-  allocate(d_curvature_d_zeta(N_phi))
-  allocate(d_torsion_d_zeta(N_phi))
-  allocate(d_X20_d_zeta(N_phi))
-  allocate(d_X2s_d_zeta(N_phi))
-  allocate(d_X2c_d_zeta(N_phi))
-  allocate(d_Y20_d_zeta(N_phi))
-  allocate(d_Y2s_d_zeta(N_phi))
-  allocate(d_Y2c_d_zeta(N_phi))
-  allocate(d_Z20_d_zeta(N_phi))
-  allocate(d_Z2s_d_zeta(N_phi))
-  allocate(d_Z2c_d_zeta(N_phi))
-  allocate(d2_X1c_d_zeta2(N_phi))
-  allocate(d2_Y1c_d_zeta2(N_phi))
-  allocate(d2_Y1s_d_zeta2(N_phi))
 
   iota_N0 = iota + axis_helicity*nfp
   lp = abs_G0_over_B0
   I2 = I2_over_B0 * B0
   G0 = sign_G * abs_G0_over_B0 * B0
   G2 = -mu0 * p2 * G0 / (B0 * B0) - iota * I2
-
-  d_curvature_d_zeta = matmul(d_d_zeta, curvature)
-  d_torsion_d_zeta = matmul(d_d_zeta, torsion)
-  d_X20_d_zeta = matmul(d_d_zeta, X20)
-  d_X2s_d_zeta = matmul(d_d_zeta, X2s)
-  d_X2c_d_zeta = matmul(d_d_zeta, X2c)
-  d_Y20_d_zeta = matmul(d_d_zeta, Y20)
-  d_Y2s_d_zeta = matmul(d_d_zeta, Y2s)
-  d_Y2c_d_zeta = matmul(d_d_zeta, Y2c)
-  d_Z20_d_zeta = matmul(d_d_zeta, Z20)
-  d_Z2s_d_zeta = matmul(d_d_zeta, Z2s)
-  d_Z2c_d_zeta = matmul(d_d_zeta, Z2c)
-  d2_X1c_d_zeta2 = matmul(d_d_zeta, d_X1c_d_zeta)
-  d2_Y1c_d_zeta2 = matmul(d_d_zeta, d_Y1c_d_zeta)
-  d2_Y1s_d_zeta2 = matmul(d_d_zeta, d_Y1s_d_zeta)
 
   ! The elements that follow are computed in the Mathematica notebook "20200407-01 Grad grad B tensor near axis"
   ! and then formatted for fortran by the python script process_grad_grad_B_tensor_code
@@ -1213,9 +1183,7 @@ subroutine quasisymmetry_grad_grad_B_tensor
   grad_grad_B_inverse_scale_length_vs_zeta = sqrt(sqrt(difference) / (4*B0))
   grad_grad_B_inverse_scale_length = maxval(grad_grad_B_inverse_scale_length_vs_zeta)
 
-  deallocate(grad_grad_B)
-  deallocate(d_curvature_d_zeta, d_torsion_d_zeta, d_X20_d_zeta, d_X2s_d_zeta, d_X2c_d_zeta, d_Y20_d_zeta, d_Y2s_d_zeta, d_Y2c_d_zeta)
-  deallocate(d_Z20_d_zeta, d_Z2s_d_zeta, d_Z2c_d_zeta, d2_X1c_d_zeta2, d2_Y1c_d_zeta2, d2_Y1s_d_zeta2, difference)
+  deallocate(grad_grad_B, difference)
 
   if (verbose) then
      call cpu_time(time2)
