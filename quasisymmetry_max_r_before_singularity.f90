@@ -9,6 +9,7 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
   real(dp), intent(in) :: d_Z20_d_zeta(N_phi), d_Z2s_d_zeta(N_phi), d_Z2c_d_zeta(N_phi)
   integer :: j, jr, varsigma, sign_quadratic
   real(dp) :: g0, g1c, g20, g2s, g2c, sigma_denominator, abs_costheta, denominator, r, residual, rc
+  real(dp) :: g3s1, g3s3, g3c1, g3c3, g40, g4s2, g4s4, g4c2, g4c4
   real(dp) :: K0, K2s, K2c, K4s, K4c, sintheta, costheta, sin2theta, cos2theta, lp
   real(dp) :: coefficients(5), real_parts(4), imag_parts(4)
   real(dp) :: quadratic_A, quadratic_B, quadratic_C, radical, varpi, sintheta_at_rc, costheta_at_rc
@@ -34,7 +35,7 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
 
      !g1s = -2*X20(j)*Y1c(j) + 2*X2c(j)*Y1c(j) + 2*X2s(j)*Y1s(j) + 2*X1c(j)*Y20(j) - 2*X1c(j)*Y2c(j)
 
-     g1c = -2*X2s(j)*Y1c(j) + 2*X20(j)*Y1s(j) + 2*X2c(j)*Y1s(j) + 2*X1c(j)*Y2s(j) - X1c(j)*X1c(j)*Y1s(j)*curvature(j)
+     g1c = lp*(-2*X2s(j)*Y1c(j) + 2*X20(j)*Y1s(j) + 2*X2c(j)*Y1s(j) + 2*X1c(j)*Y2s(j) - X1c(j)*X1c(j)*Y1s(j)*curvature(j))
 
      g20 = -4*lp*X2s(j)*Y2c(j) + 4*lp*X2c(j)*Y2s(j) + lp*X1c(j)*X2s(j)*Y1c(j)*curvature(j) - &
           2*lp*X1c(j)*X20(j)*Y1s(j)*curvature(j) - lp*X1c(j)*X2c(j)*Y1s(j)*curvature(j) - &
@@ -65,6 +66,143 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
           Y1c(j)*Z2c(j)*d_X1c_d_zeta(j) - Y1s(j)*Z2s(j)*d_X1c_d_zeta(j) - &
           X1c(j)*Z20(j)*d_Y1c_d_zeta(j) + X1c(j)*Z2c(j)*d_Y1c_d_zeta(j) - &
           X1c(j)*Z2s(j)*d_Y1s_d_zeta(j) + X1c(j)*Y1s(j)*d_Z2s_d_zeta(j)
+
+     if (r_singularity_high_order) then
+        g3s1 = lp*(2*X20(j)*X20(j)*Y1c(j)*curvature(j) + X2c(j)*X2c(j)*Y1c(j)*curvature(j) + X2s(j)*X2s(j)*Y1c(j)*curvature(j) - X1c(j)*X2s(j)1<*Y2s(j)*curvature(j) + &
+             2*Y1c(j)*Z20(j)*Z20(j)*curvature(j) - 3*Y1c(j)*Z20(j)*Z2c(j)*curvature(j) + Y1c(j)*Z2c(j)*Z2c(j)*curvature(j) - 3*Y1s(j)*Z20(j)*Z2s(j)*curvature(j) + &
+             Y1c(j)*Z2s(j)*Z2s(j)*curvature(j) - 2*Y1c(j)*Y20(j)*Z20(j)*torsion(j) - Y1c(j)*Y2c(j)*Z20(j)*torsion(j) - Y1s(j)*Y2s(j)*Z20(j)*torsion(j) + &
+             4*Y1c(j)*Y20(j)*Z2c(j)*torsion(j) - Y1c(j)*Y2c(j)*Z2c(j)*torsion(j) + 5*Y1s(j)*Y2s(j)*Z2c(j)*torsion(j) - &
+             X1c(j)*X2s(j)*Z2s(j)*torsion(j) + 4*Y1s(j)*Y20(j)*Z2s(j)*torsion(j) - 5*Y1s(j)*Y2c(j)*Z2s(j)*torsion(j) - &
+             Y1c(j)*Y2s(j)*Z2s(j)*torsion(j) - X1c(j)*X2c(j)*(Y20(j)*curvature(j) + Y2c(j)*curvature(j) + (Z20(j) + Z2c(j))*torsion(j)) - &
+             X20(j)*(3*X2c(j)*Y1c(j)*curvature(j) + 3*X2s(j)*Y1s(j)*curvature(j) + &
+             2*X1c(j)*(Y20(j)*curvature(j) - 2*Y2c(j)*curvature(j) + (Z20(j) - 2*Z2c(j))*torsion(j)))) - 2*Y20(j)*Z2c(j)*d_X1c_d_zeta(j) + &
+             2*Y1c(j)*Z20(j)*d_X20_d_zeta(j) - 2*Y1c(j)*Z2c(j)*d_X20_d_zeta(j) - &
+             2*Y1s(j)*Z2s(j)*d_X20_d_zeta(j) - Y1c(j)*Z20(j)*d_X2c_d_zeta(j) + Y1c(j)*Z2c(j)*d_X2c_d_zeta(j) + &
+             Y1s(j)*Z2s(j)*d_X2c_d_zeta(j) - Y1s(j)*Z20(j)*d_X2s_d_zeta(j) - Y1s(j)*Z2c(j)*d_X2s_d_zeta(j) + &
+             Y1c(j)*Z2s(j)*d_X2s_d_zeta(j) - 2*X2c(j)*Z20(j)*d_Y1c_d_zeta(j) + &
+             2*X20(j)*Z2c(j)*d_Y1c_d_zeta(j) - 2*X2s(j)*Z20(j)*d_Y1s_d_zeta(j) + &
+             4*X2s(j)*Z2c(j)*d_Y1s_d_zeta(j) + 2*X20(j)*Z2s(j)*d_Y1s_d_zeta(j) - &
+             4*X2c(j)*Z2s(j)*d_Y1s_d_zeta(j) - 2*X1c(j)*Z20(j)*d_Y20_d_zeta(j) + &
+             2*X1c(j)*Z2c(j)*d_Y20_d_zeta(j) + X1c(j)*Z20(j)*d_Y2c_d_zeta(j) - X1c(j)*Z2c(j)*d_Y2c_d_zeta(j) - &
+             X1c(j)*Z2s(j)*d_Y2s_d_zeta(j) - 2*X20(j)*Y1c(j)*d_Z20_d_zeta(j) + &
+             2*X2c(j)*Y1c(j)*d_Z20_d_zeta(j) + 2*X2s(j)*Y1s(j)*d_Z20_d_zeta(j) + &
+             2*X1c(j)*Y20(j)*d_Z20_d_zeta(j) + X20(j)*Y1c(j)*d_Z2c_d_zeta(j) - X2c(j)*Y1c(j)*d_Z2c_d_zeta(j) - &
+             X2s(j)*Y1s(j)*d_Z2c_d_zeta(j) - X1c(j)*Y20(j)*d_Z2c_d_zeta(j) + &
+             Y2c(j)*(2*Z20(j)*d_X1c_d_zeta(j) + X1c(j)*(-2*d_Z20_d_zeta(j) + d_Z2c_d_zeta(j))) - &
+             X2s(j)*Y1c(j)*d_Z2s_d_zeta(j) + X20(j)*Y1s(j)*d_Z2s_d_zeta(j) + X2c(j)*Y1s(j)*d_Z2s_d_zeta(j) + &
+             X1c(j)*Y2s(j)*d_Z2s_d_zeta(j)
+
+        g3s3 = lp*(-(X2c(j)*X2c(j)*Y1c(j)*curvature(j)) + X2s(j)*X2s(j)*Y1c(j)*curvature(j) - X1c(j)*X2s(j)*Y2s(j)*curvature(j) + Y1c(j)*Z20(j)*Z2c(j)*curvature(j) - &
+             Y1c(j)*Z2c(j)*Z2c(j)*curvature(j) - Y1s(j)*Z20(j)*Z2s(j)*curvature(j) - 2*Y1s(j)*Z2c(j)*Z2s(j)*curvature(j) + Y1c(j)*Z2s(j)*Z2s(j)*curvature(j) - &
+             3*Y1c(j)*Y2c(j)*Z20(j)*torsion(j) + 3*Y1s(j)*Y2s(j)*Z20(j)*torsion(j) + 2*Y1c(j)*Y20(j)*Z2c(j)*torsion(j) + &
+             Y1c(j)*Y2c(j)*Z2c(j)*torsion(j) + Y1s(j)*Y2s(j)*Z2c(j)*torsion(j) - X1c(j)*X2s(j)*Z2s(j)*torsion(j) - &
+             2*Y1s(j)*Y20(j)*Z2s(j)*torsion(j) + Y1s(j)*Y2c(j)*Z2s(j)*torsion(j) - Y1c(j)*Y2s(j)*Z2s(j)*torsion(j) + &
+             X20(j)*(X2c(j)*Y1c(j)*curvature(j) - X2s(j)*Y1s(j)*curvature(j) + 2*X1c(j)*(Y2c(j)*curvature(j) + Z2c(j)*torsion(j))) + &
+             X2c(j)*(-2*X2s(j)*Y1s(j)*curvature(j) + X1c(j)*(-3*Y20(j)*curvature(j) + Y2c(j)*curvature(j) + (-3*Z20(j) + Z2c(j))*torsion(j)))) - &
+             2*Y20(j)*Z2c(j)*d_X1c_d_zeta(j) + Y1c(j)*Z20(j)*d_X2c_d_zeta(j) - Y1c(j)*Z2c(j)*d_X2c_d_zeta(j) - &
+             Y1s(j)*Z2s(j)*d_X2c_d_zeta(j) - Y1s(j)*Z20(j)*d_X2s_d_zeta(j) - Y1s(j)*Z2c(j)*d_X2s_d_zeta(j) + &
+             Y1c(j)*Z2s(j)*d_X2s_d_zeta(j) - 2*X2c(j)*Z20(j)*d_Y1c_d_zeta(j) + &
+             2*X20(j)*Z2c(j)*d_Y1c_d_zeta(j) + 2*X2s(j)*Z20(j)*d_Y1s_d_zeta(j) - &
+             2*X20(j)*Z2s(j)*d_Y1s_d_zeta(j) - X1c(j)*Z20(j)*d_Y2c_d_zeta(j) + X1c(j)*Z2c(j)*d_Y2c_d_zeta(j) - &
+             X1c(j)*Z2s(j)*d_Y2s_d_zeta(j) - X20(j)*Y1c(j)*d_Z2c_d_zeta(j) + X2c(j)*Y1c(j)*d_Z2c_d_zeta(j) + &
+             X2s(j)*Y1s(j)*d_Z2c_d_zeta(j) + X1c(j)*Y20(j)*d_Z2c_d_zeta(j) + &
+             Y2c(j)*(2*Z20(j)*d_X1c_d_zeta(j) - X1c(j)*d_Z2c_d_zeta(j)) - X2s(j)*Y1c(j)*d_Z2s_d_zeta(j) + &
+             X20(j)*Y1s(j)*d_Z2s_d_zeta(j) + X2c(j)*Y1s(j)*d_Z2s_d_zeta(j) + X1c(j)*Y2s(j)*d_Z2s_d_zeta(j)
+
+        g3c1 = -(lp*(2*X20(j)*X20(j)*Y1s(j)*curvature(j) + X2c(j)*X2c(j)*Y1s(j)*curvature(j) + X2s(j)*X2s(j)*Y1s(j)*curvature(j) - X1c(j)*X2s(j)*Y20(j)*curvature(j) - &
+             5*X1c(j)*X2s(j)*Y2c(j)*curvature(j) + 2*Y1s(j)*Z20(j)*Z20(j)*curvature(j) + 3*Y1s(j)*Z20(j)*Z2c(j)*curvature(j) + Y1s(j)*Z2c(j)*Z2c(j)*curvature(j) - &
+             3*Y1c(j)*Z20(j)*Z2s(j)*curvature(j) + Y1s(j)*Z2s(j)*Z2s(j)*curvature(j) - X1c(j)*X2s(j)*Z20(j)*torsion(j) - &
+             2*Y1s(j)*Y20(j)*Z20(j)*torsion(j) + Y1s(j)*Y2c(j)*Z20(j)*torsion(j) - Y1c(j)*Y2s(j)*Z20(j)*torsion(j) - &
+             5*X1c(j)*X2s(j)*Z2c(j)*torsion(j) - 4*Y1s(j)*Y20(j)*Z2c(j)*torsion(j) - Y1s(j)*Y2c(j)*Z2c(j)*torsion(j) - &
+             5*Y1c(j)*Y2s(j)*Z2c(j)*torsion(j) + 4*Y1c(j)*Y20(j)*Z2s(j)*torsion(j) + 5*Y1c(j)*Y2c(j)*Z2s(j)*torsion(j) - &
+             Y1s(j)*Y2s(j)*Z2s(j)*torsion(j) + 5*X1c(j)*X2c(j)*(Y2s(j)*curvature(j) + Z2s(j)*torsion(j)) + &
+             X20(j)*(-3*X2s(j)*Y1c(j)*curvature(j) + 3*X2c(j)*Y1s(j)*curvature(j) + 4*X1c(j)*(Y2s(j)*curvature(j) + Z2s(j)*torsion(j))))) + &
+             2*Y20(j)*Z2s(j)*d_X1c_d_zeta(j) + 4*Y2c(j)*Z2s(j)*d_X1c_d_zeta(j) - &
+             2*Y1s(j)*Z20(j)*d_X20_d_zeta(j) - 2*Y1s(j)*Z2c(j)*d_X20_d_zeta(j) + &
+             2*Y1c(j)*Z2s(j)*d_X20_d_zeta(j) - Y1s(j)*Z20(j)*d_X2c_d_zeta(j) - Y1s(j)*Z2c(j)*d_X2c_d_zeta(j) + &
+             Y1c(j)*Z2s(j)*d_X2c_d_zeta(j) + Y1c(j)*Z20(j)*d_X2s_d_zeta(j) - Y1c(j)*Z2c(j)*d_X2s_d_zeta(j) - &
+             Y1s(j)*Z2s(j)*d_X2s_d_zeta(j) + 2*X2s(j)*Z20(j)*d_Y1c_d_zeta(j) + &
+             4*X2s(j)*Z2c(j)*d_Y1c_d_zeta(j) - 2*X20(j)*Z2s(j)*d_Y1c_d_zeta(j) - &
+             4*X2c(j)*Z2s(j)*d_Y1c_d_zeta(j) - 2*X2c(j)*Z20(j)*d_Y1s_d_zeta(j) + &
+             2*X20(j)*Z2c(j)*d_Y1s_d_zeta(j) - 2*X1c(j)*Z2s(j)*d_Y20_d_zeta(j) - &
+             X1c(j)*Z2s(j)*d_Y2c_d_zeta(j) - X1c(j)*Z20(j)*d_Y2s_d_zeta(j) + X1c(j)*Z2c(j)*d_Y2s_d_zeta(j) - &
+             2*X2s(j)*Y1c(j)*d_Z20_d_zeta(j) + 2*X20(j)*Y1s(j)*d_Z20_d_zeta(j) + &
+             2*X2c(j)*Y1s(j)*d_Z20_d_zeta(j) - X2s(j)*Y1c(j)*d_Z2c_d_zeta(j) + X20(j)*Y1s(j)*d_Z2c_d_zeta(j) + &
+             X2c(j)*Y1s(j)*d_Z2c_d_zeta(j) + Y2s(j)*&
+             (-2*Z20(j)*d_X1c_d_zeta(j) - 4*Z2c(j)*d_X1c_d_zeta(j) + &
+             X1c(j)*(2*d_Z20_d_zeta(j) + d_Z2c_d_zeta(j))) - X20(j)*Y1c(j)*d_Z2s_d_zeta(j) + &
+             X2c(j)*Y1c(j)*d_Z2s_d_zeta(j) + X2s(j)*Y1s(j)*d_Z2s_d_zeta(j) + X1c(j)*Y20(j)*d_Z2s_d_zeta(j) - &
+             X1c(j)*Y2c(j)*d_Z2s_d_zeta(j)
+
+        g3c3 = -(lp*(X2c(j)*X2c(j)*Y1s(j)*curvature(j) - X2s(j)*X2s(j)*Y1s(j)*curvature(j) - 3*X1c(j)*X2s(j)*Y20(j)*curvature(j) + X1c(j)*X2s(j)*Y2c(j)*curvature(j) + &
+             Y1s(j)*Z20(j)*Z2c(j)*curvature(j) + Y1s(j)*Z2c(j)*Z2c(j)*curvature(j) + Y1c(j)*Z20(j)*Z2s(j)*curvature(j) - 2*Y1c(j)*Z2c(j)*Z2s(j)*curvature(j) - &
+             Y1s(j)*Z2s(j)*Z2s(j)*curvature(j) - 3*X1c(j)*X2s(j)*Z20(j)*torsion(j) - 3*Y1s(j)*Y2c(j)*Z20(j)*torsion(j) - &
+             3*Y1c(j)*Y2s(j)*Z20(j)*torsion(j) + X1c(j)*X2s(j)*Z2c(j)*torsion(j) + 2*Y1s(j)*Y20(j)*Z2c(j)*torsion(j) - &
+             Y1s(j)*Y2c(j)*Z2c(j)*torsion(j) + Y1c(j)*Y2s(j)*Z2c(j)*torsion(j) + 2*Y1c(j)*Y20(j)*Z2s(j)*torsion(j) + &
+             Y1c(j)*Y2c(j)*Z2s(j)*torsion(j) + Y1s(j)*Y2s(j)*Z2s(j)*torsion(j) + &
+             X2c(j)*(-2*X2s(j)*Y1c(j)*curvature(j) + X1c(j)*(Y2s(j)*curvature(j) + Z2s(j)*torsion(j))) + &
+             X20(j)*(X2s(j)*Y1c(j)*curvature(j) + X2c(j)*Y1s(j)*curvature(j) + 2*X1c(j)*(Y2s(j)*curvature(j) + Z2s(j)*torsion(j))))) + &
+             2*Y20(j)*Z2s(j)*d_X1c_d_zeta(j) - Y1s(j)*Z20(j)*d_X2c_d_zeta(j) - Y1s(j)*Z2c(j)*d_X2c_d_zeta(j) + &
+             Y1c(j)*Z2s(j)*d_X2c_d_zeta(j) - Y1c(j)*Z20(j)*d_X2s_d_zeta(j) + Y1c(j)*Z2c(j)*d_X2s_d_zeta(j) + &
+             Y1s(j)*Z2s(j)*d_X2s_d_zeta(j) + 2*X2s(j)*Z20(j)*d_Y1c_d_zeta(j) - &
+             2*X20(j)*Z2s(j)*d_Y1c_d_zeta(j) + 2*X2c(j)*Z20(j)*d_Y1s_d_zeta(j) - &
+             2*X20(j)*Z2c(j)*d_Y1s_d_zeta(j) - X1c(j)*Z2s(j)*d_Y2c_d_zeta(j) + X1c(j)*Z20(j)*d_Y2s_d_zeta(j) - &
+             X1c(j)*Z2c(j)*d_Y2s_d_zeta(j) - X2s(j)*Y1c(j)*d_Z2c_d_zeta(j) + X20(j)*Y1s(j)*d_Z2c_d_zeta(j) + &
+             X2c(j)*Y1s(j)*d_Z2c_d_zeta(j) + Y2s(j)*(-2*Z20(j)*d_X1c_d_zeta(j) + X1c(j)*d_Z2c_d_zeta(j)) + &
+             X20(j)*Y1c(j)*d_Z2s_d_zeta(j) - X2c(j)*Y1c(j)*d_Z2s_d_zeta(j) - X2s(j)*Y1s(j)*d_Z2s_d_zeta(j) - &
+             X1c(j)*Y20(j)*d_Z2s_d_zeta(j) + X1c(j)*Y2c(j)*d_Z2s_d_zeta(j)
+
+        g40 = -2*(-3*lp*(-((Y2s(j)*Z2c(j) - Y2c(j)*Z2s(j))*(Z20(j)*curvature(j) - Y20(j)*torsion(j))) + &
+             X20(j)*(X2s(j)*(Y2c(j)*curvature(j) + Z2c(j)*torsion(j)) - X2c(j)*(Y2s(j)*curvature(j) + Z2s(j)*torsion(j)))) - &
+             2*Y2c(j)*Z2s(j)*d_X20_d_zeta(j) - Y20(j)*Z2s(j)*d_X2c_d_zeta(j) - &
+             Y2c(j)*Z20(j)*d_X2s_d_zeta(j) + Y20(j)*Z2c(j)*d_X2s_d_zeta(j) - &
+             2*X2s(j)*Z2c(j)*d_Y20_d_zeta(j) + 2*X2c(j)*Z2s(j)*d_Y20_d_zeta(j) - &
+             X2s(j)*Z20(j)*d_Y2c_d_zeta(j) + X20(j)*Z2s(j)*d_Y2c_d_zeta(j) + X2c(j)*Z20(j)*d_Y2s_d_zeta(j) - &
+             X20(j)*Z2c(j)*d_Y2s_d_zeta(j) + 2*X2s(j)*Y2c(j)*d_Z20_d_zeta(j) + &
+             X2s(j)*Y20(j)*d_Z2c_d_zeta(j) + Y2s(j)*&
+             (2*Z2c(j)*d_X20_d_zeta(j) + Z20(j)*d_X2c_d_zeta(j) - 2*X2c(j)*d_Z20_d_zeta(j) - &
+             X20(j)*d_Z2c_d_zeta(j)) - X2c(j)*Y20(j)*d_Z2s_d_zeta(j) + X20(j)*Y2c(j)*d_Z2s_d_zeta(j))
+
+        g4s2 = 4*(lp*(Y2c(j)*Z20(j)*Z20(j)*curvature(j) - Y20(j)*Z20(j)*Z2c(j)*curvature(j) - Y2s(j)*Z2c(j)*Z2s(j)*curvature(j) + Y2c(j)*Z2s(j)*Z2s(j)*curvature(j) - &
+             Y20(j)*Y2c(j)*Z20(j)*torsion(j) + Y20(j)*Y20(j)*Z2c(j)*torsion(j) + Y2s(j)*Y2s(j)*Z2c(j)*torsion(j) - Y2c(j)*Y2s(j)*Z2s(j)*torsion(j) - &
+             X20(j)*X2c(j)*(Y20(j)*curvature(j) + Z20(j)*torsion(j)) + X20(j)*X20(j)*(Y2c(j)*curvature(j) + Z2c(j)*torsion(j)) + &
+             X2s(j)*X2s(j)*(Y2c(j)*curvature(j) + Z2c(j)*torsion(j)) - X2c(j)*X2s(j)*(Y2s(j)*curvature(j) + Z2s(j)*torsion(j))) - &
+             Y20(j)*Z2c(j)*d_X20_d_zeta(j) - Y2s(j)*Z2c(j)*d_X2s_d_zeta(j) - X2c(j)*Z20(j)*d_Y20_d_zeta(j) + &
+             X20(j)*Z2c(j)*d_Y20_d_zeta(j) + X2s(j)*Z2c(j)*d_Y2s_d_zeta(j) - X2c(j)*Z2s(j)*d_Y2s_d_zeta(j) + &
+             X2c(j)*Y20(j)*d_Z20_d_zeta(j) + X2c(j)*Y2s(j)*d_Z2s_d_zeta(j) + &
+             Y2c(j)*(Z20(j)*d_X20_d_zeta(j) + Z2s(j)*d_X2s_d_zeta(j) - X20(j)*d_Z20_d_zeta(j) - &
+             X2s(j)*d_Z2s_d_zeta(j)))
+
+        g4s4 = 2*(lp*(Y2c(j)*Z20(j)*Z2c(j)*curvature(j) - Y20(j)*Z2c(j)*Z2c(j)*curvature(j) - Y2s(j)*Z20(j)*Z2s(j)*curvature(j) + Y20(j)*Z2s(j)*Z2s(j)*curvature(j) - &
+             Y2c(j)*Y2c(j)*Z20(j)*torsion(j) + Y2s(j)*Y2s(j)*Z20(j)*torsion(j) + Y20(j)*Y2c(j)*Z2c(j)*torsion(j) - Y20(j)*Y2s(j)*Z2s(j)*torsion(j) - &
+             X2c(j)*X2c(j)*(Y20(j)*curvature(j) + Z20(j)*torsion(j)) + X2s(j)*X2s(j)*(Y20(j)*curvature(j) + Z20(j)*torsion(j)) + &
+             X20(j)*X2c(j)*(Y2c(j)*curvature(j) + Z2c(j)*torsion(j)) - X20(j)*X2s(j)*(Y2s(j)*curvature(j) + Z2s(j)*torsion(j))) - &
+             Y20(j)*Z2c(j)*d_X2c_d_zeta(j) - Y2s(j)*Z20(j)*d_X2s_d_zeta(j) + Y20(j)*Z2s(j)*d_X2s_d_zeta(j) - &
+             X2c(j)*Z20(j)*d_Y2c_d_zeta(j) + X20(j)*Z2c(j)*d_Y2c_d_zeta(j) + X2s(j)*Z20(j)*d_Y2s_d_zeta(j) - &
+             X20(j)*Z2s(j)*d_Y2s_d_zeta(j) + X2c(j)*Y20(j)*d_Z2c_d_zeta(j) + &
+             Y2c(j)*(Z20(j)*d_X2c_d_zeta(j) - X20(j)*d_Z2c_d_zeta(j)) - X2s(j)*Y20(j)*d_Z2s_d_zeta(j) + &
+             X20(j)*Y2s(j)*d_Z2s_d_zeta(j))
+
+        g4c2 = -4*(lp*(Y2s(j)*Z20(j)*Z20(j)*curvature(j) + Y2s(j)*Z2c(j)*Z2c(j)*curvature(j) - Y20(j)*Z20(j)*Z2s(j)*curvature(j) - Y2c(j)*Z2c(j)*Z2s(j)*curvature(j) - &
+             Y20(j)*Y2s(j)*Z20(j)*torsion(j) - Y2c(j)*Y2s(j)*Z2c(j)*torsion(j) + Y20(j)*Y20(j)*Z2s(j)*torsion(j) + Y2c(j)*Y2c(j)*Z2s(j)*torsion(j) - &
+             X20(j)*X2s(j)*(Y20(j)*curvature(j) + Z20(j)*torsion(j)) - X2c(j)*X2s(j)*(Y2c(j)*curvature(j) + Z2c(j)*torsion(j)) + &
+             X20(j)*X20(j)*(Y2s(j)*curvature(j) + Z2s(j)*torsion(j)) + X2c(j)*X2c(j)*(Y2s(j)*curvature(j) + Z2s(j)*torsion(j))) - &
+             Y20(j)*Z2s(j)*d_X20_d_zeta(j) - Y2c(j)*Z2s(j)*d_X2c_d_zeta(j) - X2s(j)*Z20(j)*d_Y20_d_zeta(j) + &
+             X20(j)*Z2s(j)*d_Y20_d_zeta(j) - X2s(j)*Z2c(j)*d_Y2c_d_zeta(j) + X2c(j)*Z2s(j)*d_Y2c_d_zeta(j) + &
+             X2s(j)*Y20(j)*d_Z20_d_zeta(j) + X2s(j)*Y2c(j)*d_Z2c_d_zeta(j) + &
+             Y2s(j)*(Z20(j)*d_X20_d_zeta(j) + Z2c(j)*d_X2c_d_zeta(j) - X20(j)*d_Z20_d_zeta(j) - &
+             X2c(j)*d_Z2c_d_zeta(j)))
+
+        g4c4 = -2*(lp*(Y2s(j)*Z20(j)*Z2c(j)*curvature(j) + Y2c(j)*Z20(j)*Z2s(j)*curvature(j) - 2*Y20(j)*Z2c(j)*Z2s(j)*curvature(j) - &
+             2*Y2c(j)*Y2s(j)*Z20(j)*torsion(j) + Y20(j)*Y2s(j)*Z2c(j)*torsion(j) + Y20(j)*Y2c(j)*Z2s(j)*torsion(j) + &
+             X20(j)*X2s(j)*(Y2c(j)*curvature(j) + Z2c(j)*torsion(j)) + &
+             X2c(j)*(-2*X2s(j)*(Y20(j)*curvature(j) + Z20(j)*torsion(j)) + X20(j)*(Y2s(j)*curvature(j) + Z2s(j)*torsion(j)))) - &
+             Y20(j)*Z2s(j)*d_X2c_d_zeta(j) + Y2c(j)*Z20(j)*d_X2s_d_zeta(j) - Y20(j)*Z2c(j)*d_X2s_d_zeta(j) - &
+             X2s(j)*Z20(j)*d_Y2c_d_zeta(j) + X20(j)*Z2s(j)*d_Y2c_d_zeta(j) - X2c(j)*Z20(j)*d_Y2s_d_zeta(j) + &
+             X20(j)*Z2c(j)*d_Y2s_d_zeta(j) + X2s(j)*Y20(j)*d_Z2c_d_zeta(j) + &
+             Y2s(j)*(Z20(j)*d_X2c_d_zeta(j) - X20(j)*d_Z2c_d_zeta(j)) + X2c(j)*Y20(j)*d_Z2s_d_zeta(j) - &
+             X20(j)*Y2c(j)*d_Z2s_d_zeta(j))
+     end if
 
      ! We consider the system sqrt(g) = 0 and
      ! d (sqrtg) / d theta = 0.
@@ -244,10 +382,10 @@ contains
           call r_singularity_residual()
           if (verbose_Newton) print "(a,i3,3(a,es24.15))","    Line search step",j_line_search,"  r=",state(1)," th=",state(2)," Residual L2 norm:",Newton_residual_sqnorm
           if (Newton_residual_sqnorm < last_Newton_residual_sqnorm) exit line_search
-          
+
           step_scale = step_scale / 2       
        end do line_search
-       
+
        if (Newton_residual_sqnorm > last_Newton_residual_sqnorm) then
           if (verbose_Newton) print *,"Line search failed to reduce residual."
           exit Newton
@@ -264,7 +402,7 @@ contains
     implicit none
 
     real(dp) :: theta0, r0
-    
+
     r0 = state(1)
     theta0 = state(2)
     sintheta = sin(theta0)
@@ -276,7 +414,7 @@ contains
     Newton_residual(1) = g0 + r0 * g1c * costheta + r0 * r0 * (g20 + g2s * sin2theta + g2c * cos2theta)
     Newton_residual(2) = r0 * (-g1c * sintheta) + 2 * r0 * r0 * (g2s * cos2theta - g2c * sin2theta)
     Newton_residual_sqnorm = Newton_residual(1) * Newton_residual(1) + Newton_residual(2) * Newton_residual(2)
-    
+
   end subroutine r_singularity_residual
 
   subroutine r_singularity_Jacobian
@@ -285,10 +423,10 @@ contains
 
     real(dp) :: inv_determinant, Jacobian(2,2)
     real(dp) :: theta0, r0
-    
+
     r0 = state(1)
     theta0 = state(2)
-    
+
     ! If ghat = sqrt{g}/r,
     ! Jacobian = [d ghat / d r,           d ghat / d theta    ]
     !            [d^2 ghat / d r d theta, d^2 ghat / d theta^2]
@@ -296,14 +434,14 @@ contains
     Jacobian(1,2) = r0 * (-g1c * sintheta) + 2 * r0 * r0 * (g2s * cos2theta - g2c * sin2theta)
     Jacobian(2,1) = -g1c * sintheta + 4 * r0 * (g2s * cos2theta - g2c * sin2theta)
     Jacobian(2,2) = -r0 * (g1c * costheta) - 4 * r0 * r0 * (g2s * sin2theta + g2c * cos2theta)
-    
+
     inv_determinant = 1 / (Jacobian(1,1) * Jacobian(2,2) - Jacobian(1,2) * Jacobian(2,1))
-    
+
     inv_Jacobian(1,1) =  Jacobian(2,2) * inv_determinant
     inv_Jacobian(1,2) = -Jacobian(1,2) * inv_determinant
     inv_Jacobian(2,1) = -Jacobian(2,1) * inv_determinant
     inv_Jacobian(2,2) =  Jacobian(1,1) * inv_determinant
-    
+
   end subroutine r_singularity_Jacobian
 
 end subroutine quasisymmetry_max_r_before_singularity
