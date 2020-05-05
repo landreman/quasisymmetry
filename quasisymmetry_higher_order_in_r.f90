@@ -61,6 +61,8 @@ subroutine quasisymmetry_higher_order_in_r
   if (allocated(Z2c_untwisted)) deallocate(Z2c_untwisted)
   if (allocated(r_singularity_vs_zeta)) deallocate(r_singularity_vs_zeta)
   if (allocated(r_singularity_basic_vs_zeta)) deallocate(r_singularity_basic_vs_zeta)
+  if (allocated(r_singularity_residual_sqnorm)) deallocate(r_singularity_residual_sqnorm)
+  if (allocated(r_singularity_theta_vs_zeta)) deallocate(r_singularity_theta_vs_zeta)
 
   if (allocated(R20)) deallocate(R20)
   if (allocated(R2s)) deallocate(R2s)
@@ -90,6 +92,8 @@ subroutine quasisymmetry_higher_order_in_r
   allocate(Z2c_untwisted(N_phi))
   allocate(r_singularity_vs_zeta(N_phi))
   allocate(r_singularity_basic_vs_zeta(N_phi))
+  allocate(r_singularity_residual_sqnorm(N_phi))
+  allocate(r_singularity_theta_vs_zeta(N_phi))
 
   allocate(R20(N_phi))
   allocate(R2s(N_phi))

@@ -176,7 +176,7 @@ module quasisymmetry_variables
   real(dp) :: iota_from_torsion, d2_volume_d_psi2 = 0
   logical :: circular_cross_section_surface = .false.
   integer :: finite_r_nonlinear_N_theta = 20
-  real(dp), dimension(:), allocatable :: r_singularity_vs_zeta, r_singularity_basic_vs_zeta
+  real(dp), dimension(:), allocatable :: r_singularity_vs_zeta, r_singularity_basic_vs_zeta, r_singularity_residual_sqnorm, r_singularity_theta_vs_zeta
   real(dp) :: r_singularity, max_B2tilde, min_r_singularity_to_keep = 0.1, max_B20_variation_to_keep
   integer :: N_random = 10
   real(dp) :: random_time = 3

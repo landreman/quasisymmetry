@@ -210,6 +210,8 @@ subroutine quasisymmetry_write_output
        vn_t1c = "t1c", &
        vn_r_singularity_vs_zeta = "r_singularity_vs_zeta", &
        vn_r_singularity_basic_vs_zeta = "r_singularity_basic_vs_zeta", &
+       vn_r_singularity_residual_sqnorm = "r_singularity_residual_sqnorm", &
+       vn_r_singularity_theta_vs_zeta = "r_singularity_theta_vs_zeta", &
        vn_max_B2tildes = "max_B2tildes", &
        vn_r_singularities = "r_singularities", &
        vn_d2_volume_d_psi2s = "d2_volume_d_psi2s", &
@@ -445,6 +447,8 @@ subroutine quasisymmetry_write_output
         call cdf_define(ncid, vn_B0_order_a_squared_to_cancel, B0_order_a_squared_to_cancel, dimname=N_phi_dim)
         call cdf_define(ncid, vn_r_singularity_vs_zeta, r_singularity_vs_zeta, dimname=N_phi_dim)
         call cdf_define(ncid, vn_r_singularity_basic_vs_zeta, r_singularity_basic_vs_zeta, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_r_singularity_residual_sqnorm, r_singularity_residual_sqnorm, dimname=N_phi_dim)
+        call cdf_define(ncid, vn_r_singularity_theta_vs_zeta, r_singularity_theta_vs_zeta, dimname=N_phi_dim)
         call cdf_define(ncid, vn_grad_grad_B_inverse_scale_length_vs_zeta, grad_grad_B_inverse_scale_length_vs_zeta, dimname=N_phi_dim)
      end if
      if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2 .and. trim(order_r_option).ne.order_r_option_r2) then
@@ -727,6 +731,8 @@ subroutine quasisymmetry_write_output
         call cdf_write(ncid, vn_B0_order_a_squared_to_cancel, B0_order_a_squared_to_cancel)
         call cdf_write(ncid, vn_r_singularity_vs_zeta, r_singularity_vs_zeta)
         call cdf_write(ncid, vn_r_singularity_basic_vs_zeta, r_singularity_basic_vs_zeta)
+        call cdf_write(ncid, vn_r_singularity_residual_sqnorm, r_singularity_residual_sqnorm)
+        call cdf_write(ncid, vn_r_singularity_theta_vs_zeta, r_singularity_theta_vs_zeta)
         call cdf_write(ncid, vn_grad_grad_B_inverse_scale_length_vs_zeta, grad_grad_B_inverse_scale_length_vs_zeta)
      end if
      if (trim(order_r_option).ne.order_r_option_r1 .and. trim(order_r_option) .ne. order_r_option_r1_compute_B2 .and. trim(order_r_option).ne.order_r_option_r2) then

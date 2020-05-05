@@ -2,7 +2,7 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
 
   use quasisymmetry_variables, only: dp, N_phi, abs_G0_over_B0, X1c, Y1s, Y1c, X20, X2s, X2c, Y20, Y2s, Y2c, Z20, Z2s, Z2c, &
        curvature, torsion, r_singularity, r_singularity_vs_zeta, r_singularity_basic_vs_zeta, d_X1c_d_zeta, d_Y1s_d_zeta, d_Y1c_d_zeta, verbose, &
-       general_option, general_option_single, r_singularity_Newton_iterations
+       general_option, general_option_single, r_singularity_theta_vs_zeta, r_singularity_residual_sqnorm
 
   implicit none
 
@@ -200,8 +200,11 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
         end do
      end do
      r_singularity_basic_vs_zeta(j) = rc
-     if (r_singularity_Newton_iterations > 0) call r_singularity_Newton_solve()
+     !if (r_singularity_Newton_iterations > 0) call r_singularity_Newton_solve()
+     call r_singularity_Newton_solve()
      r_singularity_vs_zeta(j) = rc
+     r_singularity_residual_sqnorm(j) = Newton_residual_sqnorm
+     r_singularity_theta_vs_zeta(j) = theta
 
   end do
   r_singularity = minval(r_singularity_vs_zeta)
@@ -215,13 +218,14 @@ contains
   subroutine r_singularity_Newton_solve()
     ! Apply Newton's method to iteratively refine the solution for (r,theta) where the surfaces become singular.
 
-    use quasisymmetry_variables, only: r_singularity_Newton_iterations, r_singularity_line_search, r_singularity_Newton_tolerance
+    use quasisymmetry_variables, only: r_singularity_Newton_iterations, r_singularity_line_search, r_singularity_Newton_tolerance, verbose
     implicit none
 
     real(dp) :: state0(2), step_direction(2), step_scale, last_Newton_residual_sqnorm
     integer :: j_Newton, j_line_search
-    logical :: verbose_Newton = .true.
+    logical :: verbose_Newton
 
+    verbose_Newton = verbose
     theta = atan2(sintheta_at_rc, costheta_at_rc)
     state(1) = rc
     state(2) = theta
@@ -251,6 +255,7 @@ contains
     end do Newton
 
     rc = state(1)
+    theta = state(2)
 
   end subroutine r_singularity_Newton_solve
 
