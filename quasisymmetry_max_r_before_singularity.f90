@@ -362,12 +362,41 @@ contains
     real(dp) :: state0(2), step_direction(2), step_scale, last_Newton_residual_sqnorm
     integer :: j_Newton, j_line_search
     logical :: verbose_Newton
+    real(dp) :: fd_Jacobian(2,2), state_plus(2), state_minus(2), residual_plus(2), residual_minus(2), delta = 1.0d-8
 
     verbose_Newton = verbose
     theta = atan2(sintheta_at_rc, costheta_at_rc)
     state(1) = rc
     state(2) = theta
+
+!!$    if (j==80) then
+!!$       state0 = state
+!!$
+!!$       state(1) = state0(1) + delta
+!!$       call r_singularity_residual()
+!!$       residual_plus = Newton_residual
+!!$       state(1) = state0(1) - delta
+!!$       call r_singularity_residual()
+!!$       residual_minus = Newton_residual
+!!$       fd_Jacobian(:,1) = (residual_plus - residual_minus) / (2*delta)
+!!$       state = state0
+!!$
+!!$       state(2) = state0(2) + delta
+!!$       call r_singularity_residual()
+!!$       residual_plus = Newton_residual
+!!$       state(2) = state0(2) - delta
+!!$       call r_singularity_residual()
+!!$       residual_minus = Newton_residual
+!!$       fd_Jacobian(:,2) = (residual_plus - residual_minus) / (2*delta)
+!!$       state = state0
+!!$
+!!$       print *," ZZZ FD Jacobian:"
+!!$       print "(2(es24.15))", fd_Jacobian(1,:)
+!!$       print "(2(es24.15))", fd_Jacobian(2,:)
+!!$    end if
+
     call r_singularity_residual()
+
     if (verbose_Newton) print "(a,i4,3(a,es24.15))","r_singularity: jphi=",j," r=",state(1)," th=",state(2)," Residual L2 norm:",Newton_residual_sqnorm
     Newton: do j_Newton = 1, r_singularity_Newton_iterations
        if (verbose_Newton) print "(a,i3)","  Newton iteration ",j_Newton
@@ -376,6 +405,11 @@ contains
        state0 = state
        call r_singularity_Jacobian()
        step_direction = - matmul(inv_Jacobian, Newton_residual)
+
+       ! Don't let the step get too big:
+       step_direction = step_direction * min(1.0, 0.1 / abs(step_direction(2))) ! Max absolute change to theta is 0.1
+       step_direction = step_direction * min(1.0, 0.1 * abs(state(1)) / abs(step_direction(1))) ! Max relative change to r is 10%
+
        step_scale = 1
        line_search: do j_line_search = 1, r_singularity_line_search
           state = state0 + step_scale * step_direction
@@ -415,10 +449,10 @@ contains
     Newton_residual(2) = r0 * (-g1c * sintheta) + 2 * r0 * r0 * (g2s * cos2theta - g2c * sin2theta)
 
     if (r_singularity_high_order) then
-       sin3theta = sin(3*theta)
-       cos3theta = cos(3*theta)
-       sin4theta = sin(4*theta)
-       cos4theta = cos(4*theta)
+       sin3theta = sin(3*theta0)
+       cos3theta = cos(3*theta0)
+       sin4theta = sin(4*theta0)
+       cos4theta = cos(4*theta0)
 
        Newton_residual(1) = Newton_residual(1) + r0 * r0 * r0 * (g3s1 * sintheta + g3s3 * sin3theta + g3c1 * costheta + g3c3 * cos3theta) &
             + r0 * r0 * r0 * r0 * (g40 + g4s2 * sin2theta + g4s4 * sin4theta + g4c2 * cos2theta + g4c4 * cos4theta)
@@ -463,10 +497,16 @@ contains
             + 4 * r0 * r0 * r0 * (g4s2 * 2 * cos2theta + g4s4 * 4 * cos4theta + g4c2 * (-2*sin2theta) + g4c4 * (-4*sin4theta))
 
        ! d^2 ghat / d theta^2
-       Jacobian(2,2) = Jacobian(2,2) - r0 * r0 * r0 * (g3s1 * sintheta + g3s3 * 3 * sin3theta + g3c1 * costheta + g3c3 * 3 * cos3theta) &
-            - r0 * r0 * r0 * r0 * (g4s2 * 2 * sin2theta + g4s4 * 4 * sin4theta + g4c2 * 2 * cos2theta + g4c4 * 4 * cos4theta)
+       Jacobian(2,2) = Jacobian(2,2) - r0 * r0 * r0 * (g3s1 * sintheta + g3s3 * 9 * sin3theta + g3c1 * costheta + g3c3 * 9 * cos3theta) &
+            - r0 * r0 * r0 * r0 * (g4s2 * 4 * sin2theta + g4s4 * 16 * sin4theta + g4c2 * 4 * cos2theta + g4c4 * 16 * cos4theta)
        
     end if
+
+    !if (j==80) then
+    !   print *," ZZZ Jacobian:"
+    !   print "(2(es24.15))", Jacobian(1,:)
+    !   print "(2(es24.15))", Jacobian(2,:)
+    !end if
 
     inv_determinant = 1 / (Jacobian(1,1) * Jacobian(2,2) - Jacobian(1,2) * Jacobian(2,1))
     ! Inverse of a 2x2 matrix:
