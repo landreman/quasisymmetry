@@ -112,7 +112,7 @@ module quasisymmetry_variables
   real(dp), dimension(:,:), allocatable :: tangent_Cartesian, normal_Cartesian, binormal_Cartesian
   real(dp), dimension(:), allocatable :: sigma, X1s, X1c, Y1s, Y1c, R1s, R1c, Z1s, Z1c, elongation, elongation_in_Rz_plane
   real(dp), dimension(:), allocatable :: X1s_untwisted, X1c_untwisted, Y1s_untwisted, Y1c_untwisted
-  real(dp) :: B0_over_abs_G0, abs_G0_over_B0, iota, max_elongation, mean_elongation, rms_curvature, max_curvature, axis_length
+  real(dp) :: B0_over_abs_G0, abs_G0_over_B0, G0, I2, G2, iota, max_elongation, mean_elongation, rms_curvature, max_curvature, axis_length
   real(dp) :: max_precise_elongation = 10 ! Above this value, we won't do a precise solve, just take maxval over the phi grid.
   real(dp) :: max_elongation_to_keep = 10 ! Discard solutions with max(elongation) higher than this value. Set to e.g. 1.0e200 to keep all solutions.
   real(dp), dimension(:,:), allocatable :: Jacobian
@@ -175,7 +175,7 @@ module quasisymmetry_variables
   real(dp), dimension(:), allocatable :: X3s1_untwisted, X3s3_untwisted, X3c1_untwisted, X3c3_untwisted
   real(dp), dimension(:), allocatable :: Y3s1_untwisted, Y3s3_untwisted, Y3c1_untwisted, Y3c3_untwisted
   real(dp), dimension(:), allocatable :: Z3s1_untwisted, Z3s3_untwisted, Z3c1_untwisted, Z3c3_untwisted
-  real(dp) :: iota_from_torsion, d2_volume_d_psi2 = 0
+  real(dp) :: iota_from_torsion
   logical :: circular_cross_section_surface = .false.
   integer :: finite_r_nonlinear_N_theta = 20
   real(dp), dimension(:), allocatable :: r_singularity_vs_zeta, r_singularity_basic_vs_zeta, r_singularity_residual_sqnorm, r_singularity_theta_vs_zeta
@@ -188,6 +188,7 @@ module quasisymmetry_variables
   integer :: r_singularity_Newton_iterations = 0, r_singularity_line_search = 4
   real(dp) :: r_singularity_Newton_tolerance = 1.0e-40
   logical :: r_singularity_high_order = .false.
+  real(dp) :: d2_volume_d_psi2 = 0, DWell_times_r2 = 0, DGeod_times_r2 = 0, DMerc_times_r2 = 0
 
   integer :: N_procs, mpi_rank
   logical :: proc0, verbose = .true.

@@ -241,6 +241,8 @@ subroutine quasisymmetry_single_solve
   call quasisymmetry_grad_B_tensor()
   call quasisymmetry_grad_grad_B_tensor()
 
+  call quasisymmetry_Mercier()
+
   if (verbose) then
      call cpu_time(solve_end_time)
      print *,"Time to solve equations and compute diagnostics:",solve_end_time-solve_start_time

@@ -4,7 +4,7 @@ subroutine quasisymmetry_grad_grad_B_tensor
 
   real(dp), allocatable, dimension(:,:,:,:) :: grad_grad_B, grad_grad_B_alt
   real(dp), allocatable, dimension(:) :: difference
-  real(dp) :: G0, iota_N0, lp, G2, I2, norm_difference, analytic_value
+  real(dp) :: iota_N0, lp, norm_difference, analytic_value
   integer :: i,j,k
   real :: time1, time2
 
@@ -19,9 +19,6 @@ subroutine quasisymmetry_grad_grad_B_tensor
 
   iota_N0 = iota + axis_helicity*nfp
   lp = abs_G0_over_B0
-  I2 = I2_over_B0 * B0
-  G0 = sign_G * abs_G0_over_B0 * B0
-  G2 = -mu0 * p2 * G0 / (B0 * B0) - iota * I2
 
   ! The elements that follow are computed in the Mathematica notebook "20200407-01 Grad grad B tensor near axis"
   ! and then formatted for fortran by the python script process_grad_grad_B_tensor_code

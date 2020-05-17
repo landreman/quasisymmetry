@@ -78,7 +78,10 @@ subroutine quasisymmetry_write_output
        vn_max_B2tilde = "max_B2tilde", &
        vn_B20_variation = "B20_variation", &
        vn_max_B20_variation_to_keep = "max_B20_variation_to_keep", &
-       vn_grad_grad_B_inverse_scale_length = "grad_grad_B_inverse_scale_length"
+       vn_grad_grad_B_inverse_scale_length = "grad_grad_B_inverse_scale_length", &
+       vn_DMerc_times_r2 = "DMerc_times_r2", &
+       vn_DGeod_times_r2 = "DGeod_times_r2", &
+       vn_DWell_times_r2 = "DWell_times_r2"
 
   ! Arrays with dimension 1
   character(len=*), parameter :: &
@@ -322,6 +325,7 @@ subroutine quasisymmetry_write_output
      call cdf_define(ncid, vn_ntor, ntor)
      call cdf_define(ncid, vn_lasym, lasym)
      call cdf_define(ncid, vn_untwist, untwist)
+     call cdf_define(ncid, vn_DGeod_times_r2, DGeod_times_r2)
      if (trim(order_r_option) .ne. order_r_option_r1) then
         ! Quantities that matter either for order_r_option_r1_compute_B2 or O(r^2) or O(r^3)
         call cdf_define(ncid, vn_p2, p2)
@@ -342,6 +346,8 @@ subroutine quasisymmetry_write_output
         call cdf_setatt(ncid, vn_grad_grad_B_inverse_scale_length, 'An inverse scale length computed from the grad grad \vec{B} tensor: ' // &
              '\sqrt{\sqrt{\sum_{i,j,k=1}^3 (grad grad \vec{B})_{i,j,k}^2} / (4 B)}. This has units of 1/length, and equals R0 for an axisymmetric vacuum field. ' // &
              'Large values are good, meaning the coils can be farther away.')
+        call cdf_define(ncid, vn_DWell_times_r2, DWell_times_r2)
+        call cdf_define(ncid, vn_DMerc_times_r2, DMerc_times_r2)
      end if
      if (trim(order_r_option) == order_r_option_r3_B3) then
         call cdf_define(ncid, vn_B3c3_input, B3c3_input)
@@ -610,6 +616,7 @@ subroutine quasisymmetry_write_output
      call cdf_write(ncid, vn_ntor, ntor)
      call cdf_write(ncid, vn_lasym, lasym)
      call cdf_write(ncid, vn_untwist, untwist)
+     call cdf_write(ncid, vn_DGeod_times_r2, DGeod_times_r2)
      if (trim(order_r_option) .ne. order_r_option_r1) then
         ! Quantities that matter either for order_r_option_r1_compute_B2 or O(r^2) or O(r^3)
         call cdf_write(ncid, vn_p2, p2)
@@ -626,6 +633,8 @@ subroutine quasisymmetry_write_output
         call cdf_write(ncid, vn_d2_volume_d_psi2, d2_volume_d_psi2)
         call cdf_write(ncid, vn_r_singularity, r_singularity)
         call cdf_write(ncid, vn_grad_grad_B_inverse_scale_length, grad_grad_B_inverse_scale_length)
+        call cdf_write(ncid, vn_DMerc_times_r2, DMerc_times_r2)
+        call cdf_write(ncid, vn_DWell_times_r2, DWell_times_r2)
      end if
      if (trim(order_r_option) == order_r_option_r3_B3) then
         call cdf_write(ncid, vn_B3c3_input, B3c3_input)

@@ -26,7 +26,7 @@ subroutine quasisymmetry_higher_order_in_r
   integer :: vector_size, index_mixedPartialsEquation_0, index_mixedPartialsEquation_s, index_mixedPartialsEquation_c
   integer :: index_XYEquation_0, index_XYEquation_s, index_XYEquation_c, index_initialCondition
   integer :: index_X3c1, index_X3s1, index_Y3c1, index_Y3s1, index_Y3c3, index_Y3s3, index_iota2
-  real(dp) :: I2, G0, B1c, Bbar, I4, G2
+  real(dp) :: B1c, Bbar, I4
   ! Variables needed by LAPACK:
   integer :: INFO
   integer, dimension(:), allocatable :: IPIV
@@ -445,8 +445,6 @@ subroutine quasisymmetry_higher_order_in_r
   deallocate(fYc_from_X20, fYc_from_Y20, fYc_inhomogeneous)
 
   N_helicity = - axis_helicity*nfp
-  I2 = I2_over_B0 * B0
-  G0 = sign_G * abs_G0_over_B0 * B0
   Bbar = sign_psi * B0
   G2 = -mu0 * p2 * G0 / (B0 * B0) - iota * I2
 
@@ -473,6 +471,10 @@ subroutine quasisymmetry_higher_order_in_r
        -sign_G * sign_psi * B0 * I2 / (4*G0) * (-abs_G0_over_B0 * torsion * (X1c*X1c + Y1c*Y1c + Y1s*Y1s) + Y1c * d_X1c_d_zeta - X1c * d_Y1c_d_zeta)
 
   d2_volume_d_psi2 = 4*pi*pi*abs(G0)/(B0*B0*B0)*(3*eta_bar*eta_bar - 4*B20_mean/B0 + 2*(G2+iota*I2)/G0)
+
+  DWell_times_r2 = (mu0 * p2 * abs(G0) / (8 * pi * pi * pi * pi * B0 * B0 * B0)) * (d2_volume_d_psi2 - 8 * pi * pi * mu0 * p2 * abs(G0) / (B0 * B0 * B0 * B0 * B0))
+
+  DMerc_times_r2 = DWell_times_r2 + DGeod_times_r2
 
   call quasisymmetry_max_r_before_singularity()
 

@@ -28,7 +28,6 @@ subroutine quasisymmetry_compute_B2_for_r1
   real(dp), allocatable, dimension(:) :: Y2c_from_X20, Y2c_from_Y20, Y2c_inhomogeneous
   real(dp), allocatable, dimension(:) :: X2s_test, X2c_test
   real(dp), allocatable, dimension(:) :: Q, A, q_tilde
-  real(dp) :: I2, G0
 
 
   if (verbose) print "(a)", " Hello from quasisymmetry_compute_B2_for_r1"
@@ -572,8 +571,8 @@ subroutine quasisymmetry_compute_B2_for_r1
   allocate(A(N_phi))
   allocate(q_tilde(N_phi))
 
-  I2 = I2_over_B0 * B0
-  G0 = sign_G * abs_G0_over_B0 * B0
+  !I2 = I2_over_B0 * B0
+  !G0 = sign_G * abs_G0_over_B0 * B0
 
   ! The expression below is derived in the O(r^2) paper, and in "20190318-01 Wrick's streamlined Garren-Boozer method, MHD.nb" in the section "Not assuming quasisymmetry".
   ! Note Q = (1/2) * (XYEquation0 without X3 and Y3 terms) where XYEquation0 is the quantity in the above notebook.

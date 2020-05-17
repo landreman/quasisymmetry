@@ -3,7 +3,7 @@ subroutine quasisymmetry_max_r_before_singularity()
   !use quasisymmetry_variables, only: dp, N_phi, abs_G0_over_B0, X1c, Y1s, Y1c, X20, X2s, X2c, Y20, Y2s, Y2c, Z20, Z2s, Z2c, &
   !     curvature, torsion, r_singularity, r_singularity_vs_zeta, r_singularity_basic_vs_zeta, d_X1c_d_zeta, d_Y1s_d_zeta, d_Y1c_d_zeta, verbose, &
   !     general_option, general_option_single, r_singularity_theta_vs_zeta, r_singularity_residual_sqnorm
-  use quasisymmetry_variables, r_global => r, residual_global => residual
+  use quasisymmetry_variables, r_global => r, residual_global => residual, G0_Boozer => G0
 
   implicit none
 
