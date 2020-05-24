@@ -29,8 +29,26 @@ subroutine quasisymmetry_random
   real(dp) :: log_eta_bar_min, log_eta_bar_max, log_sigma_initial_min, log_sigma_initial_max
   real(dp), dimension(max_axis_nmax+1) :: log_R0s_min, log_R0s_max, log_R0c_min, log_R0c_max, log_Z0s_min, log_Z0s_max, log_Z0c_min, log_Z0c_max
   real(dp) :: log_B2s_min, log_B2s_max, log_B2c_min, log_B2c_max
+  integer :: random_size
+  integer, allocatable :: random_seed_array(:)
 
   call mpi_barrier(MPI_COMM_WORLD,ierr) ! So initial lines printed by proc0 are sure to come first.
+
+  ! Set seed for random numbers:
+  call random_seed(size=random_size)
+  allocate(random_seed_array(random_size))
+  call random_seed(get=random_seed_array)
+  print "(a,i5,a,i4,a,16(i13))","on proc",mpi_rank," random_size=",random_size," old seed=",random_seed_array
+
+  ! Ensure each proc has a different seed:
+  random_seed_array(1) = random_seed_array(1) + mpi_rank
+  call random_seed(put=random_seed_array)
+
+  call random_seed(get=random_seed_array)
+  print "(a,i5,a,i4,a,16(i13))","on proc",mpi_rank," random_size=",random_size," new seed=",random_seed_array
+  deallocate(random_seed_array)
+
+  call mpi_barrier(MPI_COMM_WORLD,ierr) ! For clean stdout
 
   ! Allocate arrays to store the scan results:
   allocate(iotas_local(N_random))

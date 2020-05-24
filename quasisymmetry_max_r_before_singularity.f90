@@ -2,7 +2,8 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
 
   use quasisymmetry_variables, only: dp, N_phi, abs_G0_over_B0, X1c, Y1s, Y1c, X20, X2s, X2c, Y20, Y2s, Y2c, Z20, Z2s, Z2c, &
        curvature, torsion, r_singularity, r_singularity_vs_zeta, d_X1c_d_zeta, d_Y1s_d_zeta, d_Y1c_d_zeta, verbose, &
-       general_option, general_option_single
+       general_option, general_option_single, &
+       eta_bar, B2c, R0c, Z0s, axis_nmax
 
   implicit none
 
@@ -123,7 +124,12 @@ subroutine quasisymmetry_max_r_before_singularity(d_Z20_d_zeta, d_Z2s_d_zeta, d_
         sigma_denominator = ((K4s*2*sin2theta + K2c) * sqrt(1 - sin2theta*sin2theta))
         if (abs(sigma_denominator) < 1e-8) print *,"WARNING!!! sigma_denominator=",sigma_denominator
         sigma = -(K0 + K2s * sin2theta + K4c*(1 - 2*sin2theta*sin2theta)) / sigma_denominator
-        if (abs(sigma*sigma-1) > 1e-3) print *,"WARNING!!! abs(sigma*sigma-1) =",abs(sigma*sigma-1)
+        if (abs(sigma*sigma-1) > 1e-3) then
+           print *,"WARNING!!! abs(sigma*sigma-1) =",abs(sigma*sigma-1)
+        end if
+        if (abs(sigma*sigma-1) > 1e-1) then
+           print "(3(a,es24.15),2(a,3(es24.15)))","WARNING!!! abs(sigma*sigma-1) =",abs(sigma*sigma-1)," etabar=",eta_bar," B2c=",B2c," R0c=",R0c(2:4)," Z0s=",Z0s(2:4)
+        end if
         sigma = nint(sigma) ! Ensure sigma is exactly either +1 or -1.
         cos2theta = sigma * sqrt(1 - sin2theta*sin2theta)
         abs_costheta = sqrt(0.5*(1 + cos2theta))
