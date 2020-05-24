@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+
+#in_filename = 'quasisymmetry_grad_grad_B_tensor'
+#out_filename = 'quasisymmetry_grad_grad_B_tensor.x.f90'
+
+in_filename = 'quasisymmetry_grad_grad_B_tensor_alt'
+out_filename = 'quasisymmetry_grad_grad_B_tensor_alt.x.f90'
+
+f = open(in_filename)
+lines = f.readlines()
+f.close()
+
+# Add '&' at the end of each line of code
+
+newlines = []
+for j in range(len(lines)):
+    line = lines[j]
+    newline = line
+    # Don't add & to the last line for each component
+    if len(line) > 1 and line[0] != '!' and j < len(lines) and len(lines[j+1])>1:
+        newline = line[:-1]+'&\n'
+
+    # Convert Rogerio's notation to my original notation
+    newline = newline.replace(r"CapitalPhi","CurlyPhi")
+    newline = newline.replace(r"*sg**2","")
+    newline = newline.replace(r"*sg**4","")
+    newline = newline.replace(r"s\[Psi]","sign_psi")
+    newline = newline.replace(r"sg","sign_G")
+    newline = newline.replace(r"*sign_psi**2","")
+    newline = newline.replace(r"sign_psi**3","sign_psi")
+    newline = newline.replace(r"sign_G**3","sign_G")
+    newline = newline.replace(r"X22s","X2s")
+    newline = newline.replace(r"X22c","X2c")
+    newline = newline.replace(r"Y22s","Y2s")
+    newline = newline.replace(r"Y22c","Y2c")
+    newline = newline.replace(r"Z22s","Z2s")
+    newline = newline.replace(r"Z22c","Z2c")
+
+    # Replacement rules
+    newline = newline.replace(r"(\[CurlyPhi])","")
+    newline = newline.replace(r"*s\[Psi]**2","")
+    newline = newline.replace(r"B0**4","B0*B0*B0*B0")
+    newline = newline.replace(r"B0**3","B0*B0*B0")
+    newline = newline.replace(r"G0**4","G0*G0*G0*G0")
+    newline = newline.replace(r"G0**3","G0*G0*G0")
+    newline = newline.replace(r"\[Iota]N0","iota_N0")
+    newline = newline.replace(r"\[Iota]0","iota")
+    newline = newline.replace(r"\[Kappa]","curvature")
+    newline = newline.replace(r"\[Tau]","torsion")
+    newline = newline.replace(r"torsion**2","torsion*torsion")
+    newline = newline.replace(r"Derivative(1)(X1c)","d_X1c_d_zeta")
+    newline = newline.replace(r"Derivative(1)(Y1c)","d_Y1c_d_zeta")
+    newline = newline.replace(r"Derivative(1)(Y1s)","d_Y1s_d_zeta")
+
+    newline = newline.replace(r"Derivative(1)(X20)","d_X20_d_zeta")
+    newline = newline.replace(r"Derivative(1)(X2s)","d_X2s_d_zeta")
+    newline = newline.replace(r"Derivative(1)(X2c)","d_X2c_d_zeta")
+
+    newline = newline.replace(r"Derivative(1)(Y20)","d_Y20_d_zeta")
+    newline = newline.replace(r"Derivative(1)(Y2s)","d_Y2s_d_zeta")
+    newline = newline.replace(r"Derivative(1)(Y2c)","d_Y2c_d_zeta")
+
+    newline = newline.replace(r"Derivative(1)(Z20)","d_Z20_d_zeta")
+    newline = newline.replace(r"Derivative(1)(Z2s)","d_Z2s_d_zeta")
+    newline = newline.replace(r"Derivative(1)(Z2c)","d_Z2c_d_zeta")
+
+    newline = newline.replace(r"Derivative(1)(curvature)","d_curvature_d_zeta")
+    newline = newline.replace(r"Derivative(1)(torsion)","d_torsion_d_zeta")
+
+    newline = newline.replace(r"X1c**3","X1c*X1c*X1c")
+    newline = newline.replace(r"X1c**2","X1c*X1c")
+    newline = newline.replace(r"Y1c**2","Y1c*Y1c")
+    newline = newline.replace(r"Y1s**2","Y1s*Y1s")
+    newline = newline.replace(r"Y1s**3","Y1s*Y1s*Y1s")
+
+    newline = newline.replace(r"curvature**2","curvature*curvature")
+    newline = newline.replace(r"lp**2","lp*lp")
+    newline = newline.replace(r"lp**3","lp*lp*lp")
+    newline = newline.replace(r"d_X1c_d_zeta**2","d_X1c_d_zeta*d_X1c_d_zeta")
+
+    newline = newline.replace(r"Derivative(2)(X1c)","d2_X1c_d_zeta2")
+    newline = newline.replace(r"Derivative(2)(Y1c)","d2_Y1c_d_zeta2")
+    newline = newline.replace(r"Derivative(2)(Y1s)","d2_Y1s_d_zeta2")
+
+    newline = newline.replace(r"d_Y1s_d_zeta**2","d_Y1s_d_zeta*d_Y1s_d_zeta")
+    newline = newline.replace(r"Y1c**3","Y1c*Y1c*Y1c")
+    #newline = newline.replace(r"","")
+
+    newlines.append(newline)
+
+f = open(out_filename,'w')
+for line in newlines:
+    f.write(line)
+f.close()

@@ -112,7 +112,7 @@ module quasisymmetry_variables
   real(dp), dimension(:,:), allocatable :: tangent_Cartesian, normal_Cartesian, binormal_Cartesian
   real(dp), dimension(:), allocatable :: sigma, X1s, X1c, Y1s, Y1c, R1s, R1c, Z1s, Z1c, elongation, elongation_in_Rz_plane
   real(dp), dimension(:), allocatable :: X1s_untwisted, X1c_untwisted, Y1s_untwisted, Y1c_untwisted
-  real(dp) :: B0_over_abs_G0, abs_G0_over_B0, iota, max_elongation, mean_elongation, rms_curvature, max_curvature, axis_length
+  real(dp) :: B0_over_abs_G0, abs_G0_over_B0, G0, I2, G2, iota, max_elongation, mean_elongation, rms_curvature, max_curvature, axis_length
   real(dp) :: max_precise_elongation = 10 ! Above this value, we won't do a precise solve, just take maxval over the phi grid.
   real(dp) :: max_elongation_to_keep = 10 ! Discard solutions with max(elongation) higher than this value. Set to e.g. 1.0e200 to keep all solutions.
   real(dp), dimension(:,:), allocatable :: Jacobian
@@ -167,20 +167,28 @@ module quasisymmetry_variables
   real(dp) :: Y3c1_initial
 
   real(dp), dimension(:), allocatable :: d_X1c_d_zeta, d_Y1c_d_zeta, d_Y1s_d_zeta
+  real(dp), dimension(:), allocatable :: d_curvature_d_zeta, d_torsion_d_zeta, d_X20_d_zeta, d_X2s_d_zeta, d_X2c_d_zeta, d_Y20_d_zeta, d_Y2s_d_zeta, d_Y2c_d_zeta
+  real(dp), dimension(:), allocatable :: d_Z20_d_zeta, d_Z2s_d_zeta, d_Z2c_d_zeta, d2_X1c_d_zeta2, d2_Y1c_d_zeta2, d2_Y1s_d_zeta2
   real(dp), dimension(:), allocatable :: X3s1, X3s3, X3c1, X3c3, Y3s1, Y3s3, Y3c1, Y3c3, Z3s1, Z3s3, Z3c1, Z3c3
   real(dp), dimension(:), allocatable :: B3s1, B3s3, B3c1, B3c3
   real(dp), dimension(:), allocatable :: R3s1, R3s3, R3c1, R3c3, z3s1_cylindrical, z3s3_cylindrical, z3c1_cylindrical, z3c3_cylindrical
   real(dp), dimension(:), allocatable :: X3s1_untwisted, X3s3_untwisted, X3c1_untwisted, X3c3_untwisted
   real(dp), dimension(:), allocatable :: Y3s1_untwisted, Y3s3_untwisted, Y3c1_untwisted, Y3c3_untwisted
   real(dp), dimension(:), allocatable :: Z3s1_untwisted, Z3s3_untwisted, Z3c1_untwisted, Z3c3_untwisted
-  real(dp) :: iota_from_torsion, d2_volume_d_psi2 = 0
+  real(dp) :: iota_from_torsion
   logical :: circular_cross_section_surface = .false.
   integer :: finite_r_nonlinear_N_theta = 20
-  real(dp), dimension(:), allocatable :: r_singularity_vs_zeta
+  real(dp), dimension(:), allocatable :: r_singularity_vs_zeta, r_singularity_basic_vs_zeta, r_singularity_residual_sqnorm, r_singularity_theta_vs_zeta
   real(dp) :: r_singularity, max_B2tilde, min_r_singularity_to_keep = 0.1, max_B20_variation_to_keep
   integer :: N_random = 10
   real(dp) :: random_time = 3
   real(dp), dimension(:), allocatable :: r_singularities, d2_volume_d_psi2s, B20_variations, min_R0s
+  real(dp), dimension(:), allocatable :: grad_grad_B_inverse_scale_length_vs_zeta
+  real(dp) :: grad_grad_B_inverse_scale_length
+  integer :: r_singularity_Newton_iterations = 0, r_singularity_line_search = 4
+  real(dp) :: r_singularity_Newton_tolerance = 1.0e-40
+  logical :: r_singularity_high_order = .false.
+  real(dp) :: d2_volume_d_psi2 = 0, DWell_times_r2 = 0, DGeod_times_r2 = 0, DMerc_times_r2 = 0
 
   integer :: N_procs, mpi_rank
   logical :: proc0, verbose = .true.
@@ -194,7 +202,8 @@ module quasisymmetry_variables
        eta_bar_min, eta_bar_max, eta_bar_N_scan, sigma_initial_min, sigma_initial_max, sigma_initial_N_scan, max_max_curvature_to_keep, min_iota_to_keep, &
        finite_r_option, order_r_option, B0, B2s, B2c, p2, untwist, max_max_modBinv_sqrt_half_grad_B_colon_grad_B_to_keep, B3s3_input, B3c3_input, Y3c1_initial, &
        circular_cross_section_surface, finite_r_nonlinear_N_theta, N_random, random_time, min_R0_to_keep, max_B2tilde_to_keep, debug, min_r_singularity_to_keep, &
-       max_B20_variation_to_keep, B2s_min, B2s_max, B2c_min, B2c_max, B2s_scan_option, B2c_scan_option
+       max_B20_variation_to_keep, B2s_min, B2s_max, B2c_min, B2c_max, B2s_scan_option, B2c_scan_option, &
+       r_singularity_Newton_iterations, r_singularity_line_search, r_singularity_Newton_tolerance, r_singularity_high_order
 
 end module quasisymmetry_variables
 

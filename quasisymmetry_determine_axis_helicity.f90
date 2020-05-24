@@ -37,6 +37,8 @@ subroutine quasisymmetry_determine_axis_helicity
      end if
   end do
 
+  counter = counter * sign_psi * sign_G ! It is necessary to flip the sign of axis_helicity in order to maintain "iota_N = iota + axis_helicity" under the parity transformations.
+
   axis_helicity = counter / 4
   if (verbose) print *,"Axis helicity counter:",counter, "  axis_helicity:",axis_helicity
   if (modulo(counter,4) .ne. 0) stop "Axis helicity counter was not a multiple of 4"

@@ -6,7 +6,6 @@ subroutine quasisymmetry_Frenet_to_cylindrical_linear
 
   real(dp), dimension(:), allocatable :: nu_1s, nu_1c, source_n, source_b, nu_20, nu_2s, nu_2c
   real(dp), dimension(:), allocatable :: d_X1c_untwisted_d_zeta, d_X1s_untwisted_d_zeta, d_Y1c_untwisted_d_zeta, d_Y1s_untwisted_d_zeta
-  real(dp), dimension(:), allocatable :: d_curvature_d_zeta, d_torsion_d_zeta
   real(dp), dimension(:), allocatable :: d_X20_untwisted_d_zeta, d_X2s_untwisted_d_zeta, d_X2c_untwisted_d_zeta
   real(dp), dimension(:), allocatable :: d_Y20_untwisted_d_zeta, d_Y2s_untwisted_d_zeta, d_Y2c_untwisted_d_zeta
   real(dp), dimension(:), allocatable :: d2_X1s_untwisted_d_zeta2, d2_X1c_untwisted_d_zeta2, d2_Y1s_untwisted_d_zeta2, d2_Y1c_untwisted_d_zeta2
@@ -109,10 +108,11 @@ subroutine quasisymmetry_Frenet_to_cylindrical_linear
   nu_2c = (R2c * R0p + z2c_cylindrical * z0p) * B0_over_abs_G0 / d_l_d_phi - Z2c * B0_over_abs_G0 &
        + curvature * (0.5d+0) * (nu_1c * X1c_untwisted - nu_1s * X1s_untwisted)
 
-  allocate(d_curvature_d_zeta(N_phi))
-  allocate(d_torsion_d_zeta(N_phi))
-  d_curvature_d_zeta = matmul(d_d_zeta,curvature)
-  d_torsion_d_zeta = matmul(d_d_zeta,torsion)
+  ! d_curvature_d_zeta and d_torsion_d_zeta are now allocated and computed in quasisymmetry_higher_order_in_r.f90
+  !allocate(d_curvature_d_zeta(N_phi))
+  !allocate(d_torsion_d_zeta(N_phi))
+  !d_curvature_d_zeta = matmul(d_d_zeta,curvature)
+  !d_torsion_d_zeta = matmul(d_d_zeta,torsion)
 
   allocate(d2_X1s_untwisted_d_zeta2(N_phi))
   allocate(d2_X1c_untwisted_d_zeta2(N_phi))
@@ -209,7 +209,7 @@ subroutine quasisymmetry_Frenet_to_cylindrical_linear
   z3c3_cylindrical = ( binormal_cylindrical(:,1) * source_n - normal_cylindrical(:,1) * source_b) * d_l_d_phi / R0
 
   deallocate(nu_20, nu_2s, nu_2c)
-  deallocate(d_curvature_d_zeta, d_torsion_d_zeta)
+  !deallocate(d_curvature_d_zeta, d_torsion_d_zeta)
   deallocate(nu_1s, nu_1c, source_n, source_b)
   deallocate(d_X1c_untwisted_d_zeta, d_X1s_untwisted_d_zeta, d_Y1c_untwisted_d_zeta, d_Y1s_untwisted_d_zeta)
   deallocate(d_X20_untwisted_d_zeta, d_X2s_untwisted_d_zeta, d_X2c_untwisted_d_zeta)

@@ -97,6 +97,8 @@ subroutine quasisymmetry_init_axis
   d2_l_d_phi2 = (R0 * R0p + R0p * R0pp + Z0p * Z0pp) / d_l_d_phi
   B0_over_abs_G0 = N_phi / sum(d_l_d_phi)
   abs_G0_over_B0 = 1 / B0_over_abs_G0
+  G0 = sign_G * abs_G0_over_B0 * B0
+  I2 = I2_over_B0 * B0
 
   d_r_d_phi_cylindrical(:,1) = R0p
   d_r_d_phi_cylindrical(:,2) = R0

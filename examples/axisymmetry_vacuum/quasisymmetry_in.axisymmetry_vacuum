@@ -1,0 +1,43 @@
+! This example is used to test the grad B and grad grad B tensor calculations,
+! by comparing to analytic results for an axisymmetric vacuum field.
+
+&quasisymmetry
+ resolution_option = 'fixed'
+ !resolution_option = 'adaptive'
+
+ general_option = 'single'
+ !general_option = 'scan'
+
+ ! The splines used in Frenet_to_cylindrical fail when N_phi=1, so use the next available value, 3:
+ N_phi = 3
+
+ max_N_phi = 1000
+
+ iota_tolerance =  0.001
+ elongation_tolerance = 0.001
+ Newton_tolerance = 1e-12
+
+ vmec_template_filename = '../../input.li383_vacuum'
+
+ r = 0.1d+0
+
+ !finite_r_option = 'linear'
+ finite_r_option = 'nonlinear'
+
+ order_r_option = 'r2'
+
+ nfp = 1
+
+ R0c = 1.7
+ B0 = 0.8
+ eta_bar = 2 ! This value should not matter.
+ sigma_initial = -1.2 ! This value should not matter.
+
+ I2_over_B0 = 1.3d-8 ! The O(r^2) solve fails if iota is exactly 0, so set a tiny nonzero current to create a tiny nonzero iota.
+
+ p2 = 0
+
+ B2s = 0
+
+ B2c = -0.7
+/

@@ -24,9 +24,11 @@ OBJ_FILES = quasisymmetry.o \
 	quasisymmetry_splines.o \
 	quasisymmetry_higher_order_in_r.o \
 	quasisymmetry_grad_B_tensor.o \
+	quasisymmetry_grad_grad_B_tensor.o \
 	quasisymmetry_max_r_before_singularity.o \
 	quasisymmetry_write_vmec_input.o \
-	quasisymmetry_write_output.o
+	quasisymmetry_write_output.o \
+	quasisymmetry_Mercier.o
 
 # Dependencies:
 quasisymmetry.o: quasisymmetry_variables.o
@@ -53,6 +55,8 @@ quasisymmetry_Frenet_to_cylindrical.o: quasisymmetry_splines.o quasisymmetry_var
 quasisymmetry_splines.o: quasisymmetry_variables.o
 quasisymmetry_higher_order_in_r.o: quasisymmetry_variables.o
 quasisymmetry_grad_B_tensor.o: quasisymmetry_variables.o
+quasisymmetry_grad_grad_B_tensor.o: quasisymmetry_variables.o
 quasisymmetry_max_r_before_singularity.o: quasisymmetry_variables.o
 quasisymmetry_write_vmec_input.o: quasisymmetry_Frenet_to_cylindrical.o quasisymmetry_variables.o
 quasisymmetry_write_output.o: quasisymmetry_variables.o
+quasisymmetry_Mercier.o: quasisymmetry_variables.o
