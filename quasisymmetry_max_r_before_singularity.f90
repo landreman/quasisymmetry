@@ -27,13 +27,15 @@ subroutine quasisymmetry_max_r_before_singularity()
   max_j_phi = N_phi
   !if (local_verbose) max_j_phi = 1
   do j = 1, max_j_phi
+     !local_verbose = (j==1)
 
      ! Write sqrt(g) = r * [g0 + r*g1c*cos(theta) + (r^2)*(g20 + g2s*sin(2*theta) + g2c*cos(2*theta) + ...]
-     ! The coefficients are evaluated in "20200322-02 Max r for Garren Boozer.nb", in the section "Order r^2 construction, expanding"
+     ! The coefficients are evaluated in "20200322-02 Max r for Garren Boozer.nb", in the section "Order r^2 construction, quasisymmetry"
 
      g0 = lp * X1c(j) * Y1s(j)
 
      !g1s = -2*X20(j)*Y1c(j) + 2*X2c(j)*Y1c(j) + 2*X2s(j)*Y1s(j) + 2*X1c(j)*Y20(j) - 2*X1c(j)*Y2c(j)
+     ! g1s vanishes for quasisymmetry.
 
      g1c = lp*(-2*X2s(j)*Y1c(j) + 2*X20(j)*Y1s(j) + 2*X2c(j)*Y1s(j) + 2*X1c(j)*Y2s(j) - X1c(j)*X1c(j)*Y1s(j)*curvature(j))
 
@@ -234,6 +236,7 @@ subroutine quasisymmetry_max_r_before_singularity()
      call quasisymmetry_quartic_roots(coefficients, real_parts, imag_parts)
 
      if (local_verbose) then
+        print "(a,i5,a)","------------ r_singularity solve at j_phi=",j,"-------------"
         print *,"g0:",g0,"  g1c:",g1c
         print *,"g20:",g20,"  g2s:",g2s,"  g2c:",g2c
         print *,"K0:",K0,"  K2s:",K2s,"  K2c:",K2c
