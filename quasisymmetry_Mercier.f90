@@ -13,6 +13,9 @@ subroutine quasisymmetry_Mercier
 
   allocate(integrand(N_phi))
 
+  ! See Overleaf note "Mercier criterion near the magnetic axis- detailed notes".
+  ! See also "20200604-02 Checking sign in Mercier DGeod near axis.docx"
+
   !integrand = d_l_d_phi * (Y1c * Y1c + X1c * (X1c + Y1s)) / (Y1c * Y1c + (X1c + Y1s) * (X1c + Y1s))
   integrand = d_l_d_phi * (eta_bar*eta_bar*eta_bar*eta_bar + curvature*curvature*curvature*curvature*sigma*sigma + eta_bar*eta_bar*curvature*curvature) &
        / (eta_bar*eta_bar*eta_bar*eta_bar + curvature*curvature*curvature*curvature*(1+sigma*sigma) + 2*eta_bar*eta_bar*curvature*curvature)

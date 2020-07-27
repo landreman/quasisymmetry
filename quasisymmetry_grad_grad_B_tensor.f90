@@ -444,7 +444,7 @@ subroutine quasisymmetry_grad_grad_B_tensor
      end do
 
      ! If curl-free, verify symmetry in last 2 indices
-     if (abs(I2) < 1e-13) then
+     if (abs(I2) < 1e-13 .and. abs(p2) < 1e-13) then
         do i = 1, 3
            do j = 1, 3
               do k = 1, j-1
